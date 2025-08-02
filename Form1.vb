@@ -9,6 +9,27 @@
         LoadCustomerData()
     End Sub
 
+    Private Sub LogoutBT_Click(sender As Object, e As EventArgs) Handles LogoutBT.Click
+        Dim result As DialogResult = MessageBox.Show("هل أنت متأكد من تسجيل الخروج؟", "تسجيل الخروج", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+
+        If result = DialogResult.Yes Then
+            ' Clear all session data including document access credentials
+            Session.Clear()
+
+            ' Close current form and show login form
+            Me.Hide()
+
+            Dim loginForm As New Login()
+            If loginForm.ShowDialog() = DialogResult.OK Then
+                ' User logged in successfully, show main form again
+                Me.Show()
+            Else
+                ' User cancelled login, exit application
+                Application.Exit()
+            End If
+        End If
+    End Sub
+
 
 
     Private Sub AddAttachmentBT_Click(sender As Object, e As EventArgs) Handles AddAttachmentsBT.Click

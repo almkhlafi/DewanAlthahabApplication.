@@ -27,8 +27,8 @@ Partial Class DelegationsManagement
         GroupBox4 = New GroupBox()
         RemoveDelegatorBT = New Button()
         AddDelegatorBT = New Button()
-        dateOfDelegateTimePicker = New DateTimePicker()
-        dateOfPermisionTimePicker = New DateTimePicker()
+        dateOfEndOfDelegateEpireTimePicker = New DateTimePicker()
+        dateOfStartOfDelegatorTimePicker = New DateTimePicker()
         Label7 = New Label()
         Label6 = New Label()
         Label5 = New Label()
@@ -82,8 +82,8 @@ Partial Class DelegationsManagement
         GroupBox4.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         GroupBox4.Controls.Add(RemoveDelegatorBT)
         GroupBox4.Controls.Add(AddDelegatorBT)
-        GroupBox4.Controls.Add(dateOfDelegateTimePicker)
-        GroupBox4.Controls.Add(dateOfPermisionTimePicker)
+        GroupBox4.Controls.Add(dateOfEndOfDelegateEpireTimePicker)
+        GroupBox4.Controls.Add(dateOfStartOfDelegatorTimePicker)
         GroupBox4.Controls.Add(Label7)
         GroupBox4.Controls.Add(Label6)
         GroupBox4.Controls.Add(Label5)
@@ -128,21 +128,21 @@ Partial Class DelegationsManagement
         AddDelegatorBT.TabIndex = 15
         AddDelegatorBT.UseVisualStyleBackColor = False
         ' 
-        ' dateOfDelegateTimePicker
+        ' dateOfEndOfDelegateEpireTimePicker
         ' 
-        dateOfDelegateTimePicker.Anchor = AnchorStyles.Bottom
-        dateOfDelegateTimePicker.Location = New Point(377, 119)
-        dateOfDelegateTimePicker.Name = "dateOfDelegateTimePicker"
-        dateOfDelegateTimePicker.Size = New Size(200, 23)
-        dateOfDelegateTimePicker.TabIndex = 13
+        dateOfEndOfDelegateEpireTimePicker.Anchor = AnchorStyles.Bottom
+        dateOfEndOfDelegateEpireTimePicker.Location = New Point(377, 119)
+        dateOfEndOfDelegateEpireTimePicker.Name = "dateOfEndOfDelegateEpireTimePicker"
+        dateOfEndOfDelegateEpireTimePicker.Size = New Size(200, 23)
+        dateOfEndOfDelegateEpireTimePicker.TabIndex = 13
         ' 
-        ' dateOfPermisionTimePicker
+        ' dateOfStartOfDelegatorTimePicker
         ' 
-        dateOfPermisionTimePicker.Anchor = AnchorStyles.Bottom
-        dateOfPermisionTimePicker.Location = New Point(151, 119)
-        dateOfPermisionTimePicker.Name = "dateOfPermisionTimePicker"
-        dateOfPermisionTimePicker.Size = New Size(200, 23)
-        dateOfPermisionTimePicker.TabIndex = 12
+        dateOfStartOfDelegatorTimePicker.Anchor = AnchorStyles.Bottom
+        dateOfStartOfDelegatorTimePicker.Location = New Point(151, 119)
+        dateOfStartOfDelegatorTimePicker.Name = "dateOfStartOfDelegatorTimePicker"
+        dateOfStartOfDelegatorTimePicker.Size = New Size(200, 23)
+        dateOfStartOfDelegatorTimePicker.TabIndex = 12
         ' 
         ' Label7
         ' 
@@ -259,7 +259,6 @@ Partial Class DelegationsManagement
         dataGDlistAllDelegators.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         dataGDlistAllDelegators.BackgroundColor = SystemColors.ButtonHighlight
         dataGDlistAllDelegators.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        dataGDlistAllDelegators.ColumnHeadersVisible = False
         dataGDlistAllDelegators.Location = New Point(6, 22)
         dataGDlistAllDelegators.Name = "dataGDlistAllDelegators"
         dataGDlistAllDelegators.RowHeadersWidth = 51
@@ -321,10 +320,9 @@ Partial Class DelegationsManagement
         ' 
         ' AddPermissionTB
         ' 
-        AddPermissionTB.Location = New Point(92, 21)
-        AddPermissionTB.Multiline = True
+        AddPermissionTB.Location = New Point(92, 26)
         AddPermissionTB.Name = "AddPermissionTB"
-        AddPermissionTB.Size = New Size(183, 31)
+        AddPermissionTB.Size = New Size(183, 23)
         AddPermissionTB.TabIndex = 10
         ' 
         ' dataGDDelegations
@@ -332,7 +330,6 @@ Partial Class DelegationsManagement
         dataGDDelegations.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Right
         dataGDDelegations.BackgroundColor = SystemColors.ButtonHighlight
         dataGDDelegations.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        dataGDDelegations.ColumnHeadersVisible = False
         dataGDDelegations.Location = New Point(6, 22)
         dataGDDelegations.Name = "dataGDDelegations"
         dataGDDelegations.RowHeadersWidth = 51
@@ -358,7 +355,7 @@ Partial Class DelegationsManagement
         ' 
         CustomerNameLable.Anchor = AnchorStyles.Bottom Or AnchorStyles.Right
         CustomerNameLable.AutoSize = True
-        CustomerNameLable.Location = New Point(209, 579)
+        CustomerNameLable.Location = New Point(162, 586)
         CustomerNameLable.Name = "CustomerNameLable"
         CustomerNameLable.Size = New Size(71, 15)
         CustomerNameLable.TabIndex = 12
@@ -369,7 +366,6 @@ Partial Class DelegationsManagement
         dataGDOfDivenPermissions.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom
         dataGDOfDivenPermissions.BackgroundColor = SystemColors.ButtonHighlight
         dataGDOfDivenPermissions.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        dataGDOfDivenPermissions.ColumnHeadersVisible = False
         dataGDOfDivenPermissions.Location = New Point(6, 22)
         dataGDOfDivenPermissions.Name = "dataGDOfDivenPermissions"
         dataGDOfDivenPermissions.RowHeadersWidth = 51
@@ -412,6 +408,7 @@ Partial Class DelegationsManagement
         Controls.Add(GroupBox3)
         Controls.Add(GroupBox2)
         Controls.Add(GroupBox1)
+        Icon = CType(resources.GetObject("$this.Icon"), Icon)
         Name = "DelegationsManagement"
         Text = "DelegationsManagement"
         GroupBox1.ResumeLayout(False)
@@ -458,4 +455,6 @@ Partial Class DelegationsManagement
     Friend WithEvents AddPermissionBT As Button
     Friend WithEvents DelegateToCustomerBT As Button
     Friend WithEvents unDelegateFromCustomerBT As Button
+    Friend WithEvents dateOfEndOfDelegateEpireTimePicker As DateTimePicker
+    Friend WithEvents dateOfStartOfDelegatorTimePicker As DateTimePicker
 End Class

@@ -16,7 +16,7 @@ Imports System.Reflection
 <Assembly: System.Reflection.AssemblyCompanyAttribute("Documents"),  _
  Assembly: System.Reflection.AssemblyConfigurationAttribute("Debug"),  _
  Assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0"),  _
- Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0"),  _
+ Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14871d7dcc9612f42f546cd2ff05e65fd10563a5"),  _
  Assembly: System.Reflection.AssemblyProductAttribute("Documents"),  _
  Assembly: System.Reflection.AssemblyTitleAttribute("Documents"),  _
  Assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0"),  _

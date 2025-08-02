@@ -9,6 +9,11 @@
         SetupDataGridView()
         LoadDocumentsData()
 
+
+        ' label1.Parent = this
+        ExpiredLB.BackColor = Color.Transparent
+        AboutToExpireLB.BackColor = Color.Transparent
+
         ' Set form title based on customer
         If SelectedCustomerId = 0 Then
             ' Show all customers
@@ -286,6 +291,11 @@
     End Sub
 
     Private Sub SacnDocumentBT_Click(sender As Object, e As EventArgs) Handles SacnDocumentBT.Click
+        ' Authenticate user first
+        If Not AuthenticateUserForPDFAccess() Then
+            Return
+        End If
+
         ' Check if a document is selected first
         If DocumnetsDGV.SelectedRows.Count = 0 Then
             MessageBox.Show("يرجى تحديد وثيقة لمسحها ضوئياً", "تحذير", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -1032,6 +1042,11 @@
     End Function
 
     Private Sub UpdateDocumenrBT_Click(sender As Object, e As EventArgs) Handles UpdateDocumenrBT.Click
+        ' Authenticate user first
+        If Not AuthenticateUserForPDFAccess() Then
+            Return
+        End If
+
         ' Check if a row is selected
         If DocumnetsDGV.SelectedRows.Count = 0 Then
             MessageBox.Show("يرجى تحديد وثيقة للتحديث", "تحذير", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -1540,6 +1555,13 @@
     ' مصادقة المستخدم لفتح أي PDF
     Private Function AuthenticateUserForPDFAccess() As Boolean
         Try
+            ' Check if already authenticated in current session
+            If Session.IsDocumentAccessAuthenticated Then
+                System.Diagnostics.Debug.WriteLine("Using cached document authentication")
+                currentDecryptionPassword = Session.DocumentAccessPassword
+                Return True
+            End If
+
             ' Create a simple input dialog for document access password
             Dim passwordForm As New Form()
             passwordForm.Text = "مصادقة الوثيقة"
@@ -1601,6 +1623,10 @@
                     If userPassword = enteredPassword Then
                         System.Diagnostics.Debug.WriteLine($"Document access authenticated for user ID: {userId}")
                         currentDecryptionPassword = enteredPassword
+
+                        ' Store credentials in session for reuse
+                        Session.SetDocumentAccess(userId, enteredPassword)
+
                         Return True
                     End If
                 Next

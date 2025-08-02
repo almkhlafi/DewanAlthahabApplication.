@@ -22,7 +22,7 @@ Partial Class DocumentsManagement
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(DocumentsManagement))
         GroupBox1 = New GroupBox()
         DocumnetsDGV = New DataGridView()
@@ -30,11 +30,11 @@ Partial Class DocumentsManagement
         SacnDocumentBT = New Button()
         UpdateDocumenrBT = New Button()
         GroupBox3 = New GroupBox()
+        ExpiredLB = New Label()
         AboutToExpireBT = New Button()
         ExpiredBT = New Button()
         RefreshShowAllDocuments = New Button()
         AboutToExpireLB = New Label()
-        ExpiredLB = New Label()
         GroupBox1.SuspendLayout()
         CType(DocumnetsDGV, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox2.SuspendLayout()
@@ -58,14 +58,14 @@ Partial Class DocumentsManagement
         ' DocumnetsDGV
         ' 
         DocumnetsDGV.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
-        DataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle3.BackColor = SystemColors.Control
-        DataGridViewCellStyle3.Font = New Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        DataGridViewCellStyle3.ForeColor = SystemColors.WindowText
-        DataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle3.WrapMode = DataGridViewTriState.True
-        DocumnetsDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle3
+        DataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle1.BackColor = SystemColors.Control
+        DataGridViewCellStyle1.Font = New Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        DataGridViewCellStyle1.ForeColor = SystemColors.WindowText
+        DataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle1.WrapMode = DataGridViewTriState.True
+        DocumnetsDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
         DocumnetsDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
         DocumnetsDGV.Location = New Point(6, 28)
         DocumnetsDGV.Name = "DocumnetsDGV"
@@ -115,6 +115,7 @@ Partial Class DocumentsManagement
         ' GroupBox3
         ' 
         GroupBox3.Anchor = AnchorStyles.Bottom Or AnchorStyles.Right
+        GroupBox3.Controls.Add(AboutToExpireLB)
         GroupBox3.Controls.Add(ExpiredLB)
         GroupBox3.Controls.Add(AboutToExpireBT)
         GroupBox3.Controls.Add(ExpiredBT)
@@ -125,6 +126,18 @@ Partial Class DocumentsManagement
         GroupBox3.TabIndex = 2
         GroupBox3.TabStop = False
         GroupBox3.Text = "اشعارات"
+        ' 
+        ' ExpiredLB
+        ' 
+        ExpiredLB.AutoSize = True
+        ExpiredLB.BackColor = Color.Transparent
+        ExpiredLB.Font = New Font("Segoe UI", 9F, FontStyle.Bold Or FontStyle.Italic)
+        ExpiredLB.ForeColor = Color.FromArgb(CByte(192), CByte(0), CByte(0))
+        ExpiredLB.Location = New Point(46, 98)
+        ExpiredLB.Name = "ExpiredLB"
+        ExpiredLB.Size = New Size(14, 15)
+        ExpiredLB.TabIndex = 10
+        ExpiredLB.Text = "0"
         ' 
         ' AboutToExpireBT
         ' 
@@ -171,25 +184,12 @@ Partial Class DocumentsManagement
         AboutToExpireLB.AutoSize = True
         AboutToExpireLB.BackColor = Color.Transparent
         AboutToExpireLB.Font = New Font("Segoe UI", 9F, FontStyle.Bold Or FontStyle.Italic)
-        AboutToExpireLB.ForeColor = Color.Goldenrod
-        AboutToExpireLB.Location = New Point(1395, 479)
+        AboutToExpireLB.ForeColor = Color.Orange
+        AboutToExpireLB.Location = New Point(51, 33)
         AboutToExpireLB.Name = "AboutToExpireLB"
-        AboutToExpireLB.RightToLeft = RightToLeft.No
         AboutToExpireLB.Size = New Size(14, 15)
-        AboutToExpireLB.TabIndex = 8
+        AboutToExpireLB.TabIndex = 11
         AboutToExpireLB.Text = "0"
-        ' 
-        ' ExpiredLB
-        ' 
-        ExpiredLB.AutoSize = True
-        ExpiredLB.BackColor = Color.Transparent
-        ExpiredLB.Font = New Font("Segoe UI", 9F, FontStyle.Bold Or FontStyle.Italic)
-        ExpiredLB.ForeColor = Color.FromArgb(CByte(192), CByte(0), CByte(0))
-        ExpiredLB.Location = New Point(46, 98)
-        ExpiredLB.Name = "ExpiredLB"
-        ExpiredLB.Size = New Size(14, 15)
-        ExpiredLB.TabIndex = 10
-        ExpiredLB.Text = "0"
         ' 
         ' DocumentsManagement
         ' 
@@ -197,10 +197,10 @@ Partial Class DocumentsManagement
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(1433, 668)
         Controls.Add(RefreshShowAllDocuments)
-        Controls.Add(AboutToExpireLB)
         Controls.Add(GroupBox3)
         Controls.Add(GroupBox2)
         Controls.Add(GroupBox1)
+        Icon = CType(resources.GetObject("$this.Icon"), Icon)
         Name = "DocumentsManagement"
         Text = "DocumentsManagement"
         GroupBox1.ResumeLayout(False)
@@ -209,7 +209,6 @@ Partial Class DocumentsManagement
         GroupBox3.ResumeLayout(False)
         GroupBox3.PerformLayout()
         ResumeLayout(False)
-        PerformLayout()
     End Sub
 
     Friend WithEvents GroupBox1 As GroupBox
@@ -221,6 +220,6 @@ Partial Class DocumentsManagement
     Friend WithEvents AboutToExpireBT As Button
     Friend WithEvents ExpiredBT As Button
     Friend WithEvents RefreshShowAllDocuments As Button
-    Friend WithEvents AboutToExpireLB As Label
     Friend WithEvents ExpiredLB As Label
+    Friend WithEvents AboutToExpireLB As Label
 End Class

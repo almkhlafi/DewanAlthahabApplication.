@@ -7,8 +7,8 @@ Public Class DBconnections
 
     '===============Reuse the connection=============
     ' Reusable method to get a new connection
-    Public Function GetConnection() As Microsoft.Data.SqlClient.SqlConnection
-        Return New Microsoft.Data.SqlClient.SqlConnection(connpath)
+    Public Function GetConnection() As SqlConnection
+        Return New SqlConnection(connpath)
     End Function
 
 
@@ -17,17 +17,17 @@ Public Class DBconnections
     ' =====================List Customers========================
     Public Function GetCustomers() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT Id, Name FROM Customers"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -47,16 +47,16 @@ Public Class DBconnections
 
     '=====================Add a Customer========================
     Public Function AddCustomer(name As String) As Integer
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim newCustomerId As Integer = 0
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "INSERT INTO Customers (Name) VALUES (@Name); SELECT SCOPE_IDENTITY();"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Name", name)
 
             Dim result = localCmd.ExecuteScalar()
@@ -79,45 +79,45 @@ Public Class DBconnections
 
     '=====================Remove a Customer========================
     Public Function RemoveCustomer(id As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim transaction As Microsoft.Data.SqlClient.SqlTransaction = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim transaction As SqlTransaction = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
             transaction = localConn.BeginTransaction()
 
             ' Delete related records in correct order to avoid foreign key conflicts
-            
-            ' 1. Delete DelegatorsPermissions for delegators belonging to this customer
-            Dim deletePermissionsQuery As String = "DELETE FROM DelegatorsPermissions WHERE DelegatorId IN (SELECT Id FROM Delegators WHERE Customer_ID = @CustomerId)"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deletePermissionsQuery, localConn, transaction)
+
+            ' 1. Delete Delegators_Permissions for delegators belonging to this customer
+            Dim deletePermissionsQuery As String = "DELETE FROM Delegators_Permissions WHERE DelegatorId IN (SELECT Id FROM Delegators WHERE CustomerId = @CustomerId)"
+            localCmd = New SqlCommand(deletePermissionsQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@CustomerId", id)
             localCmd.ExecuteNonQuery()
             localCmd.Dispose()
 
             ' 2. Delete Delegators for this customer
-            Dim deleteDelegatorsQuery As String = "DELETE FROM Delegators WHERE Customer_ID = @CustomerId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteDelegatorsQuery, localConn, transaction)
+            Dim deleteDelegatorsQuery As String = "DELETE FROM Delegators WHERE CustomerId = @CustomerId"
+            localCmd = New SqlCommand(deleteDelegatorsQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@CustomerId", id)
             localCmd.ExecuteNonQuery()
             localCmd.Dispose()
 
             ' 3. Delete Documents for this customer
             Dim deleteDocumentsQuery As String = "DELETE FROM Customers_Attachmnets_Documnets WHERE Customer_ID = @CustomerId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteDocumentsQuery, localConn, transaction)
+            localCmd = New SqlCommand(deleteDocumentsQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@CustomerId", id)
             localCmd.ExecuteNonQuery()
             localCmd.Dispose()
 
             ' 4. Finally delete the customer
             Dim deleteCustomerQuery As String = "DELETE FROM Customers WHERE Id = @CustomerId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteCustomerQuery, localConn, transaction)
+            localCmd = New SqlCommand(deleteCustomerQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@CustomerId", id)
             Dim rowsAffected As Integer = localCmd.ExecuteNonQuery()
-            
+
             ' Commit transaction if customer was deleted
             If rowsAffected > 0 Then
                 transaction.Commit()
@@ -148,17 +148,17 @@ Public Class DBconnections
     ' =====================List ِAttachments========================
     Public Function GetAttachmnts() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT Id, Name FROM Attachments"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -178,16 +178,16 @@ Public Class DBconnections
     '=====================Add an Attachment========================
 
     Public Function AddAttachment(name As String) As Integer
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim newAttachmentId As Integer = 0
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "INSERT INTO Attachments (Name) VALUES (@Name); SELECT SCOPE_IDENTITY();"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Name", name)
 
             Dim result = localCmd.ExecuteScalar()
@@ -210,26 +210,26 @@ Public Class DBconnections
 
     '=====================Remove an Attachment========================
     Public Function RemoveAttachment(id As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim transaction As Microsoft.Data.SqlClient.SqlTransaction = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim transaction As SqlTransaction = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
             transaction = localConn.BeginTransaction()
 
             ' حذف جميع الوثائق المرتبطة بهذا المرفق أولاً
             Dim deleteDocsQuery As String = "DELETE FROM Customers_Attachmnets_Documnets WHERE Attachment_ID = @AttachmentId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteDocsQuery, localConn, transaction)
+            localCmd = New SqlCommand(deleteDocsQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@AttachmentId", id)
             localCmd.ExecuteNonQuery()
             localCmd.Dispose()
 
             ' ثم حذف المرفق نفسه
             Dim deleteAttachmentQuery As String = "DELETE FROM Attachments WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteAttachmentQuery, localConn, transaction)
+            localCmd = New SqlCommand(deleteAttachmentQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@Id", id)
             Dim rowsAffected As Integer = localCmd.ExecuteNonQuery()
 
@@ -261,16 +261,16 @@ Public Class DBconnections
 
     '=====================Update a Customer========================
     Public Function UpdateCustomer(id As Integer, name As String) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "UPDATE Customers SET Name = @Name WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Name", name)
             localCmd.Parameters.AddWithValue("@Id", id)
 
@@ -293,16 +293,16 @@ Public Class DBconnections
 
     '=====================Update an Attachment========================
     Public Function UpdateAttachment(id As Integer, name As String) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "UPDATE Attachments SET Name = @Name WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Name", name)
             localCmd.Parameters.AddWithValue("@Id", id)
 
@@ -326,20 +326,20 @@ Public Class DBconnections
     '=====================Get Documents with Attachment Names========================
     Public Function GetDocuments() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
                                 "FROM Customers_Attachmnets_Documnets d " &
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "ORDER BY d.UploadingDate DESC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -359,12 +359,12 @@ Public Class DBconnections
     ' Get documents for a specific customer
     Public Function GetDocumentsByCustomer(customerId As Integer) As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -372,9 +372,9 @@ Public Class DBconnections
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "WHERE d.Customer_ID = @CustomerId " &
                                 "ORDER BY d.UploadingDate DESC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerId", customerId)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -394,15 +394,15 @@ Public Class DBconnections
     ' Get customer name by ID
     Public Function GetCustomerName(customerId As Integer) As String
         Dim customerName As String = ""
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT Name FROM Customers WHERE Id = @CustomerId"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerId", customerId)
 
             Dim result = cmd.ExecuteScalar()
@@ -426,12 +426,12 @@ Public Class DBconnections
     ' Get documents that are about to expire (within 30 days)
     Public Function GetAboutToExpireDocuments() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -439,8 +439,8 @@ Public Class DBconnections
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "WHERE d.ExpireDate > GETDATE() AND d.ExpireDate <= DATEADD(DAY, 30, GETDATE()) " &
                                 "ORDER BY d.ExpireDate ASC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -460,12 +460,12 @@ Public Class DBconnections
     ' Get documents that have already expired
     Public Function GetExpiredDocuments() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -473,8 +473,8 @@ Public Class DBconnections
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "WHERE d.ExpireDate < GETDATE() " &
                                 "ORDER BY d.ExpireDate DESC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -494,12 +494,12 @@ Public Class DBconnections
     ' Get documents that are about to expire for a specific customer (within 30 days)
     Public Function GetAboutToExpireDocumentsByCustomer(customerId As Integer) As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -507,9 +507,9 @@ Public Class DBconnections
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "WHERE d.Customer_ID = @CustomerId AND d.ExpireDate > GETDATE() AND d.ExpireDate <= DATEADD(DAY, 30, GETDATE()) " &
                                 "ORDER BY d.ExpireDate ASC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerId", customerId)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -529,12 +529,12 @@ Public Class DBconnections
     ' Get expired documents for a specific customer
     Public Function GetExpiredDocumentsByCustomer(customerId As Integer) As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -542,9 +542,9 @@ Public Class DBconnections
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "WHERE d.Customer_ID = @CustomerId AND d.ExpireDate < GETDATE() " &
                                 "ORDER BY d.ExpireDate DESC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerId", customerId)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -563,12 +563,12 @@ Public Class DBconnections
 
     ' Update document information with optional file content
     Public Function UpdateDocument(id As Integer, filePath As String, uploadingDate As DateTime, expireDate As DateTime, attachmentId As Integer, fileContent As Byte()) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             ' Build query based on whether file content should be updated
@@ -581,7 +581,7 @@ Public Class DBconnections
                 query = "UPDATE Customers_Attachmnets_Documnets SET FilePath = @FilePath, UploadingDate = @UploadingDate, ExpireDate = @ExpireDate, Attachment_ID = @AttachmentId WHERE Id = @Id"
             End If
 
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@FilePath", filePath)
             localCmd.Parameters.AddWithValue("@UploadingDate", uploadingDate)
             localCmd.Parameters.AddWithValue("@ExpireDate", expireDate)
@@ -612,16 +612,16 @@ Public Class DBconnections
 
     ' Add new document with file content
     Public Function AddDocument(filePath As String, uploadingDate As DateTime, expireDate As DateTime, customerId As Integer, attachmentId As Integer, fileContent As Byte()) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "INSERT INTO Customers_Attachmnets_Documnets (FilePath, UploadingDate, ExpireDate, Customer_ID, Attachment_ID, fileAttached) VALUES (@FilePath, @UploadingDate, @ExpireDate, @CustomerId, @AttachmentId, @FileContent)"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@FilePath", filePath)
             localCmd.Parameters.AddWithValue("@UploadingDate", uploadingDate)
             localCmd.Parameters.AddWithValue("@ExpireDate", expireDate)
@@ -654,16 +654,16 @@ Public Class DBconnections
 
     ' Get document file content by ID
     Public Function GetDocumentFileContent(documentId As Integer) As Byte()
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim fileContent As Byte() = Nothing
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "SELECT fileAttached FROM Customers_Attachmnets_Documnets WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Id", documentId)
 
             Dim result = localCmd.ExecuteScalar()
@@ -686,29 +686,29 @@ Public Class DBconnections
 
     ' Add attachment placeholder document entries for all customers
     Public Function AddAttachmentDocumentsForAllCustomers(attachmentId As Integer, attachmentName As String) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim transaction As Microsoft.Data.SqlClient.SqlTransaction = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim transaction As SqlTransaction = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
             transaction = localConn.BeginTransaction()
 
             ' Get all customer IDs
             Dim getCustomersQuery As String = "SELECT Id FROM Customers"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(getCustomersQuery, localConn, transaction)
+            localCmd = New SqlCommand(getCustomersQuery, localConn, transaction)
             Dim customersTable As New DataTable()
-            Dim adapter As New Microsoft.Data.SqlClient.SqlDataAdapter(localCmd)
+            Dim adapter As New SqlDataAdapter(localCmd)
             adapter.Fill(customersTable)
             adapter.Dispose()
             localCmd.Dispose()
 
             ' Insert document entry for each customer
             Dim insertQuery As String = "INSERT INTO Customers_Attachmnets_Documnets (FilePath, UploadingDate, ExpireDate, Customer_ID, Attachment_ID, fileAttached) VALUES (@FilePath, @UploadingDate, @ExpireDate, @CustomerId, @AttachmentId, @FileContent)"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(insertQuery, localConn, transaction)
-            
+            localCmd = New SqlCommand(insertQuery, localConn, transaction)
+
             ' Add parameters with explicit types to prevent data corruption
             localCmd.Parameters.Add("@FilePath", SqlDbType.NVarChar, 500)
             localCmd.Parameters.Add("@UploadingDate", SqlDbType.DateTime2)
@@ -719,7 +719,7 @@ Public Class DBconnections
 
             For Each customerRow As DataRow In customersTable.Rows
                 Dim customerId As Integer = Convert.ToInt32(customerRow("Id"))
-                
+
                 ' Set parameter values for each iteration
                 localCmd.Parameters("@FilePath").Value = $"مرفق جديد: {attachmentName}"
                 localCmd.Parameters("@UploadingDate").Value = DateTime.Now
@@ -754,29 +754,29 @@ Public Class DBconnections
 
     ' Add attachment placeholder documents for a new customer
     Public Function AddAttachmentDocumentsForNewCustomer(customerId As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim transaction As Microsoft.Data.SqlClient.SqlTransaction = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim transaction As SqlTransaction = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
             transaction = localConn.BeginTransaction()
 
             ' Get all attachment IDs and names
             Dim getAttachmentsQuery As String = "SELECT Id, Name FROM Attachments"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(getAttachmentsQuery, localConn, transaction)
+            localCmd = New SqlCommand(getAttachmentsQuery, localConn, transaction)
             Dim attachmentsTable As New DataTable()
-            Dim adapter As New Microsoft.Data.SqlClient.SqlDataAdapter(localCmd)
+            Dim adapter As New SqlDataAdapter(localCmd)
             adapter.Fill(attachmentsTable)
             adapter.Dispose()
             localCmd.Dispose()
 
             ' Insert document entry for each attachment
             Dim insertQuery As String = "INSERT INTO Customers_Attachmnets_Documnets (FilePath, UploadingDate, ExpireDate, Customer_ID, Attachment_ID, fileAttached) VALUES (@FilePath, @UploadingDate, @ExpireDate, @CustomerId, @AttachmentId, @FileContent)"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(insertQuery, localConn, transaction)
-            
+            localCmd = New SqlCommand(insertQuery, localConn, transaction)
+
             ' Add parameters with explicit types to prevent data corruption
             localCmd.Parameters.Add("@FilePath", SqlDbType.NVarChar, 500)
             localCmd.Parameters.Add("@UploadingDate", SqlDbType.DateTime2)
@@ -823,17 +823,17 @@ Public Class DBconnections
 
     ' Update document with scanned content only
     Public Function UpdateDocumentWithScannedContent(documentId As Integer, scannedContent As Byte()) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             ' Update only the file content and upload date
             Dim query As String = "UPDATE Customers_Attachmnets_Documnets SET fileAttached = @FileContent, UploadingDate = @UploadingDate WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Id", documentId)
             localCmd.Parameters.AddWithValue("@UploadingDate", DateTime.Now)
             localCmd.Parameters.Add("@FileContent", SqlDbType.VarBinary, -1).Value = scannedContent
@@ -858,12 +858,12 @@ Public Class DBconnections
     ' =====================Get Delegators by Customer========================
     Public Function GetDelegatorsByCustomer(customerId As Integer) As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             ' First, ensure the required tables exist
@@ -889,9 +889,9 @@ FROM Delegators
 WHERE CustomerId = @CustomerId 
 ORDER BY Name"
 
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerId", customerId)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -909,30 +909,30 @@ ORDER BY Name"
     End Function
 
     ' =====================Ensure Delegators Table Exists========================
-    Private Sub EnsureDelegatorsTableExists(conn As Microsoft.Data.SqlClient.SqlConnection)
+    Private Sub EnsureDelegatorsTableExists(conn As SqlConnection)
         Try
             Dim checkTableQuery As String = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Delegators'"
-            Dim checkCmd As New Microsoft.Data.SqlClient.SqlCommand(checkTableQuery, conn)
+            Dim checkCmd As New SqlCommand(checkTableQuery, conn)
             Dim tableExists As Integer = Convert.ToInt32(checkCmd.ExecuteScalar())
             checkCmd.Dispose()
 
             If tableExists = 0 Then
                 ' Create the Delegators table
-                Dim createTableQuery As String = "CREATE TABLE Delegators (" & _
-                    "Id INT IDENTITY(1,1) PRIMARY KEY," & _
-                    "Name NVARCHAR(255) NOT NULL," & _
-                    "CustomerId INT NOT NULL," & _
-                    "[Identity] NVARCHAR(50)," & _
-                    "Nationality NVARCHAR(100)," & _
-                    "PhoneNumber NVARCHAR(20)," & _
-                    "[Type] NVARCHAR(100)," & _
-                    "dateOfDelegation DATETIME," & _
-                    "expireOfDelegation DATETIME," & _
-                    "dateOfPermision DATETIME," & _
-                    "expireOfPermision DATETIME," & _
-                    "FOREIGN KEY (CustomerId) REFERENCES Customers(Id) ON DELETE CASCADE" & _
+                Dim createTableQuery As String = "CREATE TABLE Delegators (" &
+                    "Id INT IDENTITY(1,1) PRIMARY KEY," &
+                    "Name NVARCHAR(255) NOT NULL," &
+                    "CustomerId INT NOT NULL," &
+                    "[Identity] NVARCHAR(50)," &
+                    "Nationality NVARCHAR(100)," &
+                    "PhoneNumber NVARCHAR(20)," &
+                    "[Type] NVARCHAR(100)," &
+                    "dateOfDelegation DATETIME," &
+                    "expireOfDelegation DATETIME," &
+                    "dateOfPermision DATETIME," &
+                    "expireOfPermision DATETIME," &
+                    "FOREIGN KEY (CustomerId) REFERENCES Customers(Id) ON DELETE CASCADE" &
                     ")"
-                Dim createCmd As New Microsoft.Data.SqlClient.SqlCommand(createTableQuery, conn)
+                Dim createCmd As New SqlCommand(createTableQuery, conn)
                 createCmd.ExecuteNonQuery()
                 createCmd.Dispose()
             End If
@@ -942,23 +942,24 @@ ORDER BY Name"
     End Sub
 
     ' =====================Ensure Delegators_Permissions Bridge Table Exists========================
-    Private Sub EnsureDelegatorsPermissionsTableExists(conn As Microsoft.Data.SqlClient.SqlConnection)
+    Private Sub EnsureDelegatorsPermissionsTableExists(conn As SqlConnection)
         Try
             Dim checkTableQuery As String = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Delegators_Permissions'"
-            Dim checkCmd As New Microsoft.Data.SqlClient.SqlCommand(checkTableQuery, conn)
+            Dim checkCmd As New SqlCommand(checkTableQuery, conn)
             Dim tableExists As Integer = Convert.ToInt32(checkCmd.ExecuteScalar())
             checkCmd.Dispose()
 
             If tableExists = 0 Then
-                ' Create the Delegators_Permissions bridge table
-                Dim createTableQuery As String = "CREATE TABLE Delegators_Permissions (" & _
-                    "Id INT IDENTITY(1,1) PRIMARY KEY," & _
-                    "PermissionId INT NOT NULL," & _
-                    "DelegatorId INT NOT NULL," & _
-                    "AssignedDate DATETIME DEFAULT GETDATE()," & _
-                    "FOREIGN KEY (DelegatorId) REFERENCES Delegators(Id) ON DELETE CASCADE" & _
+                ' Create the Delegators_Permissions bridge table with cascade constraints
+                Dim createTableQuery As String = "CREATE TABLE Delegators_Permissions (" &
+                    "Id INT IDENTITY(1,1) PRIMARY KEY," &
+                    "PermissionId INT NOT NULL," &
+                    "DelegatorId INT NOT NULL," &
+                    "AssignedDate DATETIME DEFAULT GETDATE()," &
+                    "FOREIGN KEY (DelegatorId) REFERENCES Delegators(Id) ON DELETE CASCADE," &
+                    "FOREIGN KEY (PermissionId) REFERENCES Permissions(Id) ON DELETE CASCADE" &
                     ")"
-                Dim createCmd As New Microsoft.Data.SqlClient.SqlCommand(createTableQuery, conn)
+                Dim createCmd As New SqlCommand(createTableQuery, conn)
                 createCmd.ExecuteNonQuery()
                 createCmd.Dispose()
             End If
@@ -969,16 +970,16 @@ ORDER BY Name"
 
     ' =====================Add Delegator========================
     Public Function AddDelegator(name As String, customerId As Integer, identity As String, nationality As String, phoneNumber As String, type As String, dateOfDelegation As DateTime, expireOfDelegation As DateTime, dateOfPermision As DateTime, expireOfPermision As DateTime) As Integer
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim newDelegatorId As Integer = 0
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "INSERT INTO Delegators (Name, CustomerId, [Identity], Nationality, PhoneNumber, [Type], dateOfDelegation, expireOfDelegation, dateOfPermision, expireOfPermision) VALUES (@Name, @CustomerId, @Identity, @Nationality, @PhoneNumber, @Type, @DateOfDelegation, @ExpireOfDelegation, @DateOfPermision, @ExpireOfPermision); SELECT SCOPE_IDENTITY();"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Name", name)
             localCmd.Parameters.AddWithValue("@CustomerId", customerId)
             localCmd.Parameters.AddWithValue("@Identity", identity)
@@ -993,18 +994,18 @@ ORDER BY Name"
             Dim result = localCmd.ExecuteScalar()
             If result IsNot Nothing Then
                 newDelegatorId = Convert.ToInt32(result)
-                
+
                 ' Check if permission ID 1 exists before creating bridge entry
                 localCmd.Dispose()
                 Dim checkPermissionQuery As String = "SELECT COUNT(*) FROM Permissions WHERE Id = 1"
-                localCmd = New Microsoft.Data.SqlClient.SqlCommand(checkPermissionQuery, localConn)
+                localCmd = New SqlCommand(checkPermissionQuery, localConn)
                 Dim permissionExists As Integer = Convert.ToInt32(localCmd.ExecuteScalar())
                 localCmd.Dispose()
-                
+
                 ' Only create bridge entry if permission ID 1 exists
                 If permissionExists > 0 Then
                     Dim bridgeQuery As String = "INSERT INTO Delegators_Permissions (PermissionId, DelegatorId, AssignedDate) VALUES (1, @DelegatorId, @AssignedDate)"
-                    localCmd = New Microsoft.Data.SqlClient.SqlCommand(bridgeQuery, localConn)
+                    localCmd = New SqlCommand(bridgeQuery, localConn)
                     localCmd.Parameters.AddWithValue("@DelegatorId", newDelegatorId)
                     localCmd.Parameters.AddWithValue("@AssignedDate", dateOfDelegation)
                     localCmd.ExecuteNonQuery()
@@ -1027,12 +1028,12 @@ ORDER BY Name"
     ' =====================Get All Delegators for Testing========================
     Public Function GetAllDelegators() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             ' First, ensure the required tables exist
@@ -1057,8 +1058,8 @@ SELECT
 FROM Delegators 
 ORDER BY Name"
 
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1077,16 +1078,16 @@ ORDER BY Name"
 
     ' =====================Update Delegator========================
     Public Function UpdateDelegator(id As Integer, name As String, customerId As Integer, identity As String, nationality As String, phoneNumber As String, type As String, dateOfDelegation As DateTime, expireOfDelegation As DateTime, dateOfPermision As DateTime, expireOfPermision As DateTime) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "UPDATE Delegators SET Name = @Name, CustomerId = @CustomerId, [Identity] = @Identity, Nationality = @Nationality, PhoneNumber = @PhoneNumber, [Type] = @Type, dateOfDelegation = @DateOfDelegation, expireOfDelegation = @ExpireOfDelegation, dateOfPermision = @DateOfPermision, expireOfPermision = @ExpireOfPermision WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@Name", name)
             localCmd.Parameters.AddWithValue("@CustomerId", customerId)
             localCmd.Parameters.AddWithValue("@Identity", identity)
@@ -1118,26 +1119,26 @@ ORDER BY Name"
 
     ' =====================Remove Delegator========================
     Public Function RemoveDelegator(id As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim transaction As Microsoft.Data.SqlClient.SqlTransaction = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim transaction As SqlTransaction = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
             transaction = localConn.BeginTransaction()
 
             ' Delete delegator permissions first
-            Dim deletePermissionsQuery As String = "DELETE FROM DelegatorsPermissions WHERE DelegatorId = @DelegatorId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deletePermissionsQuery, localConn, transaction)
+            Dim deletePermissionsQuery As String = "DELETE FROM Delegators_Permissions WHERE DelegatorId = @DelegatorId"
+            localCmd = New SqlCommand(deletePermissionsQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@DelegatorId", id)
             localCmd.ExecuteNonQuery()
             localCmd.Dispose()
 
             ' Then delete the delegator
             Dim deleteDelegatorQuery As String = "DELETE FROM Delegators WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteDelegatorQuery, localConn, transaction)
+            localCmd = New SqlCommand(deleteDelegatorQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@Id", id)
             Dim rowsAffected As Integer = localCmd.ExecuteNonQuery()
 
@@ -1170,20 +1171,20 @@ ORDER BY Name"
     ' =====================Get All Permissions========================
     Public Function GetAllPermissions() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             ' Ensure Permissions table exists
             EnsurePermissionsTableExists(conn)
 
             Dim query As String = "SELECT Id, Name FROM Permissions ORDER BY Name"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1203,12 +1204,12 @@ ORDER BY Name"
     ' =====================Get Delegator Permissions========================
     Public Function GetDelegatorPermissions(delegatorId As Integer) As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "
@@ -1221,9 +1222,9 @@ INNER JOIN Delegators_Permissions dp ON p.Id = dp.PermissionId
 WHERE dp.DelegatorId = @DelegatorId
 ORDER BY p.Name"
 
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@DelegatorId", delegatorId)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1243,12 +1244,12 @@ ORDER BY p.Name"
     ' =====================Get Available Permissions for Delegator========================
     Public Function GetAvailablePermissionsForDelegator(delegatorId As Integer) As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "
@@ -1263,9 +1264,9 @@ WHERE p.Id NOT IN (
 )
 ORDER BY p.Name"
 
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@DelegatorId", delegatorId)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1284,12 +1285,12 @@ ORDER BY p.Name"
 
     ' =====================Add New Permission========================
     Public Function AddPermission(permissionName As String) As Integer
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim newPermissionId As Integer = 0
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             ' Ensure Permissions table exists
@@ -1297,18 +1298,18 @@ ORDER BY p.Name"
 
             ' Check if permission already exists
             Dim checkQuery As String = "SELECT COUNT(*) FROM Permissions WHERE Name = @Name"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(checkQuery, localConn)
+            localCmd = New SqlCommand(checkQuery, localConn)
             localCmd.Parameters.AddWithValue("@Name", permissionName.Trim())
-            
+
             Dim count As Integer = Convert.ToInt32(localCmd.ExecuteScalar())
             localCmd.Dispose()
 
             If count = 0 Then
                 ' Insert new permission
                 Dim insertQuery As String = "INSERT INTO Permissions (Name) VALUES (@Name); SELECT SCOPE_IDENTITY();"
-                localCmd = New Microsoft.Data.SqlClient.SqlCommand(insertQuery, localConn)
+                localCmd = New SqlCommand(insertQuery, localConn)
                 localCmd.Parameters.AddWithValue("@Name", permissionName.Trim())
-                
+
                 Dim result = localCmd.ExecuteScalar()
                 If result IsNot Nothing Then
                     newPermissionId = Convert.ToInt32(result)
@@ -1334,30 +1335,30 @@ ORDER BY p.Name"
 
     ' =====================Update Permission========================
     Public Function UpdatePermission(permissionId As Integer, permissionName As String) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             ' Check if another permission with the same name exists (excluding current one)
             Dim checkQuery As String = "SELECT COUNT(*) FROM Permissions WHERE Name = @Name AND Id <> @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(checkQuery, localConn)
+            localCmd = New SqlCommand(checkQuery, localConn)
             localCmd.Parameters.AddWithValue("@Name", permissionName.Trim())
             localCmd.Parameters.AddWithValue("@Id", permissionId)
-            
+
             Dim count As Integer = Convert.ToInt32(localCmd.ExecuteScalar())
             localCmd.Dispose()
 
             If count = 0 Then
                 ' Update permission
                 Dim updateQuery As String = "UPDATE Permissions SET Name = @Name WHERE Id = @Id"
-                localCmd = New Microsoft.Data.SqlClient.SqlCommand(updateQuery, localConn)
+                localCmd = New SqlCommand(updateQuery, localConn)
                 localCmd.Parameters.AddWithValue("@Name", permissionName.Trim())
                 localCmd.Parameters.AddWithValue("@Id", permissionId)
-                
+
                 Dim rowsAffected As Integer = localCmd.ExecuteNonQuery()
                 success = (rowsAffected > 0)
             Else
@@ -1381,26 +1382,31 @@ ORDER BY p.Name"
 
     ' =====================Remove Permission========================
     Public Function RemovePermission(permissionId As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim transaction As Microsoft.Data.SqlClient.SqlTransaction = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim transaction As SqlTransaction = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
+
+            ' Ensure the DelegatorsPermissions table exists (before transaction)
+            EnsureDelegatorsPermissionsTableExists(localConn)
+
             transaction = localConn.BeginTransaction()
 
-            ' First, remove all delegator-permission relationships
-            Dim deleteRelationsQuery As String = "DELETE FROM DelegatorsPermissions WHERE PermissionId = @PermissionId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deleteRelationsQuery, localConn, transaction)
+            ' First, manually delete related records from Delegators_Permissions 
+            ' (in case the existing foreign key doesn't have CASCADE DELETE)
+            Dim deleteRelationsQuery As String = "DELETE FROM Delegators_Permissions WHERE PermissionId = @PermissionId"
+            localCmd = New SqlCommand(deleteRelationsQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@PermissionId", permissionId)
             localCmd.ExecuteNonQuery()
             localCmd.Dispose()
 
-            ' Then, remove the permission itself
+            ' Then delete the permission itself
             Dim deletePermissionQuery As String = "DELETE FROM Permissions WHERE Id = @Id"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(deletePermissionQuery, localConn, transaction)
+            localCmd = New SqlCommand(deletePermissionQuery, localConn, transaction)
             localCmd.Parameters.AddWithValue("@Id", permissionId)
             Dim rowsAffected As Integer = localCmd.ExecuteNonQuery()
 
@@ -1430,33 +1436,80 @@ ORDER BY p.Name"
         Return success
     End Function
 
+    ' =====================Get All Delegator Dates========================
+    Public Function GetDelegatorDates(delegatorId As Integer) As (startDate As DateTime, endDate As DateTime, permissionStartDate As DateTime, permissionEndDate As DateTime)
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
+        Dim startDate As DateTime = DateTime.Now
+        Dim endDate As DateTime = DateTime.Now.AddYears(1)
+        Dim permissionStartDate As DateTime = DateTime.Now
+        Dim permissionEndDate As DateTime = DateTime.Now.AddYears(1)
+
+        Try
+            localConn = New SqlConnection(connpath)
+            localConn.Open()
+
+            Dim query As String = "SELECT ISNULL(dateOfDelegation, GETDATE()) AS startDate, " &
+                                 "ISNULL(expireOfDelegation, DATEADD(YEAR, 1, GETDATE())) AS endDate, " &
+                                 "ISNULL(dateOfPermision, GETDATE()) AS permissionStartDate, " &
+                                 "ISNULL(expireOfPermision, DATEADD(YEAR, 1, GETDATE())) AS permissionEndDate " &
+                                 "FROM Delegators WHERE Id = @Id"
+            localCmd = New SqlCommand(query, localConn)
+            localCmd.Parameters.AddWithValue("@Id", delegatorId)
+
+            Dim reader = localCmd.ExecuteReader()
+            If reader.Read() Then
+                startDate = Convert.ToDateTime(reader("startDate"))
+                endDate = Convert.ToDateTime(reader("endDate"))
+                permissionStartDate = Convert.ToDateTime(reader("permissionStartDate"))
+                permissionEndDate = Convert.ToDateTime(reader("permissionEndDate"))
+            End If
+            reader.Close()
+
+        Catch ex As Exception
+            ' If there's an error, use default dates
+            startDate = DateTime.Now
+            endDate = DateTime.Now.AddYears(1)
+            permissionStartDate = DateTime.Now
+            permissionEndDate = DateTime.Now.AddYears(1)
+        Finally
+            If localCmd IsNot Nothing Then localCmd.Dispose()
+            If localConn IsNot Nothing AndAlso localConn.State = ConnectionState.Open Then
+                localConn.Close()
+                localConn.Dispose()
+            End If
+        End Try
+
+        Return (startDate, endDate, permissionStartDate, permissionEndDate)
+    End Function
+
     ' =====================Grant Permission to Delegator========================
     Public Function GrantPermissionToDelegator(delegatorId As Integer, permissionId As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             ' Check if permission already exists
             Dim checkQuery As String = "SELECT COUNT(*) FROM Delegators_Permissions WHERE DelegatorId = @DelegatorId AND PermissionId = @PermissionId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(checkQuery, localConn)
+            localCmd = New SqlCommand(checkQuery, localConn)
             localCmd.Parameters.AddWithValue("@DelegatorId", delegatorId)
             localCmd.Parameters.AddWithValue("@PermissionId", permissionId)
-            
+
             Dim count As Integer = Convert.ToInt32(localCmd.ExecuteScalar())
             localCmd.Dispose()
 
             If count = 0 Then
                 ' Insert new permission
                 Dim insertQuery As String = "INSERT INTO Delegators_Permissions (DelegatorId, PermissionId, AssignedDate) VALUES (@DelegatorId, @PermissionId, @AssignedDate)"
-                localCmd = New Microsoft.Data.SqlClient.SqlCommand(insertQuery, localConn)
+                localCmd = New SqlCommand(insertQuery, localConn)
                 localCmd.Parameters.AddWithValue("@DelegatorId", delegatorId)
                 localCmd.Parameters.AddWithValue("@PermissionId", permissionId)
                 localCmd.Parameters.AddWithValue("@AssignedDate", DateTime.Now)
-                
+
                 Dim rowsAffected As Integer = localCmd.ExecuteNonQuery()
                 success = (rowsAffected > 0)
             Else
@@ -1479,16 +1532,16 @@ ORDER BY p.Name"
 
     ' =====================Revoke Permission from Delegator========================
     Public Function RevokePermissionFromDelegator(delegatorId As Integer, permissionId As Integer) As Boolean
-        Dim localConn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim localCmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim localConn As SqlConnection = Nothing
+        Dim localCmd As SqlCommand = Nothing
         Dim success As Boolean = False
 
         Try
-            localConn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            localConn = New SqlConnection(connpath)
             localConn.Open()
 
             Dim query As String = "DELETE FROM Delegators_Permissions WHERE DelegatorId = @DelegatorId AND PermissionId = @PermissionId"
-            localCmd = New Microsoft.Data.SqlClient.SqlCommand(query, localConn)
+            localCmd = New SqlCommand(query, localConn)
             localCmd.Parameters.AddWithValue("@DelegatorId", delegatorId)
             localCmd.Parameters.AddWithValue("@PermissionId", permissionId)
 
@@ -1510,27 +1563,27 @@ ORDER BY p.Name"
     End Function
 
     ' =====================Ensure Permissions Table Exists========================
-    Private Sub EnsurePermissionsTableExists(conn As Microsoft.Data.SqlClient.SqlConnection)
+    Private Sub EnsurePermissionsTableExists(conn As SqlConnection)
         Try
             Dim checkTableQuery As String = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Permissions'"
-            Dim checkCmd As New Microsoft.Data.SqlClient.SqlCommand(checkTableQuery, conn)
+            Dim checkCmd As New SqlCommand(checkTableQuery, conn)
             Dim tableExists As Integer = Convert.ToInt32(checkCmd.ExecuteScalar())
             checkCmd.Dispose()
 
             If tableExists = 0 Then
                 ' Create the Permissions table
-                Dim createTableQuery As String = "CREATE TABLE Permissions (" & _
-                    "Id INT IDENTITY(1,1) PRIMARY KEY," & _
-                    "Name NVARCHAR(255) NOT NULL UNIQUE" & _
+                Dim createTableQuery As String = "CREATE TABLE Permissions (" &
+                    "Id INT IDENTITY(1,1) PRIMARY KEY," &
+                    "Name NVARCHAR(255) NOT NULL UNIQUE" &
                     ")"
-                Dim createCmd As New Microsoft.Data.SqlClient.SqlCommand(createTableQuery, conn)
+                Dim createCmd As New SqlCommand(createTableQuery, conn)
                 createCmd.ExecuteNonQuery()
                 createCmd.Dispose()
 
                 ' Insert default permissions
-                Dim insertDefaults As String = "INSERT INTO Permissions (Name) VALUES " & _
+                Dim insertDefaults As String = "INSERT INTO Permissions (Name) VALUES " &
                     "('إدارة الوثائق'), ('إضافة مرفقات'), ('حذف مرفقات'), ('تحديث بيانات العملاء'), ('عرض التقارير')"
-                Dim insertCmd As New Microsoft.Data.SqlClient.SqlCommand(insertDefaults, conn)
+                Dim insertCmd As New SqlCommand(insertDefaults, conn)
                 insertCmd.ExecuteNonQuery()
                 insertCmd.Dispose()
             End If
@@ -1542,15 +1595,15 @@ ORDER BY p.Name"
 
     ' Methods for UsersLogin_Documents table (for PDF document access)
     Public Function IsUserActive(userCode As String) As Boolean
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT Active FROM UsersLogin_Documents WHERE userId = @userId"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@userId", userCode)
 
             Dim result As Object = cmd.ExecuteScalar()
@@ -1571,15 +1624,15 @@ ORDER BY p.Name"
     End Function
 
     Public Function GetUserPassword(userCode As String) As String
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT password FROM UsersLogin_Documents WHERE userId = @userId AND Active = 1"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
+            cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@userId", userCode)
 
             Dim result As Object = cmd.ExecuteScalar()
@@ -1601,17 +1654,17 @@ ORDER BY p.Name"
 
     Public Function GetActiveDocumentUsers() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT userId, password FROM UsersLogin_Documents WHERE Active = 1"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1630,12 +1683,12 @@ ORDER BY p.Name"
     ' Get all documents with customer names
     Public Function GetDocumentsWithCustomerNames() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, c.Name AS CustomerName, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -1643,8 +1696,8 @@ ORDER BY p.Name"
                                 "INNER JOIN Attachments a ON d.Attachment_ID = a.Id " &
                                 "INNER JOIN Customers c ON d.Customer_ID = c.Id " &
                                 "ORDER BY c.Name, d.UploadingDate DESC"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1664,12 +1717,12 @@ ORDER BY p.Name"
     ' Get about to expire documents with customer names (within 30 days)
     Public Function GetAboutToExpireDocumentsWithCustomerNames() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, c.Name AS CustomerName, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -1678,8 +1731,8 @@ ORDER BY p.Name"
                                 "INNER JOIN Customers c ON d.Customer_ID = c.Id " &
                                 "WHERE d.ExpireDate > GETDATE() AND d.ExpireDate <= DATEADD(DAY, 30, GETDATE()) " &
                                 "ORDER BY d.ExpireDate ASC, c.Name"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception
@@ -1699,12 +1752,12 @@ ORDER BY p.Name"
     ' Get expired documents with customer names
     Public Function GetExpiredDocumentsWithCustomerNames() As DataTable
         Dim dt As New DataTable()
-        Dim conn As Microsoft.Data.SqlClient.SqlConnection = Nothing
-        Dim cmd As Microsoft.Data.SqlClient.SqlCommand = Nothing
-        Dim da As Microsoft.Data.SqlClient.SqlDataAdapter = Nothing
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
 
         Try
-            conn = New Microsoft.Data.SqlClient.SqlConnection(connpath)
+            conn = New SqlConnection(connpath)
             conn.Open()
 
             Dim query As String = "SELECT d.Id, c.Name AS CustomerName, a.Name AS AttachmentName, d.FilePath, d.UploadingDate, d.ExpireDate, d.fileAttached, d.Attachment_ID " &
@@ -1713,8 +1766,8 @@ ORDER BY p.Name"
                                 "INNER JOIN Customers c ON d.Customer_ID = c.Id " &
                                 "WHERE d.ExpireDate < GETDATE() " &
                                 "ORDER BY d.ExpireDate DESC, c.Name"
-            cmd = New Microsoft.Data.SqlClient.SqlCommand(query, conn)
-            da = New Microsoft.Data.SqlClient.SqlDataAdapter(cmd)
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
             da.Fill(dt)
 
         Catch ex As Exception

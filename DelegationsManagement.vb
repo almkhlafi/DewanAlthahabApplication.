@@ -67,18 +67,12 @@
         dataGDlistAllDelegators.Columns.Add("Nationality", "الجنسية")
         dataGDlistAllDelegators.Columns.Add("PhoneNumber", "رقم الهاتف")
         dataGDlistAllDelegators.Columns.Add("Type", "نوع التفويض")
-        dataGDlistAllDelegators.Columns.Add("dateOfDelegation", "تاريخ بداية التفويض")
-        dataGDlistAllDelegators.Columns.Add("expireOfDelegation", "تاريخ انتهاء التفويض")
-        dataGDlistAllDelegators.Columns.Add("dateOfPermision", "تاريخ بداية الترخيص")
-        dataGDlistAllDelegators.Columns.Add("expireOfPermision", "تاريخ انتهاء الترخيص")
-        dataGDlistAllDelegators.Columns.Add("AssignedDate", "تاريخ تعيين الصلاحية")
+        dataGDlistAllDelegators.Columns.Add("dateOfDelegation", "تاريخ التصريح")
+        dataGDlistAllDelegators.Columns.Add("expireOfDelegation", "تاريخ  انتهاء التصريح")
 
         ' تنسيق أعمدة التاريخ
         dataGDlistAllDelegators.Columns("dateOfDelegation").DefaultCellStyle.Format = "dd/MM/yyyy"
         dataGDlistAllDelegators.Columns("expireOfDelegation").DefaultCellStyle.Format = "dd/MM/yyyy"
-        dataGDlistAllDelegators.Columns("dateOfPermision").DefaultCellStyle.Format = "dd/MM/yyyy"
-        dataGDlistAllDelegators.Columns("expireOfPermision").DefaultCellStyle.Format = "dd/MM/yyyy"
-        dataGDlistAllDelegators.Columns("AssignedDate").DefaultCellStyle.Format = "dd/MM/yyyy"
 
         ' إخفاء عمود الرقم أو جعله أصغر
         dataGDlistAllDelegators.Columns("Id").Width = 50
@@ -89,20 +83,20 @@
         ' Configure Arabic culture for date display
         Dim arabicCulture As New System.Globalization.CultureInfo("ar-SA")
 
-        ' Configure dateOfPermisionTimePicker for Arabic display
-        If dateOfPermisionTimePicker IsNot Nothing Then
-            dateOfPermisionTimePicker.Format = DateTimePickerFormat.Custom
-            dateOfPermisionTimePicker.CustomFormat = "dd/MM/yyyy"
-            dateOfPermisionTimePicker.RightToLeft = RightToLeft.Yes
-            dateOfPermisionTimePicker.RightToLeftLayout = True
+        ' Configure dateOfStartOfDelegatorTimePicker for Arabic display
+        If dateOfStartOfDelegatorTimePicker IsNot Nothing Then
+            dateOfStartOfDelegatorTimePicker.Format = DateTimePickerFormat.Custom
+            dateOfStartOfDelegatorTimePicker.CustomFormat = "dd/MM/yyyy"
+            dateOfStartOfDelegatorTimePicker.RightToLeft = RightToLeft.Yes
+            dateOfStartOfDelegatorTimePicker.RightToLeftLayout = True
         End If
 
-        ' Configure dateOfDelegateTimePicker for Arabic display
-        If dateOfDelegateTimePicker IsNot Nothing Then
-            dateOfDelegateTimePicker.Format = DateTimePickerFormat.Custom
-            dateOfDelegateTimePicker.CustomFormat = "dd/MM/yyyy"
-            dateOfDelegateTimePicker.RightToLeft = RightToLeft.Yes
-            dateOfDelegateTimePicker.RightToLeftLayout = True
+        ' Configure dateOfEndOfDelegateEpireTimePicker for Arabic display
+        If dateOfEndOfDelegateEpireTimePicker IsNot Nothing Then
+            dateOfEndOfDelegateEpireTimePicker.Format = DateTimePickerFormat.Custom
+            dateOfEndOfDelegateEpireTimePicker.CustomFormat = "dd/MM/yyyy"
+            dateOfEndOfDelegateEpireTimePicker.RightToLeft = RightToLeft.Yes
+            dateOfEndOfDelegateEpireTimePicker.RightToLeftLayout = True
         End If
 
         ' Configure ExpireDatePicker for Arabic display (if it exists)
@@ -163,7 +157,11 @@
         dataGDlistAllDelegators.Refresh()
 
         For Each row As DataRow In dt.Rows
-            dataGDlistAllDelegators.Rows.Add(
+            ' Get delegation dates for color coding
+            Dim dateOfDelegation As DateTime = If(row("dateOfDelegation") Is DBNull.Value, DateTime.Now, Convert.ToDateTime(row("dateOfDelegation")))
+            Dim expireOfDelegation As DateTime = If(row("expireOfDelegation") Is DBNull.Value, DateTime.Now.AddYears(1), Convert.ToDateTime(row("expireOfDelegation")))
+
+            Dim rowIndex As Integer = dataGDlistAllDelegators.Rows.Add(
                 row("Id"),
                 row("Name"),
                 row("CustomerId"),
@@ -171,12 +169,12 @@
                 If(row("Nationality") Is DBNull.Value, "", row("Nationality").ToString()),
                 If(row("PhoneNumber") Is DBNull.Value, "", row("PhoneNumber").ToString()),
                 If(row("Type") Is DBNull.Value, "", row("Type").ToString()),
-                If(row("dateOfDelegation") Is DBNull.Value, DateTime.Now, Convert.ToDateTime(row("dateOfDelegation"))).ToString("dd/MM/yyyy"),
-                If(row("expireOfDelegation") Is DBNull.Value, DateTime.Now.AddYears(1), Convert.ToDateTime(row("expireOfDelegation"))).ToString("dd/MM/yyyy"),
-                If(row("dateOfPermision") Is DBNull.Value, DateTime.Now, Convert.ToDateTime(row("dateOfPermision"))).ToString("dd/MM/yyyy"),
-                If(row("expireOfPermision") Is DBNull.Value, DateTime.Now.AddYears(1), Convert.ToDateTime(row("expireOfPermision"))).ToString("dd/MM/yyyy"),
-                If(row("AssignedDate") Is DBNull.Value, DateTime.Now, Convert.ToDateTime(row("AssignedDate"))).ToString("dd/MM/yyyy")
+                dateOfDelegation.ToString("dd/MM/yyyy"),
+                expireOfDelegation.ToString("dd/MM/yyyy")
             )
+
+            ' Color the row based on delegation expiration status
+            ColorRowByDelegationExpiration(dataGDlistAllDelegators.Rows(rowIndex), expireOfDelegation)
         Next
 
         ' Clear form fields when loading new data
@@ -199,13 +197,15 @@
             DelegatorPhoneNumberTB.Text = selectedRow.Cells("PhoneNumber").Value.ToString()
             DelegatorTypeTB.Text = selectedRow.Cells("Type").Value.ToString()
 
-            ' Parse dates
+            ' Parse dates - load actual delegation dates from database
             Try
-                dateOfDelegateTimePicker.Value = Convert.ToDateTime(selectedRow.Cells("dateOfDelegation").Value)
-                dateOfPermisionTimePicker.Value = Convert.ToDateTime(selectedRow.Cells("dateOfPermision").Value)
+                ' Get both delegation dates from database
+                Dim delegationDates = GetDelegatorDates(selectedDelegatorId)
+                dateOfStartOfDelegatorTimePicker.Value = delegationDates.startDate
+                dateOfEndOfDelegateEpireTimePicker.Value = delegationDates.endDate
             Catch ex As Exception
-                dateOfDelegateTimePicker.Value = DateTime.Now
-                dateOfPermisionTimePicker.Value = DateTime.Now
+                dateOfStartOfDelegatorTimePicker.Value = DateTime.Now
+                dateOfEndOfDelegateEpireTimePicker.Value = DateTime.Now.AddYears(1)
             End Try
 
             isUpdatingDelegator = True
@@ -229,11 +229,10 @@
         End If
 
         Try
-            ' Calculate expiry dates (1 year from delegation/permission dates)
-            Dim expireOfDelegation As DateTime = dateOfDelegateTimePicker.Value.AddYears(1)
-            Dim expireOfPermision As DateTime = dateOfPermisionTimePicker.Value.AddYears(1)
-
             If isUpdatingDelegator Then
+                ' Get current permission dates from database to preserve them
+                Dim currentDates = GetDelegatorDates(selectedDelegatorId)
+
                 ' Update existing delegator
                 Dim updateSuccess As Boolean = dbConn.UpdateDelegator(
                     selectedDelegatorId,
@@ -243,10 +242,10 @@
                     DelegatorNationalityTB.Text.Trim(),
                     DelegatorPhoneNumberTB.Text.Trim(),
                     DelegatorTypeTB.Text.Trim(),
-                    dateOfDelegateTimePicker.Value,
-                    expireOfDelegation,
-                    dateOfPermisionTimePicker.Value,
-                    expireOfPermision
+                    dateOfStartOfDelegatorTimePicker.Value,
+                    dateOfEndOfDelegateEpireTimePicker.Value,
+                    currentDates.permissionStartDate,
+                    currentDates.permissionEndDate
                 )
 
                 If updateSuccess Then
@@ -266,10 +265,10 @@
                     DelegatorNationalityTB.Text.Trim(),
                     DelegatorPhoneNumberTB.Text.Trim(),
                     DelegatorTypeTB.Text.Trim(),
-                    dateOfDelegateTimePicker.Value,
-                    expireOfDelegation,
-                    dateOfPermisionTimePicker.Value,
-                    expireOfPermision
+                    dateOfStartOfDelegatorTimePicker.Value,
+                    dateOfEndOfDelegateEpireTimePicker.Value,
+                    dateOfStartOfDelegatorTimePicker.Value,
+                    dateOfEndOfDelegateEpireTimePicker.Value
                 )
 
                 If newDelegatorId > 0 Then
@@ -323,8 +322,8 @@
         DelegatorNationalityTB.Clear()
         DelegatorPhoneNumberTB.Clear()
         DelegatorTypeTB.Clear()
-        dateOfDelegateTimePicker.Value = DateTime.Now
-        dateOfPermisionTimePicker.Value = DateTime.Now
+        dateOfStartOfDelegatorTimePicker.Value = DateTime.Now
+        dateOfEndOfDelegateEpireTimePicker.Value = DateTime.Now.AddYears(1)
         isUpdatingDelegator = False
         selectedDelegatorId = 0
         dataGDlistAllDelegators.ClearSelection()
@@ -588,7 +587,6 @@
                     ' Reset update mode
                     isUpdatingPermission = False
                     selectedPermissionId = 0
-                    AddPermissionBT.Text = "إضافة صلاحية"
                 Else
                     MessageBox.Show("فشل في تحديث الصلاحية", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End If
@@ -620,6 +618,18 @@
     End Sub
 
     ' =====================Permission Grid Click Events for Editing========================
+    Private Sub dataGDDelegations_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles dataGDDelegations.CellClick
+        If e.RowIndex >= 0 Then
+            EditSelectedPermission(dataGDDelegations.Rows(e.RowIndex))
+        End If
+    End Sub
+
+    Private Sub dataGDOfDivenPermissions_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles dataGDOfDivenPermissions.CellClick
+        If e.RowIndex >= 0 Then
+            EditSelectedPermission(dataGDOfDivenPermissions.Rows(e.RowIndex))
+        End If
+    End Sub
+
     Private Sub dataGDDelegations_CellDoubleClick(sender As Object, e As DataGridViewCellEventArgs) Handles dataGDDelegations.CellDoubleClick
         If e.RowIndex >= 0 Then
             EditSelectedPermission(dataGDDelegations.Rows(e.RowIndex))
@@ -655,11 +665,10 @@
 
     ' =====================Clear Permission Update Mode========================
     Private Sub AddPermissionTB_TextChanged(sender As Object, e As EventArgs) Handles AddPermissionTB.TextChanged
-        ' If textbox is cleared, reset update mode
-        If String.IsNullOrEmpty(AddPermissionTB.Text) And isUpdatingPermission Then
+        ' Only reset update mode if textbox is manually cleared by user (empty) and we were in update mode
+        If String.IsNullOrEmpty(AddPermissionTB.Text.Trim()) And isUpdatingPermission Then
             isUpdatingPermission = False
             selectedPermissionId = 0
-            AddPermissionBT.Text = "إضافة صلاحية"
         End If
     End Sub
 
@@ -741,7 +750,6 @@
                             ' Reset update mode
                             isUpdatingPermission = False
                             selectedPermissionId = 0
-                            AddPermissionBT.Text = "إضافة صلاحية"
                             AddPermissionTB.Clear()
                             Exit For
                         End If
@@ -785,11 +793,13 @@
     End Sub
 
     ' Clear selection when clicking on other controls (except those that need selection)
-    Private Sub ClearSelectionOnControlClick(sender As Object, e As EventArgs) Handles DelegatorNameTB.Click, DelegatorIdentityBT.Click, DelegatorNationalityTB.Click, DelegatorPhoneNumberTB.Click, DelegatorTypeTB.Click, AddPermissionTB.Click
-        ' Clear selections and reset when clicking on input controls
-        If dataGDlistAllDelegators.SelectedRows.Count > 0 OrElse dataGDlistAllDelegators.CurrentRow IsNot Nothing Then
-            dataGDlistAllDelegators.ClearSelection()
-            ClearFormFieldsAndResetPermissions()
+    Private Sub ClearSelectionOnControlClick(sender As Object, e As EventArgs) Handles AddPermissionTB.Click
+        ' Only clear when clicking on AddPermissionTB, not on delegator input fields
+        If sender Is AddPermissionTB Then
+            If dataGDlistAllDelegators.SelectedRows.Count > 0 OrElse dataGDlistAllDelegators.CurrentRow IsNot Nothing Then
+                dataGDlistAllDelegators.ClearSelection()
+                ClearFormFieldsAndResetPermissions()
+            End If
         End If
     End Sub
 
@@ -797,13 +807,13 @@
     Private Sub ClearFormFieldsAndResetPermissions()
         ' Clear form fields
         ClearFormFields()
-        
+
         ' Clear dataGDOfDivenPermissions
         If dataGDOfDivenPermissions IsNot Nothing Then
             dataGDOfDivenPermissions.Rows.Clear()
             dataGDOfDivenPermissions.Refresh()
         End If
-        
+
         ' Load all permissions into dataGDDelegations (restore original functionality)
         LoadAllPermissionsIntoGrid()
     End Sub
@@ -817,5 +827,42 @@
             MessageBox.Show("خطأ في تحميل الصلاحيات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
+
+    ' Color row based on delegation expiration status
+    Private Sub ColorRowByDelegationExpiration(row As DataGridViewRow, expireOfDelegation As DateTime)
+        Try
+            Dim today As DateTime = DateTime.Now.Date
+            Dim daysUntilDelegationExpiry As Integer = (expireOfDelegation.Date - today).Days
+
+            If daysUntilDelegationExpiry < 0 Then
+                ' Expired delegations - Red background
+                row.DefaultCellStyle.BackColor = Color.FromArgb(255, 200, 200) ' Light red
+                row.DefaultCellStyle.ForeColor = Color.DarkRed
+            ElseIf daysUntilDelegationExpiry <= 30 Then
+                ' About to expire (within 30 days) - Orange/Yellow background
+                row.DefaultCellStyle.BackColor = Color.FromArgb(255, 245, 150) ' Light orange/yellow
+                row.DefaultCellStyle.ForeColor = Color.DarkOrange
+            Else
+                ' Valid delegations - Light green background
+                row.DefaultCellStyle.BackColor = Color.FromArgb(200, 255, 200) ' Light green
+                row.DefaultCellStyle.ForeColor = Color.DarkGreen
+            End If
+
+        Catch ex As Exception
+            ' If there's an error, use default colors
+            row.DefaultCellStyle.BackColor = Color.White
+            row.DefaultCellStyle.ForeColor = Color.Black
+        End Try
+    End Sub
+
+    ' Get all dates for a delegator from database
+    Private Function GetDelegatorDates(delegatorId As Integer) As (startDate As DateTime, endDate As DateTime, permissionStartDate As DateTime, permissionEndDate As DateTime)
+        Try
+            Return dbConn.GetDelegatorDates(delegatorId)
+        Catch ex As Exception
+            ' If there's an error getting the dates, return default dates
+            Return (DateTime.Now, DateTime.Now.AddYears(1), DateTime.Now, DateTime.Now.AddYears(1))
+        End Try
+    End Function
 
 End Class

@@ -22,6 +22,7 @@ Partial Class DocumentUpdateForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(DocumentUpdateForm))
         GroupBox1 = New GroupBox()
         ViewFileButton = New Button()
         BrowseFileButton = New Button()
@@ -47,51 +48,51 @@ Partial Class DocumentUpdateForm
         GroupBox1.Controls.Add(FilePathTextBox)
         GroupBox1.Controls.Add(Label1)
         GroupBox1.Font = New Font("Microsoft Sans Serif", 10F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        GroupBox1.Location = New Point(16, 18)
-        GroupBox1.Margin = New Padding(4, 5, 4, 5)
+        GroupBox1.Location = New Point(14, 14)
+        GroupBox1.Margin = New Padding(4, 4, 4, 4)
         GroupBox1.Name = "GroupBox1"
-        GroupBox1.Padding = New Padding(4, 5, 4, 5)
+        GroupBox1.Padding = New Padding(4, 4, 4, 4)
         GroupBox1.RightToLeft = RightToLeft.Yes
-        GroupBox1.Size = New Size(747, 154)
+        GroupBox1.Size = New Size(654, 116)
         GroupBox1.TabIndex = 0
         GroupBox1.TabStop = False
         GroupBox1.Text = "معلومات الملف"
         ' 
         ' ViewFileButton
         ' 
-        ViewFileButton.Location = New Point(30, 98)
-        ViewFileButton.Margin = New Padding(4, 5, 4, 5)
+        ViewFileButton.Location = New Point(26, 74)
+        ViewFileButton.Margin = New Padding(4, 4, 4, 4)
         ViewFileButton.Name = "ViewFileButton"
-        ViewFileButton.Size = New Size(133, 46)
+        ViewFileButton.Size = New Size(116, 34)
         ViewFileButton.TabIndex = 3
         ViewFileButton.Text = "عرض الملف"
         ViewFileButton.UseVisualStyleBackColor = True
         ' 
         ' BrowseFileButton
         ' 
-        BrowseFileButton.Location = New Point(30, 38)
-        BrowseFileButton.Margin = New Padding(4, 5, 4, 5)
+        BrowseFileButton.Location = New Point(26, 28)
+        BrowseFileButton.Margin = New Padding(4, 4, 4, 4)
         BrowseFileButton.Name = "BrowseFileButton"
-        BrowseFileButton.Size = New Size(133, 46)
+        BrowseFileButton.Size = New Size(116, 34)
         BrowseFileButton.TabIndex = 2
         BrowseFileButton.Text = "استعراض..."
         BrowseFileButton.UseVisualStyleBackColor = True
         ' 
         ' FilePathTextBox
         ' 
-        FilePathTextBox.Location = New Point(200, 48)
-        FilePathTextBox.Margin = New Padding(4, 5, 4, 5)
+        FilePathTextBox.Location = New Point(175, 36)
+        FilePathTextBox.Margin = New Padding(4, 4, 4, 4)
         FilePathTextBox.Name = "FilePathTextBox"
-        FilePathTextBox.Size = New Size(425, 26)
+        FilePathTextBox.Size = New Size(372, 23)
         FilePathTextBox.TabIndex = 1
         ' 
         ' Label1
         ' 
         Label1.AutoSize = True
-        Label1.Location = New Point(640, 51)
+        Label1.Location = New Point(560, 38)
         Label1.Margin = New Padding(4, 0, 4, 0)
         Label1.Name = "Label1"
-        Label1.Size = New Size(79, 20)
+        Label1.Size = New Size(64, 17)
         Label1.TabIndex = 0
         Label1.Text = "مسار الملف:"
         ' 
@@ -104,12 +105,12 @@ Partial Class DocumentUpdateForm
         GroupBox2.Controls.Add(UploadDatePicker)
         GroupBox2.Controls.Add(Label2)
         GroupBox2.Font = New Font("Microsoft Sans Serif", 10F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        GroupBox2.Location = New Point(16, 200)
-        GroupBox2.Margin = New Padding(4, 5, 4, 5)
+        GroupBox2.Location = New Point(14, 150)
+        GroupBox2.Margin = New Padding(4, 4, 4, 4)
         GroupBox2.Name = "GroupBox2"
-        GroupBox2.Padding = New Padding(4, 5, 4, 5)
+        GroupBox2.Padding = New Padding(4, 4, 4, 4)
         GroupBox2.RightToLeft = RightToLeft.Yes
-        GroupBox2.Size = New Size(747, 231)
+        GroupBox2.Size = New Size(654, 173)
         GroupBox2.TabIndex = 1
         GroupBox2.TabStop = False
         GroupBox2.Text = "معلومات الوثيقة"
@@ -118,57 +119,57 @@ Partial Class DocumentUpdateForm
         ' 
         AttachmentComboBox.DropDownStyle = ComboBoxStyle.DropDownList
         AttachmentComboBox.FormattingEnabled = True
-        AttachmentComboBox.Location = New Point(200, 162)
-        AttachmentComboBox.Margin = New Padding(4, 5, 4, 5)
+        AttachmentComboBox.Location = New Point(175, 122)
+        AttachmentComboBox.Margin = New Padding(4, 4, 4, 4)
         AttachmentComboBox.Name = "AttachmentComboBox"
-        AttachmentComboBox.Size = New Size(399, 28)
+        AttachmentComboBox.Size = New Size(350, 24)
         AttachmentComboBox.TabIndex = 5
         ' 
         ' Label4
         ' 
         Label4.AutoSize = True
-        Label4.Location = New Point(640, 166)
+        Label4.Location = New Point(560, 124)
         Label4.Margin = New Padding(4, 0, 4, 0)
         Label4.Name = "Label4"
-        Label4.Size = New Size(52, 20)
+        Label4.Size = New Size(42, 17)
         Label4.TabIndex = 4
         Label4.Text = "المرفق:"
         ' 
         ' ExpireDatePicker
         ' 
         ExpireDatePicker.Format = DateTimePickerFormat.Short
-        ExpireDatePicker.Location = New Point(271, 109)
-        ExpireDatePicker.Margin = New Padding(4, 5, 4, 5)
+        ExpireDatePicker.Location = New Point(237, 82)
+        ExpireDatePicker.Margin = New Padding(4, 4, 4, 4)
         ExpireDatePicker.Name = "ExpireDatePicker"
-        ExpireDatePicker.Size = New Size(265, 26)
+        ExpireDatePicker.Size = New Size(232, 23)
         ExpireDatePicker.TabIndex = 3
         ' 
         ' Label3
         ' 
         Label3.AutoSize = True
-        Label3.Location = New Point(600, 115)
+        Label3.Location = New Point(525, 86)
         Label3.Margin = New Padding(4, 0, 4, 0)
         Label3.Name = "Label3"
-        Label3.Size = New Size(87, 20)
+        Label3.Size = New Size(71, 17)
         Label3.TabIndex = 2
         Label3.Text = "تاريخ الانتهاء:"
         ' 
         ' UploadDatePicker
         ' 
         UploadDatePicker.Format = DateTimePickerFormat.Short
-        UploadDatePicker.Location = New Point(271, 54)
-        UploadDatePicker.Margin = New Padding(4, 5, 4, 5)
+        UploadDatePicker.Location = New Point(237, 40)
+        UploadDatePicker.Margin = New Padding(4, 4, 4, 4)
         UploadDatePicker.Name = "UploadDatePicker"
-        UploadDatePicker.Size = New Size(265, 26)
+        UploadDatePicker.Size = New Size(232, 23)
         UploadDatePicker.TabIndex = 1
         ' 
         ' Label2
         ' 
         Label2.AutoSize = True
-        Label2.Location = New Point(600, 60)
+        Label2.Location = New Point(525, 45)
         Label2.Margin = New Padding(4, 0, 4, 0)
         Label2.Name = "Label2"
-        Label2.Size = New Size(77, 20)
+        Label2.Size = New Size(63, 17)
         Label2.TabIndex = 0
         Label2.Text = "تاريخ الرفع:"
         ' 
@@ -178,10 +179,10 @@ Partial Class DocumentUpdateForm
         SaveButton.FlatStyle = FlatStyle.Flat
         SaveButton.Font = New Font("Microsoft Sans Serif", 10F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         SaveButton.ForeColor = Color.White
-        SaveButton.Location = New Point(600, 462)
-        SaveButton.Margin = New Padding(4, 5, 4, 5)
+        SaveButton.Location = New Point(525, 346)
+        SaveButton.Margin = New Padding(4, 4, 4, 4)
         SaveButton.Name = "SaveButton"
-        SaveButton.Size = New Size(160, 62)
+        SaveButton.Size = New Size(140, 46)
         SaveButton.TabIndex = 2
         SaveButton.Text = "حفظ التحديث"
         SaveButton.UseVisualStyleBackColor = False
@@ -192,25 +193,26 @@ Partial Class DocumentUpdateForm
         CancelButton.FlatStyle = FlatStyle.Flat
         CancelButton.Font = New Font("Microsoft Sans Serif", 10F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         CancelButton.ForeColor = Color.White
-        CancelButton.Location = New Point(427, 462)
-        CancelButton.Margin = New Padding(4, 5, 4, 5)
+        CancelButton.Location = New Point(374, 346)
+        CancelButton.Margin = New Padding(4, 4, 4, 4)
         CancelButton.Name = "CancelButton"
-        CancelButton.Size = New Size(160, 62)
+        CancelButton.Size = New Size(140, 46)
         CancelButton.TabIndex = 3
         CancelButton.Text = "إلغاء"
         CancelButton.UseVisualStyleBackColor = False
         ' 
         ' DocumentUpdateForm
         ' 
-        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleDimensions = New SizeF(7F, 15F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(779, 555)
+        ClientSize = New Size(682, 416)
         Controls.Add(CancelButton)
         Controls.Add(SaveButton)
         Controls.Add(GroupBox2)
         Controls.Add(GroupBox1)
         FormBorderStyle = FormBorderStyle.FixedDialog
-        Margin = New Padding(4, 5, 4, 5)
+        Icon = CType(resources.GetObject("$this.Icon"), Icon)
+        Margin = New Padding(4, 4, 4, 4)
         MaximizeBox = False
         MinimizeBox = False
         Name = "DocumentUpdateForm"

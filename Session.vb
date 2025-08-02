@@ -22,6 +22,11 @@
     Private Shared _loggedInUserId As Integer = -1
     Private Shared _loggedInUsername As String = String.Empty
     Private Shared _loggedInName As String = String.Empty
+    
+    ' Document access session variables
+    Private Shared _documentAccessUserId As String = String.Empty
+    Private Shared _documentAccessPassword As String = String.Empty
+    Private Shared _isDocumentAccessAuthenticated As Boolean = False
 
     Public Shared Property LoggedInUserId As Integer
         Get
@@ -50,6 +55,52 @@
         End Set
     End Property
 
+    ' Document access session properties
+    Public Shared Property DocumentAccessUserId As String
+        Get
+            Return _documentAccessUserId
+        End Get
+        Set(value As String)
+            _documentAccessUserId = value
+        End Set
+    End Property
+
+    Public Shared Property DocumentAccessPassword As String
+        Get
+            Return _documentAccessPassword
+        End Get
+        Set(value As String)
+            _documentAccessPassword = value
+        End Set
+    End Property
+
+    Public Shared Property IsDocumentAccessAuthenticated As Boolean
+        Get
+            Return _isDocumentAccessAuthenticated
+        End Get
+        Set(value As Boolean)
+            _isDocumentAccessAuthenticated = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Sets document access credentials and marks as authenticated
+    ''' </summary>
+    Public Shared Sub SetDocumentAccess(userId As String, password As String)
+        _documentAccessUserId = userId
+        _documentAccessPassword = password
+        _isDocumentAccessAuthenticated = True
+    End Sub
+
+    ''' <summary>
+    ''' Clears document access credentials
+    ''' </summary>
+    Public Shared Sub ClearDocumentAccess()
+        _documentAccessUserId = String.Empty
+        _documentAccessPassword = String.Empty
+        _isDocumentAccessAuthenticated = False
+    End Sub
+
     ''' <summary>
     ''' Clears all session info — call on logout.
     ''' </summary>
@@ -57,5 +108,6 @@
         _loggedInUserId = -1
         _loggedInUsername = String.Empty
         _loggedInName = String.Empty
+        ClearDocumentAccess()
     End Sub
 End Class

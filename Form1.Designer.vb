@@ -38,6 +38,7 @@ Partial Class Form1
         AddCustomerBT = New Button()
         addUserTB = New RichTextBox()
         CustomerTableDGV = New DataGridView()
+        LogoutBT = New Button()
         GroupBox1.SuspendLayout()
         GroupBox4.SuspendLayout()
         GroupBox3.SuspendLayout()
@@ -62,7 +63,7 @@ Partial Class Form1
         ' GroupBox4
         ' 
         GroupBox4.Controls.Add(Delegations)
-        GroupBox4.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        GroupBox4.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         GroupBox4.Location = New Point(78, 286)
         GroupBox4.Name = "GroupBox4"
         GroupBox4.RightToLeft = RightToLeft.Yes
@@ -86,7 +87,7 @@ Partial Class Form1
         ' 
         GroupBox3.Controls.Add(DocumentsSettings)
         GroupBox3.Controls.Add(AddAttachmentsBT)
-        GroupBox3.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        GroupBox3.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         GroupBox3.Location = New Point(163, 287)
         GroupBox3.Name = "GroupBox3"
         GroupBox3.RightToLeft = RightToLeft.Yes
@@ -122,7 +123,7 @@ Partial Class Form1
         GroupBox2.Controls.Add(RemoveCustomerBT)
         GroupBox2.Controls.Add(AddCustomerBT)
         GroupBox2.Controls.Add(addUserTB)
-        GroupBox2.Font = New Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        GroupBox2.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         GroupBox2.Location = New Point(290, 287)
         GroupBox2.Name = "GroupBox2"
         GroupBox2.RightToLeft = RightToLeft.Yes
@@ -180,7 +181,7 @@ Partial Class Form1
         CustomerTableDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
         DataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle2.BackColor = SystemColors.Window
-        DataGridViewCellStyle2.Font = New Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        DataGridViewCellStyle2.Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         DataGridViewCellStyle2.ForeColor = SystemColors.ControlText
         DataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight
         DataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText
@@ -191,7 +192,7 @@ Partial Class Form1
         CustomerTableDGV.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Sunken
         DataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle3.BackColor = SystemColors.Control
-        DataGridViewCellStyle3.Font = New Font("Segoe UI Black", 9F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        DataGridViewCellStyle3.Font = New Font("Segoe UI Black", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         DataGridViewCellStyle3.ForeColor = SystemColors.WindowText
         DataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight
         DataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText
@@ -205,15 +206,29 @@ Partial Class Form1
         CustomerTableDGV.Size = New Size(739, 268)
         CustomerTableDGV.TabIndex = 1
         ' 
+        ' LogoutBT
+        ' 
+        LogoutBT.BackColor = Color.Transparent
+        LogoutBT.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        LogoutBT.ForeColor = Color.White
+        LogoutBT.Image = CType(resources.GetObject("LogoutBT.Image"), Image)
+        LogoutBT.Location = New Point(3, 2)
+        LogoutBT.Name = "LogoutBT"
+        LogoutBT.Size = New Size(37, 41)
+        LogoutBT.TabIndex = 1
+        LogoutBT.UseVisualStyleBackColor = False
+        ' 
         ' Form1
         ' 
-        AutoScaleDimensions = New SizeF(7F, 15F)
+        AutoScaleDimensions = New SizeF(7.0F, 15.0F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
         ClientSize = New Size(1360, 684)
+        Controls.Add(LogoutBT)
         Controls.Add(GroupBox1)
+        Icon = CType(resources.GetObject("$this.Icon"), Icon)
         Name = "Form1"
-        Text = "Form1"
+        Text = "الـعــمــــــــلاء"
         WindowState = FormWindowState.Maximized
         GroupBox1.ResumeLayout(False)
         GroupBox4.ResumeLayout(False)
@@ -234,5 +249,6 @@ Partial Class Form1
     Friend WithEvents DocumentsSettings As Button
     Friend WithEvents GroupBox4 As GroupBox
     Friend WithEvents Delegations As Button
+    Friend WithEvents LogoutBT As Button
 
 End Class
