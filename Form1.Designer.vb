@@ -22,189 +22,36 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        components = New ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
-        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
         GroupBox1 = New GroupBox()
-        GroupBox4 = New GroupBox()
-        Delegations = New Button()
-        GroupBox3 = New GroupBox()
-        DocumentsSettings = New Button()
-        AddAttachmentsBT = New Button()
-        GroupBox2 = New GroupBox()
-        RemoveCustomerBT = New Button()
-        AddCustomerBT = New Button()
-        addUserTB = New RichTextBox()
-        CustomerTableDGV = New DataGridView()
         LogoutBT = New Button()
-        GroupBox1.SuspendLayout()
-        GroupBox4.SuspendLayout()
-        GroupBox3.SuspendLayout()
+        GroupBox5 = New GroupBox()
+        GroupBox2 = New GroupBox()
+        Delegations = New PictureBox()
+        DocumentsSettings = New PictureBox()
+        PictureBox3 = New PictureBox()
+        AddAttachmentsBT = New PictureBox()
+        PictureBox5 = New PictureBox()
+        NotifyIcon1 = New NotifyIcon(components)
+        GroupBox5.SuspendLayout()
         GroupBox2.SuspendLayout()
-        CType(CustomerTableDGV, ComponentModel.ISupportInitialize).BeginInit()
+        CType(Delegations, ComponentModel.ISupportInitialize).BeginInit()
+        CType(DocumentsSettings, ComponentModel.ISupportInitialize).BeginInit()
+        CType(PictureBox3, ComponentModel.ISupportInitialize).BeginInit()
+        CType(AddAttachmentsBT, ComponentModel.ISupportInitialize).BeginInit()
+        CType(PictureBox5, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
         ' GroupBox1
         ' 
-        GroupBox1.Anchor = AnchorStyles.None
-        GroupBox1.Controls.Add(GroupBox4)
-        GroupBox1.Controls.Add(GroupBox3)
-        GroupBox1.Controls.Add(GroupBox2)
-        GroupBox1.Controls.Add(CustomerTableDGV)
-        GroupBox1.Location = New Point(346, 192)
+        GroupBox1.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
+        GroupBox1.Location = New Point(-8, 85)
         GroupBox1.Name = "GroupBox1"
         GroupBox1.RightToLeft = RightToLeft.Yes
-        GroupBox1.Size = New Size(759, 371)
+        GroupBox1.Size = New Size(1409, 679)
         GroupBox1.TabIndex = 0
         GroupBox1.TabStop = False
-        ' 
-        ' GroupBox4
-        ' 
-        GroupBox4.Controls.Add(Delegations)
-        GroupBox4.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        GroupBox4.Location = New Point(78, 286)
-        GroupBox4.Name = "GroupBox4"
-        GroupBox4.RightToLeft = RightToLeft.Yes
-        GroupBox4.Size = New Size(79, 72)
-        GroupBox4.TabIndex = 7
-        GroupBox4.TabStop = False
-        GroupBox4.Text = "التصريحات"
-        ' 
-        ' Delegations
-        ' 
-        Delegations.BackColor = Color.Transparent
-        Delegations.BackgroundImageLayout = ImageLayout.Center
-        Delegations.Image = CType(resources.GetObject("Delegations.Image"), Image)
-        Delegations.Location = New Point(9, 22)
-        Delegations.Name = "Delegations"
-        Delegations.Size = New Size(58, 41)
-        Delegations.TabIndex = 6
-        Delegations.UseVisualStyleBackColor = False
-        ' 
-        ' GroupBox3
-        ' 
-        GroupBox3.Controls.Add(DocumentsSettings)
-        GroupBox3.Controls.Add(AddAttachmentsBT)
-        GroupBox3.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        GroupBox3.Location = New Point(163, 287)
-        GroupBox3.Name = "GroupBox3"
-        GroupBox3.RightToLeft = RightToLeft.Yes
-        GroupBox3.Size = New Size(121, 72)
-        GroupBox3.TabIndex = 6
-        GroupBox3.TabStop = False
-        GroupBox3.Text = "المرفقات"
-        ' 
-        ' DocumentsSettings
-        ' 
-        DocumentsSettings.BackColor = Color.Transparent
-        DocumentsSettings.BackgroundImageLayout = ImageLayout.Center
-        DocumentsSettings.Image = CType(resources.GetObject("DocumentsSettings.Image"), Image)
-        DocumentsSettings.Location = New Point(15, 20)
-        DocumentsSettings.Name = "DocumentsSettings"
-        DocumentsSettings.Size = New Size(48, 45)
-        DocumentsSettings.TabIndex = 6
-        DocumentsSettings.UseVisualStyleBackColor = False
-        ' 
-        ' AddAttachmentsBT
-        ' 
-        AddAttachmentsBT.BackColor = Color.Transparent
-        AddAttachmentsBT.BackgroundImageLayout = ImageLayout.Center
-        AddAttachmentsBT.Image = CType(resources.GetObject("AddAttachmentsBT.Image"), Image)
-        AddAttachmentsBT.Location = New Point(67, 20)
-        AddAttachmentsBT.Name = "AddAttachmentsBT"
-        AddAttachmentsBT.Size = New Size(48, 45)
-        AddAttachmentsBT.TabIndex = 5
-        AddAttachmentsBT.UseVisualStyleBackColor = False
-        ' 
-        ' GroupBox2
-        ' 
-        GroupBox2.Controls.Add(RemoveCustomerBT)
-        GroupBox2.Controls.Add(AddCustomerBT)
-        GroupBox2.Controls.Add(addUserTB)
-        GroupBox2.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        GroupBox2.Location = New Point(290, 287)
-        GroupBox2.Name = "GroupBox2"
-        GroupBox2.RightToLeft = RightToLeft.Yes
-        GroupBox2.Size = New Size(451, 72)
-        GroupBox2.TabIndex = 3
-        GroupBox2.TabStop = False
-        GroupBox2.Text = "اضافة مستخدم"
-        ' 
-        ' RemoveCustomerBT
-        ' 
-        RemoveCustomerBT.BackColor = Color.Transparent
-        RemoveCustomerBT.BackgroundImageLayout = ImageLayout.Center
-        RemoveCustomerBT.Image = CType(resources.GetObject("RemoveCustomerBT.Image"), Image)
-        RemoveCustomerBT.Location = New Point(20, 23)
-        RemoveCustomerBT.Name = "RemoveCustomerBT"
-        RemoveCustomerBT.Size = New Size(45, 43)
-        RemoveCustomerBT.TabIndex = 4
-        RemoveCustomerBT.UseVisualStyleBackColor = False
-        ' 
-        ' AddCustomerBT
-        ' 
-        AddCustomerBT.BackColor = Color.Transparent
-        AddCustomerBT.BackgroundImageLayout = ImageLayout.Center
-        AddCustomerBT.FlatAppearance.BorderSize = 0
-        AddCustomerBT.Image = CType(resources.GetObject("AddCustomerBT.Image"), Image)
-        AddCustomerBT.Location = New Point(78, 25)
-        AddCustomerBT.Name = "AddCustomerBT"
-        AddCustomerBT.Size = New Size(45, 41)
-        AddCustomerBT.TabIndex = 5
-        AddCustomerBT.UseVisualStyleBackColor = False
-        ' 
-        ' addUserTB
-        ' 
-        addUserTB.Location = New Point(133, 30)
-        addUserTB.Multiline = False
-        addUserTB.Name = "addUserTB"
-        addUserTB.Size = New Size(295, 29)
-        addUserTB.TabIndex = 3
-        addUserTB.Text = ""
-        ' 
-        ' CustomerTableDGV
-        ' 
-        CustomerTableDGV.AllowUserToAddRows = False
-        CustomerTableDGV.Anchor = AnchorStyles.None
-        CustomerTableDGV.BackgroundColor = SystemColors.ButtonHighlight
-        CustomerTableDGV.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal
-        DataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle1.BackColor = SystemColors.Control
-        DataGridViewCellStyle1.Font = New Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        DataGridViewCellStyle1.ForeColor = SystemColors.WindowText
-        DataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle1.WrapMode = DataGridViewTriState.True
-        CustomerTableDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
-        CustomerTableDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        DataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle2.BackColor = SystemColors.Window
-        DataGridViewCellStyle2.Font = New Font("Segoe UI Semibold", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        DataGridViewCellStyle2.ForeColor = SystemColors.ControlText
-        DataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle2.WrapMode = DataGridViewTriState.False
-        CustomerTableDGV.DefaultCellStyle = DataGridViewCellStyle2
-        CustomerTableDGV.Location = New Point(10, 14)
-        CustomerTableDGV.Name = "CustomerTableDGV"
-        CustomerTableDGV.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Sunken
-        DataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle3.BackColor = SystemColors.Control
-        DataGridViewCellStyle3.Font = New Font("Segoe UI Black", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        DataGridViewCellStyle3.ForeColor = SystemColors.WindowText
-        DataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle3.WrapMode = DataGridViewTriState.True
-        CustomerTableDGV.RowHeadersDefaultCellStyle = DataGridViewCellStyle3
-        CustomerTableDGV.RowHeadersVisible = False
-        CustomerTableDGV.RowHeadersWidth = 51
-        DataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter
-        CustomerTableDGV.RowsDefaultCellStyle = DataGridViewCellStyle4
-        CustomerTableDGV.RowTemplate.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter
-        CustomerTableDGV.Size = New Size(739, 268)
-        CustomerTableDGV.TabIndex = 1
         ' 
         ' LogoutBT
         ' 
@@ -212,43 +59,142 @@ Partial Class Form1
         LogoutBT.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
         LogoutBT.ForeColor = Color.White
         LogoutBT.Image = CType(resources.GetObject("LogoutBT.Image"), Image)
-        LogoutBT.Location = New Point(3, 2)
+        LogoutBT.Location = New Point(7, 22)
         LogoutBT.Name = "LogoutBT"
         LogoutBT.Size = New Size(37, 41)
         LogoutBT.TabIndex = 1
         LogoutBT.UseVisualStyleBackColor = False
+        ' 
+        ' GroupBox5
+        ' 
+        GroupBox5.Controls.Add(LogoutBT)
+        GroupBox5.Location = New Point(10, 6)
+        GroupBox5.Name = "GroupBox5"
+        GroupBox5.RightToLeft = RightToLeft.Yes
+        GroupBox5.Size = New Size(1452, 89)
+        GroupBox5.TabIndex = 1
+        GroupBox5.TabStop = False
+        ' 
+        ' GroupBox2
+        ' 
+        GroupBox2.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        GroupBox2.BackColor = Color.Transparent
+        GroupBox2.Controls.Add(Delegations)
+        GroupBox2.Controls.Add(DocumentsSettings)
+        GroupBox2.Controls.Add(PictureBox3)
+        GroupBox2.Controls.Add(AddAttachmentsBT)
+        GroupBox2.Controls.Add(PictureBox5)
+        GroupBox2.Font = New Font("Segoe UI Black", 8.0F, FontStyle.Bold)
+        GroupBox2.Location = New Point(1402, 95)
+        GroupBox2.Name = "GroupBox2"
+        GroupBox2.RightToLeft = RightToLeft.Yes
+        GroupBox2.Size = New Size(60, 352)
+        GroupBox2.TabIndex = 6
+        GroupBox2.TabStop = False
+        ' 
+        ' Delegations
+        ' 
+        Delegations.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        Delegations.BackColor = Color.Transparent
+        Delegations.BackgroundImageLayout = ImageLayout.None
+        Delegations.Image = CType(resources.GetObject("Delegations.Image"), Image)
+        Delegations.ImageLocation = ""
+        Delegations.InitialImage = CType(resources.GetObject("Delegations.InitialImage"), Image)
+        Delegations.Location = New Point(13, 252)
+        Delegations.Name = "Delegations"
+        Delegations.Size = New Size(35, 34)
+        Delegations.SizeMode = PictureBoxSizeMode.StretchImage
+        Delegations.TabIndex = 8
+        Delegations.TabStop = False
+        ' 
+        ' DocumentsSettings
+        ' 
+        DocumentsSettings.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        DocumentsSettings.BackColor = Color.Transparent
+        DocumentsSettings.Image = CType(resources.GetObject("DocumentsSettings.Image"), Image)
+        DocumentsSettings.Location = New Point(12, 183)
+        DocumentsSettings.Name = "DocumentsSettings"
+        DocumentsSettings.Size = New Size(35, 36)
+        DocumentsSettings.SizeMode = PictureBoxSizeMode.StretchImage
+        DocumentsSettings.TabIndex = 7
+        DocumentsSettings.TabStop = False
+        ' 
+        ' PictureBox3
+        ' 
+        PictureBox3.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        PictureBox3.BackColor = Color.Transparent
+        PictureBox3.BackgroundImageLayout = ImageLayout.None
+        PictureBox3.Image = CType(resources.GetObject("PictureBox3.Image"), Image)
+        PictureBox3.ImageLocation = ""
+        PictureBox3.Location = New Point(13, 15)
+        PictureBox3.Name = "PictureBox3"
+        PictureBox3.Size = New Size(34, 33)
+        PictureBox3.SizeMode = PictureBoxSizeMode.StretchImage
+        PictureBox3.TabIndex = 7
+        PictureBox3.TabStop = False
+        ' 
+        ' AddAttachmentsBT
+        ' 
+        AddAttachmentsBT.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        AddAttachmentsBT.BackColor = Color.Transparent
+        AddAttachmentsBT.Image = CType(resources.GetObject("AddAttachmentsBT.Image"), Image)
+        AddAttachmentsBT.Location = New Point(13, 141)
+        AddAttachmentsBT.Name = "AddAttachmentsBT"
+        AddAttachmentsBT.Size = New Size(35, 34)
+        AddAttachmentsBT.SizeMode = PictureBoxSizeMode.StretchImage
+        AddAttachmentsBT.TabIndex = 5
+        AddAttachmentsBT.TabStop = False
+        ' 
+        ' PictureBox5
+        ' 
+        PictureBox5.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        PictureBox5.Image = CType(resources.GetObject("PictureBox5.Image"), Image)
+        PictureBox5.Location = New Point(13, 54)
+        PictureBox5.Name = "PictureBox5"
+        PictureBox5.Size = New Size(34, 36)
+        PictureBox5.TabIndex = 8
+        PictureBox5.TabStop = False
+        ' 
+        ' NotifyIcon1
+        ' 
+        NotifyIcon1.BalloonTipText = "تم بنجاح"
+        NotifyIcon1.BalloonTipTitle = "تم مسح اختيار العميل بنجاح"
+        NotifyIcon1.Icon = CType(resources.GetObject("NotifyIcon1.Icon"), Icon)
+        NotifyIcon1.Text = "NotifyIcon1"
+        NotifyIcon1.Visible = True
         ' 
         ' Form1
         ' 
         AutoScaleDimensions = New SizeF(7.0F, 15.0F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
-        ClientSize = New Size(1360, 684)
-        Controls.Add(LogoutBT)
+        ClientSize = New Size(1470, 761)
+        Controls.Add(GroupBox2)
+        Controls.Add(GroupBox5)
         Controls.Add(GroupBox1)
         Icon = CType(resources.GetObject("$this.Icon"), Icon)
         Name = "Form1"
         Text = "الـعــمــــــــلاء"
         WindowState = FormWindowState.Maximized
-        GroupBox1.ResumeLayout(False)
-        GroupBox4.ResumeLayout(False)
-        GroupBox3.ResumeLayout(False)
+        GroupBox5.ResumeLayout(False)
         GroupBox2.ResumeLayout(False)
-        CType(CustomerTableDGV, ComponentModel.ISupportInitialize).EndInit()
+        CType(Delegations, ComponentModel.ISupportInitialize).EndInit()
+        CType(DocumentsSettings, ComponentModel.ISupportInitialize).EndInit()
+        CType(PictureBox3, ComponentModel.ISupportInitialize).EndInit()
+        CType(AddAttachmentsBT, ComponentModel.ISupportInitialize).EndInit()
+        CType(PictureBox5, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
     End Sub
 
     Friend WithEvents GroupBox1 As GroupBox
-    Friend WithEvents CustomerTableDGV As DataGridView
-    Friend WithEvents GroupBox2 As GroupBox
-    Friend WithEvents AddAttachmentsBT As Button
-    Friend WithEvents RemoveCustomerBT As Button
-    Friend WithEvents addUserTB As RichTextBox
-    Friend WithEvents GroupBox3 As GroupBox
-    Friend WithEvents AddCustomerBT As Button
-    Friend WithEvents DocumentsSettings As Button
-    Friend WithEvents GroupBox4 As GroupBox
-    Friend WithEvents Delegations As Button
     Friend WithEvents LogoutBT As Button
+    Friend WithEvents GroupBox5 As GroupBox
+    Friend WithEvents GroupBox2 As GroupBox
+    Friend WithEvents Delegations As PictureBox
+    Friend WithEvents DocumentsSettings As PictureBox
+    Friend WithEvents PictureBox3 As PictureBox
+    Friend WithEvents AddAttachmentsBT As PictureBox
+    Friend WithEvents PictureBox5 As PictureBox
+    Friend WithEvents NotifyIcon1 As NotifyIcon
 
 End Class

@@ -4,6 +4,12 @@
     <Compile Update="AttachmentsManagement.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="AutoCloseMessageForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="CustomerSearchForm.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="DelegationsManagement.vb">
       <SubType>Form</SubType>
     </Compile>

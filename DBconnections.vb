@@ -4,11 +4,26 @@ Imports Microsoft.Data.SqlClient
 Public Class DBconnections
 
     Dim connpath As String = "Data Source=ABDULRAHMAN;Initial Catalog=EmployeesDB;Integrated Security=True;TrustServerCertificate=True"
+    Dim connpath2 As String = "Data Source=192.168.15.56;Persist Security Info=True;User ID=AR;Pooling=False;Multiple Active Result Sets=False;Encrypt=True;Trust Server Certificate=True;Application Name=""SQL Server Management Studio"";Command Timeout=30;Password=YOUR_PASSWORD_HERE"
 
     '===============Reuse the connection=============
-    ' Reusable method to get a new connection
+    ' Reusable method to get a new connection (default - first connection)
     Public Function GetConnection() As SqlConnection
         Return New SqlConnection(connpath)
+    End Function
+
+    ' Reusable method to get a connection using the second connection string
+    Public Function GetConnection2() As SqlConnection
+        Return New SqlConnection(connpath2)
+    End Function
+
+    ' Reusable method to get a connection by choice (1 or 2)
+    Public Function GetConnection(connectionNumber As Integer) As SqlConnection
+        If connectionNumber = 2 Then
+            Return New SqlConnection(connpath2)
+        Else
+            Return New SqlConnection(connpath)
+        End If
     End Function
 
 

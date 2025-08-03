@@ -57,3 +57,5 @@ C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documen
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.DocumentUpdateForm.resources
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.Login.resources
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.sourcelink.json
+C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.CustomerSearchForm.resources
+C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.AutoCloseMessageForm.resources
