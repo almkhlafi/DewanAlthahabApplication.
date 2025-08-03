@@ -30,6 +30,9 @@
             ' Load countries from CMGADB2024 database
             Dim countriesTable As DataTable = dbConn.GetCountries()
 
+            ' Debug: Show row count
+            MessageBox.Show($"تم استرجاع {countriesTable.Rows.Count} بلد من قاعدة البيانات", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
             ' Clear existing items
             CountryCB.Items.Clear()
 
@@ -52,6 +55,9 @@
 
             ' Bind to ComboBox
             CountryCB.DataSource = displayTable
+
+            ' Debug: Show final count
+            MessageBox.Show($"تم إضافة {displayTable.Rows.Count} بلد إلى القائمة", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل البلدان: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -141,27 +147,28 @@
             ' Load branches from CMGADB2024 database
             Dim branchesTable As DataTable = dbConn.GetBranches()
 
+            ' Debug: Show row count
+            MessageBox.Show($"تم استرجاع {branchesTable.Rows.Count} فرع من قاعدة البيانات", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
             ' Clear existing rows
             BranchesInfoDGV.Rows.Clear()
 
-            ' Add branches to DataGridView
+            ' Add branches to DataGridView with default values
             For Each row As DataRow In branchesTable.Rows
-                ' Convert database values to boolean for checkboxes
-                Dim isSelected As Boolean = Convert.ToBoolean(row("fld_select"))
-                Dim isActive As Boolean = Convert.ToBoolean(row("fld_active_branch"))
-                Dim isLocked As Boolean = Convert.ToBoolean(row("fld_loacked"))
-
                 Dim newRow As Object() = {
-                    isSelected, ' Select checkbox from fld_select
+                    False, ' Select checkbox (default unchecked)
                     row("branch_arabic").ToString(), ' Arabic name
                     row("branch_name").ToString(), ' English name
                     row("branch_code").ToString(), ' Branch code
-                    isActive, ' Active status from fld_active_branch
-                    row("fld_ref_no_branch").ToString(), ' Ref NO from fld_ref_no_branch
-                    isLocked ' Locked status from fld_loacked
+                    True, ' Active status (default checked - will be saved to fld_active_branch)
+                    "", ' Ref NO (empty default - will be saved to fld_ref_no_branch)
+                    False ' Locked status (default unchecked - will be saved to fld_loacked)
                 }
                 BranchesInfoDGV.Rows.Add(newRow)
             Next
+
+            ' Debug: Show final count
+            MessageBox.Show($"تم إضافة {BranchesInfoDGV.Rows.Count} فرع إلى الجدول", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل الفروع: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -311,6 +318,9 @@
             ' Load currency from CMGADB2024 database
             Dim currencyTable As DataTable = dbConn.GetCurrency()
 
+            ' Debug: Show row count
+            MessageBox.Show($"تم استرجاع {currencyTable.Rows.Count} عملة من قاعدة البيانات", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
             ' Clear existing rows
             CurrencyDGV.Rows.Clear()
 
@@ -324,6 +334,9 @@
                 }
                 CurrencyDGV.Rows.Add(newRow)
             Next
+
+            ' Debug: Show final count
+            MessageBox.Show($"تم إضافة {CurrencyDGV.Rows.Count} عملة إلى الجدول", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل العملات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)

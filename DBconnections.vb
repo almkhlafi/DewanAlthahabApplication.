@@ -1807,13 +1807,22 @@ ORDER BY p.Name"
         Dim da As SqlDataAdapter = Nothing
 
         Try
+            ' Debug: Test connection string
+            MessageBox.Show("محاولة الاتصال بقاعدة البيانات CMGADB2024...", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            
             conn = New SqlConnection(connpath2)
             conn.Open()
+            
+            ' Debug: Connection successful
+            MessageBox.Show("تم الاتصال بقاعدة البيانات بنجاح!", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
             Dim query As String = "SELECT countrycode, countryName, contryarname FROM CountryMaster WHERE active = 'True' ORDER BY contryarname"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
+            
+            ' Debug: Query executed
+            MessageBox.Show($"تم تنفيذ الاستعلام - العثور على {dt.Rows.Count} سجل", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل البلدان: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1837,24 +1846,19 @@ ORDER BY p.Name"
         Dim da As SqlDataAdapter = Nothing
 
         Try
+            ' Debug: Test connection
+            MessageBox.Show("محاولة تحميل الفروع من قاعدة البيانات...", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "
-                SELECT 
-                    b.branch_code,
-                    b.branch_name,
-                    b.branch_arabic,
-                    ISNULL(cam.fld_active_branch, 0) AS fld_active_branch,
-                    ISNULL(cam.fld_ref_no_branch, '') AS fld_ref_no_branch,
-                    ISNULL(cam.fld_select, 0) AS fld_select,
-                    ISNULL(cam.fld_loacked, 0) AS fld_loacked
-                FROM Branchs b
-                LEFT JOIN CustomerAccountsMaster_BranchSelected cam ON b.branch_code = cam.fld_branch_code
-                ORDER BY b.branch_arabic"
+            Dim query As String = "SELECT branch_code, branch_name, branch_arabic FROM Branchs ORDER BY branch_arabic"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
+            
+            ' Debug: Query result
+            MessageBox.Show($"تم تحميل {dt.Rows.Count} فرع من جدول Branchs", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل الفروع: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1878,6 +1882,9 @@ ORDER BY p.Name"
         Dim da As SqlDataAdapter = Nothing
 
         Try
+            ' Debug: Test connection
+            MessageBox.Show("محاولة تحميل العملات من قاعدة البيانات...", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            
             conn = New SqlConnection(connpath2)
             conn.Open()
 
@@ -1885,6 +1892,9 @@ ORDER BY p.Name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
+            
+            ' Debug: Query result
+            MessageBox.Show($"تم تحميل {dt.Rows.Count} عملة من جدول CurrencyMaster", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل العملات: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
