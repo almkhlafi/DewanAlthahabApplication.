@@ -4,7 +4,7 @@ Imports Microsoft.Data.SqlClient
 Public Class DBconnections
 
     Dim connpath As String = "Data Source=ABDULRAHMAN;Initial Catalog=EmployeesDB;Integrated Security=True;TrustServerCertificate=True"
-    Dim connpath2 As String = "Data Source=192.168.15.56;Persist Security Info=True;User ID=AR;Pooling=False;Multiple Active Result Sets=False;Encrypt=True;Trust Server Certificate=True;Application Name=""SQL Server Management Studio"";Command Timeout=30;Password=YOUR_PASSWORD_HERE"
+    Dim connpath2 As String = "Data Source=192.168.15.56;Initial Catalog=CMGADB2024;Persist Security Info=True;User ID=AR;Pooling=False;Multiple Active Result Sets=False;Encrypt=True;Trust Server Certificate=True;Application Name=""SQL Server Management Studio"";Command Timeout=30;Password=123456"
 
     '===============Reuse the connection=============
     ' Reusable method to get a new connection (default - first connection)
@@ -1797,6 +1797,157 @@ ORDER BY p.Name"
         End Try
 
         Return dt
+    End Function
+
+    ' =====================Get Countries from CMGADB2024 Database========================
+    Public Function GetCountries() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT countrycode, countryName, contryarname FROM CountryMaster WHERE active = 'True' ORDER BY contryarname"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل البلدان: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Get Branches from CMGADB2024 Database========================
+    Public Function GetBranches() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "
+                SELECT 
+                    b.branch_code,
+                    b.branch_name,
+                    b.branch_arabic,
+                    ISNULL(cam.fld_active_branch, 0) AS fld_active_branch,
+                    ISNULL(cam.fld_ref_no_branch, '') AS fld_ref_no_branch,
+                    ISNULL(cam.fld_select, 0) AS fld_select,
+                    ISNULL(cam.fld_loacked, 0) AS fld_loacked
+                FROM Branchs b
+                LEFT JOIN CustomerAccountsMaster_BranchSelected cam ON b.branch_code = cam.fld_branch_code
+                ORDER BY b.branch_arabic"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل الفروع: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Get Currency from CMGADB2024 Database========================
+    Public Function GetCurrency() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT suffix_code, symbol, arabicname, decimal FROM CurrencyMaster ORDER BY arabicname"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل العملات: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Update Branch Selection Data========================
+    Public Function UpdateBranchSelection(branchCode As String, isSelected As Boolean, isActive As Boolean, isLocked As Boolean, refNo As String) As Boolean
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim success As Boolean = False
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            ' Check if record exists
+            Dim checkQuery As String = "SELECT COUNT(*) FROM CustomerAccountsMaster_BranchSelected WHERE fld_branch_code = @BranchCode"
+            cmd = New SqlCommand(checkQuery, conn)
+            cmd.Parameters.AddWithValue("@BranchCode", branchCode)
+            Dim recordExists As Integer = Convert.ToInt32(cmd.ExecuteScalar())
+            cmd.Dispose()
+
+            If recordExists > 0 Then
+                ' Update existing record
+                Dim updateQuery As String = "UPDATE CustomerAccountsMaster_BranchSelected SET fld_select = @Selected, fld_active_branch = @Active, fld_loacked = @Locked, fld_ref_no_branch = @RefNo WHERE fld_branch_code = @BranchCode"
+                cmd = New SqlCommand(updateQuery, conn)
+            Else
+                ' Insert new record
+                Dim insertQuery As String = "INSERT INTO CustomerAccountsMaster_BranchSelected (fld_branch_code, fld_select, fld_active_branch, fld_loacked, fld_ref_no_branch) VALUES (@BranchCode, @Selected, @Active, @Locked, @RefNo)"
+                cmd = New SqlCommand(insertQuery, conn)
+            End If
+
+            cmd.Parameters.AddWithValue("@BranchCode", branchCode)
+            cmd.Parameters.AddWithValue("@Selected", isSelected)
+            cmd.Parameters.AddWithValue("@Active", isActive)
+            cmd.Parameters.AddWithValue("@Locked", isLocked)
+            cmd.Parameters.AddWithValue("@RefNo", refNo)
+
+            Dim rowsAffected As Integer = cmd.ExecuteNonQuery()
+            success = (rowsAffected > 0)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديث بيانات الفرع: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            success = False
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return success
     End Function
 
 
