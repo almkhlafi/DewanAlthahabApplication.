@@ -25,6 +25,12 @@ Public Class Customers
         ' Setup and load currency DataGridView
         SetupCurrencyDataGridView()
         LoadCurrency()
+
+        ' Load additional ComboBoxes
+        LoadMarketData()
+        LoadCategoryData()
+        LoadGroupsData()
+        LoadTypeData()
     End Sub
 
     Private Sub LoadCountries()
@@ -61,6 +67,20 @@ Public Class Customers
             ' Store original data for filtering
             CountryCB.Tag = displayTable
 
+            ' Set Saudi Arabia as default selection
+            Dim foundSaudi As Boolean = False
+            ' Set "Saudi Arabia" as the default selection in CountryCB using its country code (00966)
+            For i As Integer = 0 To displayTable.Rows.Count - 1
+                If displayTable.Rows(i)("countrycode").ToString() = "00966" Then
+                    CountryCB.SelectedIndex = i
+                    Exit For
+                End If
+            Next
+
+            If Not foundSaudi Then
+                MessageBox.Show("Saudi Arabia (00966) not found in countries list", "Default Selection Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
+
             ' Set up additional search functionality
             SetupCountrySearch()
 
@@ -71,49 +91,86 @@ Public Class Customers
 
     Private Sub LoadAreas(countryCode As String)
         Try
+            ' Temporarily remove CountryCB event handler to prevent interference
+            RemoveHandler CountryCB.SelectedIndexChanged, AddressOf CountryCB_SelectedIndexChanged
+
             ' Load areas from CMGADB2024 database for specific country
             Dim areasTable As DataTable = dbConn.GetAreas(countryCode)
 
-            ' Clear existing items
-            AreaCB.Items.Clear()
+            ' Debug: Show exact results from database
+            If areasTable.Rows.Count > 0 Then
+                Dim firstRow = areasTable.Rows(0)
+                MessageBox.Show($"Found {areasTable.Rows.Count} areas for '{countryCode}'{vbCrLf}First area: {firstRow("description")} - {firstRow("shortname")}", "Database Results", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            End If
+
+            ' Check if areas were found
+            If areasTable.Rows.Count = 0 Then
+                ' Clear AreaCB if no areas found for this country
+                isUpdatingAreaData = True
+                isUpdatingCountryData = True
+                AreaCB.DataSource = Nothing
+                AreaCB.Tag = Nothing
+                AreaCB.Text = ""
+                isUpdatingAreaData = False
+                isUpdatingCountryData = False
+                Return
+            End If
+
+            ' Clear existing data completely
+            isUpdatingAreaData = True
+            isUpdatingCountryData = True
+            AreaCB.DataSource = Nothing
+            AreaCB.Tag = Nothing
+            AreaCB.Text = ""
 
             ' Set up AreaCB properties for enhanced search functionality
             AreaCB.DisplayMember = "DisplayText"
-            AreaCB.ValueMember = "areacode"
+            AreaCB.ValueMember = "description"
             AreaCB.AutoCompleteMode = AutoCompleteMode.Suggest
             AreaCB.AutoCompleteSource = AutoCompleteSource.ListItems
             AreaCB.DropDownStyle = ComboBoxStyle.DropDown
 
             ' Create a new DataTable with combined display text
             Dim displayTable As New DataTable()
-            displayTable.Columns.Add("areacode", GetType(String))
+            displayTable.Columns.Add("description", GetType(String))
             displayTable.Columns.Add("DisplayText", GetType(String))
 
-            ' Add areas to ComboBox with combined display format
+            ' Add areas to ComboBox with combined display format: description - shortname
             For Each row As DataRow In areasTable.Rows
                 Dim newRow As DataRow = displayTable.NewRow()
-                newRow("areacode") = row("areacode").ToString()
-                
-                ' Create display text with area code, description, and short name
-                Dim displayText As String = $"{row("areacode")} - {row("description")}"
+                newRow("description") = row("description").ToString()
+
+                ' Create display text with description and short name
+                Dim displayText As String = row("description").ToString()
                 If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
                     displayText += $" - {row("shortname")}"
                 End If
-                
+
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)
             Next
 
+            ' Store original data for filtering before binding
+            AreaCB.Tag = displayTable
+
             ' Bind to ComboBox
             AreaCB.DataSource = displayTable
 
-            ' Store original data for filtering
-            AreaCB.Tag = displayTable
+
+            isUpdatingAreaData = False
+            isUpdatingCountryData = False
 
             ' Set up additional search functionality
             SetupAreaSearch()
 
+            ' Re-add CountryCB event handler
+            AddHandler CountryCB.SelectedIndexChanged, AddressOf CountryCB_SelectedIndexChanged
+
         Catch ex As Exception
+            ' Ensure event handler is re-added even on error
+            AddHandler CountryCB.SelectedIndexChanged, AddressOf CountryCB_SelectedIndexChanged
+            isUpdatingAreaData = False
+            isUpdatingCountryData = False
             MessageBox.Show("خطأ في تحميل المناطق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -122,14 +179,46 @@ Public Class Customers
         ' Enable advanced search functionality for CountryCB
         AddHandler CountryCB.KeyUp, AddressOf CountryCB_KeyUp
         AddHandler CountryCB.TextChanged, AddressOf CountryCB_TextChanged
-        AddHandler CountryCB.Leave, AddressOf CountryCB_Leave
     End Sub
 
+    Private areaSearchSetup As Boolean = False
+
     Private Sub SetupAreaSearch()
-        ' Enable advanced search functionality for AreaCB
-        AddHandler AreaCB.KeyUp, AddressOf AreaCB_KeyUp
-        AddHandler AreaCB.TextChanged, AddressOf AreaCB_TextChanged
-        AddHandler AreaCB.Leave, AddressOf AreaCB_Leave
+        ' Enable advanced search functionality for AreaCB only once
+        If Not areaSearchSetup Then
+            AddHandler AreaCB.KeyUp, AddressOf AreaCB_KeyUp
+            AddHandler AreaCB.TextChanged, AddressOf AreaCB_TextChanged
+            AddHandler AreaCB.DropDown, AddressOf AreaCB_DropDown
+            AddHandler AreaCB.SelectedIndexChanged, AddressOf AreaCB_SelectedIndexChanged
+            AddHandler AreaCB.Click, AddressOf AreaCB_Click
+            AddHandler AreaCB.Enter, AddressOf AreaCB_Enter
+            AddHandler AreaCB.GotFocus, AddressOf AreaCB_GotFocus
+            areaSearchSetup = True
+        End If
+    End Sub
+
+    Private Sub SetupMarketSearch()
+        ' Enable advanced search functionality for MarketCB
+        AddHandler MarketCB.KeyUp, AddressOf MarketCB_KeyUp
+        AddHandler MarketCB.TextChanged, AddressOf MarketCB_TextChanged
+    End Sub
+
+    Private Sub SetupCategorySearch()
+        ' Enable advanced search functionality for CategoryCB
+        AddHandler CatogeryCB.KeyUp, AddressOf CategoryCB_KeyUp
+        AddHandler CatogeryCB.TextChanged, AddressOf CategoryCB_TextChanged
+    End Sub
+
+    Private Sub SetupGroupsSearch()
+        ' Enable advanced search functionality for GroupsCB
+        AddHandler GroupsCB.KeyUp, AddressOf GroupsCB_KeyUp
+        AddHandler GroupsCB.TextChanged, AddressOf GroupsCB_TextChanged
+    End Sub
+
+    Private Sub SetupTypeSearch()
+        ' Enable advanced search functionality for TypeCB
+        AddHandler TypeCB.KeyUp, AddressOf TypeCB_KeyUp
+        AddHandler TypeCB.TextChanged, AddressOf TypeCB_TextChanged
     End Sub
 
     Private Sub CountryCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -141,39 +230,69 @@ Public Class Customers
         End If
     End Sub
 
+    Private isUpdatingCountryData As Boolean = False
+
     Private Sub CountryCB_TextChanged(sender As Object, e As EventArgs)
-        ' Enhanced search functionality - filter items based on typed text
+        ' Prevent recursive calls when updating data
+        If isUpdatingCountryData Then Return
+
+        ' Enhanced search functionality - move matching items to top
         Try
-            Dim searchText As String = CountryCB.Text.ToLower()
-            If String.IsNullOrEmpty(searchText) Then Return
+            Dim searchText As String = CountryCB.Text.ToLower().Trim()
+            Dim currentCursorPosition As Integer = CountryCB.SelectionStart
 
             ' Get the original data
             Dim originalData As DataTable = CType(CountryCB.Tag, DataTable)
             If originalData Is Nothing Then Return
 
-            ' Filter the data based on search text
-            Dim filteredRows = originalData.AsEnumerable().Where(Function(row)
-                Dim displayText As String = row("DisplayText").ToString().ToLower()
-                Return displayText.Contains(searchText)
-            End Function)
-
-            If filteredRows.Any() Then
-                ' Create filtered DataTable
-                Dim filteredTable As DataTable = originalData.Clone()
-                For Each row In filteredRows
-                    filteredTable.ImportRow(row)
-                Next
-
-                ' Update ComboBox with filtered data
-                CountryCB.DataSource = filteredTable
-                CountryCB.DroppedDown = True
-
-                ' Move cursor to end of text
-                CountryCB.SelectionStart = CountryCB.Text.Length
-                CountryCB.SelectionLength = 0
+            ' If search text is empty, restore full list
+            If String.IsNullOrEmpty(searchText) Then
+                isUpdatingCountryData = True
+                CountryCB.DataSource = originalData
+                CountryCB.Text = ""
+                isUpdatingCountryData = False
+                Return
             End If
 
+            ' Sort data: matching items first, then non-matching items
+            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                     Return displayText.Contains(searchText)
+                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                        Return Not displayText.Contains(searchText)
+                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            ' Create reordered DataTable with matches first
+            Dim reorderedTable As DataTable = originalData.Clone()
+
+            ' Add matching rows first
+            For Each row In matchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            ' Add non-matching rows after
+            For Each row In nonMatchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            ' Update ComboBox with reordered data without changing text
+            isUpdatingCountryData = True
+            Dim userText As String = CountryCB.Text
+            CountryCB.DataSource = reorderedTable
+            CountryCB.Text = userText
+            CountryCB.SelectionStart = currentCursorPosition
+            CountryCB.SelectionLength = 0
+            ' Only open dropdown if CountryCB has focus and user is actively typing
+            If CountryCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                CountryCB.DroppedDown = True
+            End If
+            isUpdatingCountryData = False
+
         Catch ex As Exception
+            isUpdatingCountryData = False
             ' Ignore any errors during text change
         End Try
     End Sub
@@ -187,85 +306,410 @@ Public Class Customers
         End If
     End Sub
 
+    Private isUpdatingAreaData As Boolean = False
+
     Private Sub AreaCB_TextChanged(sender As Object, e As EventArgs)
-        ' Enhanced search functionality - filter items based on typed text
+        ' Prevent recursive calls when updating data
+        If isUpdatingAreaData Then Return
+
+        ' Enhanced search functionality - move matching items to top
         Try
-            Dim searchText As String = AreaCB.Text.ToLower()
-            If String.IsNullOrEmpty(searchText) Then Return
+            Dim searchText As String = AreaCB.Text.ToLower().Trim()
+            Dim currentCursorPosition As Integer = AreaCB.SelectionStart
 
             ' Get the original data
             Dim originalData As DataTable = CType(AreaCB.Tag, DataTable)
             If originalData Is Nothing Then Return
 
-            ' Filter the data based on search text
-            Dim filteredRows = originalData.AsEnumerable().Where(Function(row)
-                Dim displayText As String = row("DisplayText").ToString().ToLower()
-                Return displayText.Contains(searchText)
-            End Function)
-
-            If filteredRows.Any() Then
-                ' Create filtered DataTable
-                Dim filteredTable As DataTable = originalData.Clone()
-                For Each row In filteredRows
-                    filteredTable.ImportRow(row)
-                Next
-
-                ' Update ComboBox with filtered data
-                AreaCB.DataSource = filteredTable
-                AreaCB.DroppedDown = True
-
-                ' Move cursor to end of text
-                AreaCB.SelectionStart = AreaCB.Text.Length
-                AreaCB.SelectionLength = 0
+            ' If search text is empty, restore full list
+            If String.IsNullOrEmpty(searchText) Then
+                isUpdatingAreaData = True
+                AreaCB.DataSource = originalData
+                AreaCB.Text = ""
+                isUpdatingAreaData = False
+                Return
             End If
 
+            ' Sort data: matching items first, then non-matching items
+            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                     Return displayText.Contains(searchText)
+                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                        Return Not displayText.Contains(searchText)
+                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            ' Create reordered DataTable with matches first
+            Dim reorderedTable As DataTable = originalData.Clone()
+
+            ' Add matching rows first
+            For Each row In matchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            ' Add non-matching rows after
+            For Each row In nonMatchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            ' Update ComboBox with reordered data without changing text
+            isUpdatingAreaData = True
+            Dim userText As String = AreaCB.Text
+            AreaCB.DataSource = reorderedTable
+            AreaCB.Text = userText
+            AreaCB.SelectionStart = currentCursorPosition
+            AreaCB.SelectionLength = 0
+            ' Only open dropdown if AreaCB has focus and user is actively typing
+            If AreaCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                AreaCB.DroppedDown = True
+            End If
+            isUpdatingAreaData = False
+
         Catch ex As Exception
+            isUpdatingAreaData = False
             ' Ignore any errors during text change
         End Try
     End Sub
 
-    Private Sub CountryCB_Leave(sender As Object, e As EventArgs)
-        ' Restore full list when leaving the control
+
+
+    Private Sub AreaCB_DropDown(sender As Object, e As EventArgs)
+        ' Prevent CountryCB changes when AreaCB dropdown opens
         Try
-            Dim originalData As DataTable = CType(CountryCB.Tag, DataTable)
-            If originalData IsNot Nothing Then
-                CountryCB.DataSource = originalData
-            End If
+            isLoadingAreas = True
+            isUpdatingCountryData = True
         Catch ex As Exception
             ' Ignore errors
         End Try
     End Sub
 
-    Private Sub AreaCB_Leave(sender As Object, e As EventArgs)
-        ' Restore full list when leaving the control
+    Private Sub AreaCB_SelectedIndexChanged(sender As Object, e As EventArgs)
+        ' Prevent CountryCB changes when AreaCB selection changes
         Try
-            Dim originalData As DataTable = CType(AreaCB.Tag, DataTable)
-            If originalData IsNot Nothing Then
-                AreaCB.DataSource = originalData
+            If Not isUpdatingAreaData Then
+                ' Simply reset the flags after area selection
+                isLoadingAreas = False
+                isUpdatingCountryData = False
             End If
+        Catch ex As Exception
+            isLoadingAreas = False
+            isUpdatingCountryData = False
+        End Try
+    End Sub
+
+    Private Sub AreaCB_Click(sender As Object, e As EventArgs)
+        ' Completely remove CountryCB event handler when AreaCB is clicked
+        Try
+            RemoveHandler CountryCB.SelectedIndexChanged, AddressOf CountryCB_SelectedIndexChanged
+            isUpdatingCountryData = True
+            isLoadingAreas = True
         Catch ex As Exception
             ' Ignore errors
         End Try
     End Sub
+
+    Private Sub AreaCB_Enter(sender As Object, e As EventArgs)
+        ' Completely remove CountryCB event handler when AreaCB gets focus
+        Try
+            RemoveHandler CountryCB.SelectedIndexChanged, AddressOf CountryCB_SelectedIndexChanged
+            isUpdatingCountryData = True
+            isLoadingAreas = True
+        Catch ex As Exception
+            ' Ignore errors
+        End Try
+    End Sub
+
+    Private Sub AreaCB_GotFocus(sender As Object, e As EventArgs)
+        ' Completely remove CountryCB event handler when AreaCB gets focus
+        Try
+            RemoveHandler CountryCB.SelectedIndexChanged, AddressOf CountryCB_SelectedIndexChanged
+            isUpdatingCountryData = True
+            isLoadingAreas = True
+        Catch ex As Exception
+            ' Ignore errors
+        End Try
+    End Sub
+
+    ' =====================MarketCB Search Event Handlers========================
+    Private isUpdatingMarketData As Boolean = False
+
+    Private Sub MarketCB_KeyUp(sender As Object, e As KeyEventArgs)
+        If e.KeyCode = Keys.Enter Then
+            MarketCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            MarketCB.DroppedDown = True
+        End If
+    End Sub
+
+    Private Sub MarketCB_TextChanged(sender As Object, e As EventArgs)
+        If isUpdatingMarketData Then Return
+
+        Try
+            Dim searchText As String = MarketCB.Text.ToLower().Trim()
+            Dim currentCursorPosition As Integer = MarketCB.SelectionStart
+
+            Dim originalData As DataTable = CType(MarketCB.Tag, DataTable)
+            If originalData Is Nothing Then Return
+
+            If String.IsNullOrEmpty(searchText) Then
+                isUpdatingMarketData = True
+                MarketCB.DataSource = originalData
+                MarketCB.Text = ""
+                isUpdatingMarketData = False
+                Return
+            End If
+
+            ' Sort data: matching items first, then non-matching items
+            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                     Return displayText.Contains(searchText)
+                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                        Return Not displayText.Contains(searchText)
+                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim reorderedTable As DataTable = originalData.Clone()
+            For Each row In matchingRows
+                reorderedTable.ImportRow(row)
+            Next
+            For Each row In nonMatchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            isUpdatingMarketData = True
+            Dim userText As String = MarketCB.Text
+            MarketCB.DataSource = reorderedTable
+            MarketCB.Text = userText
+            MarketCB.SelectionStart = currentCursorPosition
+            MarketCB.SelectionLength = 0
+            If MarketCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                MarketCB.DroppedDown = True
+            End If
+            isUpdatingMarketData = False
+
+        Catch ex As Exception
+            isUpdatingMarketData = False
+        End Try
+    End Sub
+
+    ' =====================CategoryCB Search Event Handlers========================
+    Private isUpdatingCategoryData As Boolean = False
+
+    Private Sub CategoryCB_KeyUp(sender As Object, e As KeyEventArgs)
+        If e.KeyCode = Keys.Enter Then
+            CatogeryCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            CatogeryCB.DroppedDown = True
+        End If
+    End Sub
+
+    Private Sub CategoryCB_TextChanged(sender As Object, e As EventArgs)
+        If isUpdatingCategoryData Then Return
+
+        Try
+            Dim searchText As String = CatogeryCB.Text.ToLower().Trim()
+            Dim currentCursorPosition As Integer = CatogeryCB.SelectionStart
+
+            Dim originalData As DataTable = CType(CatogeryCB.Tag, DataTable)
+            If originalData Is Nothing Then Return
+
+            If String.IsNullOrEmpty(searchText) Then
+                isUpdatingCategoryData = True
+                CatogeryCB.DataSource = originalData
+                CatogeryCB.Text = ""
+                isUpdatingCategoryData = False
+                Return
+            End If
+
+            ' Sort data: matching items first, then non-matching items
+            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                     Return displayText.Contains(searchText)
+                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                        Return Not displayText.Contains(searchText)
+                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim reorderedTable As DataTable = originalData.Clone()
+            For Each row In matchingRows
+                reorderedTable.ImportRow(row)
+            Next
+            For Each row In nonMatchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            isUpdatingCategoryData = True
+            Dim userText As String = CatogeryCB.Text
+            CatogeryCB.DataSource = reorderedTable
+            CatogeryCB.Text = userText
+            CatogeryCB.SelectionStart = currentCursorPosition
+            CatogeryCB.SelectionLength = 0
+            If CatogeryCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                CatogeryCB.DroppedDown = True
+            End If
+            isUpdatingCategoryData = False
+
+        Catch ex As Exception
+            isUpdatingCategoryData = False
+        End Try
+    End Sub
+
+    ' =====================GroupsCB Search Event Handlers========================
+    Private isUpdatingGroupsData As Boolean = False
+
+    Private Sub GroupsCB_KeyUp(sender As Object, e As KeyEventArgs)
+        If e.KeyCode = Keys.Enter Then
+            GroupsCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            GroupsCB.DroppedDown = True
+        End If
+    End Sub
+
+    Private Sub GroupsCB_TextChanged(sender As Object, e As EventArgs)
+        If isUpdatingGroupsData Then Return
+
+        Try
+            Dim searchText As String = GroupsCB.Text.ToLower().Trim()
+            Dim currentCursorPosition As Integer = GroupsCB.SelectionStart
+
+            Dim originalData As DataTable = CType(GroupsCB.Tag, DataTable)
+            If originalData Is Nothing Then Return
+
+            If String.IsNullOrEmpty(searchText) Then
+                isUpdatingGroupsData = True
+                GroupsCB.DataSource = originalData
+                GroupsCB.Text = ""
+                isUpdatingGroupsData = False
+                Return
+            End If
+
+            ' Sort data: matching items first, then non-matching items
+            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                     Return displayText.Contains(searchText)
+                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                        Return Not displayText.Contains(searchText)
+                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim reorderedTable As DataTable = originalData.Clone()
+            For Each row In matchingRows
+                reorderedTable.ImportRow(row)
+            Next
+            For Each row In nonMatchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            isUpdatingGroupsData = True
+            Dim userText As String = GroupsCB.Text
+            GroupsCB.DataSource = reorderedTable
+            GroupsCB.Text = userText
+            GroupsCB.SelectionStart = currentCursorPosition
+            GroupsCB.SelectionLength = 0
+            If GroupsCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                GroupsCB.DroppedDown = True
+            End If
+            isUpdatingGroupsData = False
+
+        Catch ex As Exception
+            isUpdatingGroupsData = False
+        End Try
+    End Sub
+
+    ' =====================TypeCB Search Event Handlers========================
+    Private isUpdatingTypeData As Boolean = False
+
+    Private Sub TypeCB_KeyUp(sender As Object, e As KeyEventArgs)
+        If e.KeyCode = Keys.Enter Then
+            TypeCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            TypeCB.DroppedDown = True
+        End If
+    End Sub
+
+    Private Sub TypeCB_TextChanged(sender As Object, e As EventArgs)
+        If isUpdatingTypeData Then Return
+
+        Try
+            Dim searchText As String = TypeCB.Text.ToLower().Trim()
+            Dim currentCursorPosition As Integer = TypeCB.SelectionStart
+
+            Dim originalData As DataTable = CType(TypeCB.Tag, DataTable)
+            If originalData Is Nothing Then Return
+
+            If String.IsNullOrEmpty(searchText) Then
+                isUpdatingTypeData = True
+                TypeCB.DataSource = originalData
+                TypeCB.Text = ""
+                isUpdatingTypeData = False
+                Return
+            End If
+
+            ' Sort data: matching items first, then non-matching items
+            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                     Return displayText.Contains(searchText)
+                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
+                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
+                                                                        Return Not displayText.Contains(searchText)
+                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+
+            Dim reorderedTable As DataTable = originalData.Clone()
+            For Each row In matchingRows
+                reorderedTable.ImportRow(row)
+            Next
+            For Each row In nonMatchingRows
+                reorderedTable.ImportRow(row)
+            Next
+
+            isUpdatingTypeData = True
+            Dim userText As String = TypeCB.Text
+            TypeCB.DataSource = reorderedTable
+            TypeCB.Text = userText
+            TypeCB.SelectionStart = currentCursorPosition
+            TypeCB.SelectionLength = 0
+            If TypeCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                TypeCB.DroppedDown = True
+            End If
+            isUpdatingTypeData = False
+
+        Catch ex As Exception
+            isUpdatingTypeData = False
+        End Try
+    End Sub
+
+    Private isLoadingAreas As Boolean = False
 
     Private Sub CountryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CountryCB.SelectedIndexChanged
+        ' Prevent execution during area loading or country data updates
+        If isLoadingAreas OrElse isUpdatingCountryData Then Return
+
         Try
             If CountryCB.SelectedItem IsNot Nothing Then
-                Dim selectedCountry As DataRowView = CType(CountryCB.SelectedItem, DataRowView)
-                Dim countryCode As String = selectedCountry("countrycode").ToString()
-                Dim displayText As String = selectedCountry("DisplayText").ToString()
+                Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
+                Dim countryCode = selectedCountry("countrycode").ToString
+                Dim displayText = selectedCountry("DisplayText").ToString
 
-                ' Check if Saudi Arabia is selected (looking for SA or السعودية in the display text)
-                If countryCode = "SA" OrElse displayText.Contains("السعودية") OrElse displayText.Contains("Saudi") Then
-                    ' Auto-populate AreaCB with areas from database for Saudi Arabia
-                    LoadAreas(countryCode)
-                Else
-                    ' Clear AreaCB for other countries
-                    AreaCB.DataSource = Nothing
-                    AreaCB.Items.Clear()
-                End If
+
+                ' Auto-populate AreaCB with areas/cities for any selected country
+                isLoadingAreas = True
+                LoadAreas(countryCode)
+                isLoadingAreas = False
+            Else
+                MessageBox.Show("CountryCB.SelectedItem is Nothing", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Catch ex As Exception
+            isLoadingAreas = False
             MessageBox.Show("خطأ في تحديد البلد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -356,16 +800,17 @@ Public Class Customers
             ' Clear existing rows
             BranchesInfoDGV.Rows.Clear()
 
-            ' Add branches to DataGridView with default values
+            ' Add branches to DataGridView - only populate Arabic and English names from database
+            ' Other columns (Select, Active, RefNo, Locked) will be filled by users later
             For Each row As DataRow In branchesTable.Rows
                 Dim newRow As Object() = {
-                    False, ' Select checkbox (default unchecked)
-                    row("branch_arabic").ToString(), ' Arabic name
-                    row("branch_name").ToString(), ' English name
-                    row("branch_code").ToString(), ' Branch code
-                    True, ' Active status (default checked - will be saved to fld_active_branch)
-                    "", ' Ref NO (empty default - will be saved to fld_ref_no_branch)
-                    False ' Locked status (default unchecked - will be saved to fld_loacked)
+                    False, ' Select checkbox (default unchecked - user will set)
+                    row("branch_arabic").ToString(), ' Arabic name from database
+                    row("branch_name").ToString(), ' English name from database
+                    "", ' Branch code (empty - user will fill)
+                    False, ' Active status (default unchecked - user will set)
+                    "", ' Ref NO (empty - user will fill)
+                    False ' Locked status (default unchecked - user will set)
                 }
                 BranchesInfoDGV.Rows.Add(newRow)
             Next
@@ -537,6 +982,178 @@ Public Class Customers
         End Try
     End Sub
 
+    Private Sub LoadMarketData()
+        Try
+            ' Load market data from CMGADB2024 database
+            Dim marketTable As DataTable = dbConn.GetMarketData()
+
+            ' Set up MarketCB properties for enhanced search functionality
+            MarketCB.DisplayMember = "DisplayText"
+            MarketCB.ValueMember = "code"
+            MarketCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            MarketCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            MarketCB.DropDownStyle = ComboBoxStyle.DropDown
+
+            ' Create a new DataTable with combined display text
+            Dim displayTable As New DataTable()
+            displayTable.Columns.Add("code", GetType(String))
+            displayTable.Columns.Add("DisplayText", GetType(String))
+
+            ' Add market data with combined display format: code - description - shortname
+            For Each row As DataRow In marketTable.Rows
+                Dim newRow As DataRow = displayTable.NewRow()
+                newRow("code") = row("code").ToString()
+
+                Dim displayText As String = $"{row("code")} - {row("description")}"
+                If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
+                    displayText += $" - {row("shortname")}"
+                End If
+
+                newRow("DisplayText") = displayText
+                displayTable.Rows.Add(newRow)
+            Next
+
+            ' Bind to ComboBox and store original data for search
+            MarketCB.DataSource = displayTable
+            MarketCB.Tag = displayTable
+
+            ' Set up search functionality
+            SetupMarketSearch()
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات السوق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub LoadCategoryData()
+        Try
+            ' Load category data from CMGADB2024 database
+            Dim categoryTable As DataTable = dbConn.GetCategoryData()
+
+            ' Set up CategoryCB properties for enhanced search functionality
+            CatogeryCB.DisplayMember = "DisplayText"
+            CatogeryCB.ValueMember = "fld_code"
+            CatogeryCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            CatogeryCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            CatogeryCB.DropDownStyle = ComboBoxStyle.DropDown
+
+            ' Create a new DataTable with combined display text
+            Dim displayTable As New DataTable()
+            displayTable.Columns.Add("fld_code", GetType(String))
+            displayTable.Columns.Add("DisplayText", GetType(String))
+
+            ' Add category data with combined display format: fld_code - fld_name - fld_arabic_name
+            For Each row As DataRow In categoryTable.Rows
+                Dim newRow As DataRow = displayTable.NewRow()
+                newRow("fld_code") = row("fld_code").ToString()
+
+                Dim displayText As String = $"{row("fld_code")} - {row("fld_name")}"
+                If Not String.IsNullOrEmpty(row("fld_arabic_name").ToString()) Then
+                    displayText += $" - {row("fld_arabic_name")}"
+                End If
+
+                newRow("DisplayText") = displayText
+                displayTable.Rows.Add(newRow)
+            Next
+
+            ' Bind to ComboBox and store original data for search
+            CatogeryCB.DataSource = displayTable
+            CatogeryCB.Tag = displayTable
+
+            ' Set up search functionality
+            SetupCategorySearch()
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات الفئة: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub LoadGroupsData()
+        Try
+            ' Load groups data from CMGADB2024 database
+            Dim groupsTable As DataTable = dbConn.GetGroupsData()
+
+            ' Set up GroupsCB properties for enhanced search functionality
+            GroupsCB.DisplayMember = "DisplayText"
+            GroupsCB.ValueMember = "code"
+            GroupsCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            GroupsCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            GroupsCB.DropDownStyle = ComboBoxStyle.DropDown
+
+            ' Create a new DataTable with combined display text
+            Dim displayTable As New DataTable()
+            displayTable.Columns.Add("code", GetType(String))
+            displayTable.Columns.Add("DisplayText", GetType(String))
+
+            ' Add groups data with combined display format: code - description - shortname
+            For Each row As DataRow In groupsTable.Rows
+                Dim newRow As DataRow = displayTable.NewRow()
+                newRow("code") = row("code").ToString()
+
+                Dim displayText As String = $"{row("code")} - {row("description")}"
+                If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
+                    displayText += $" - {row("shortname")}"
+                End If
+
+                newRow("DisplayText") = displayText
+                displayTable.Rows.Add(newRow)
+            Next
+
+            ' Bind to ComboBox and store original data for search
+            GroupsCB.DataSource = displayTable
+            GroupsCB.Tag = displayTable
+
+            ' Set up search functionality
+            SetupGroupsSearch()
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات المجموعات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub LoadTypeData()
+        Try
+            ' Load type data from CMGADB2024 database
+            Dim typeTable As DataTable = dbConn.GetTypeData()
+
+            ' Set up TypeCB properties for enhanced search functionality
+            TypeCB.DisplayMember = "DisplayText"
+            TypeCB.ValueMember = "fld_code"
+            TypeCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            TypeCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            TypeCB.DropDownStyle = ComboBoxStyle.DropDown
+
+            ' Create a new DataTable with combined display text
+            Dim displayTable As New DataTable()
+            displayTable.Columns.Add("fld_code", GetType(String))
+            displayTable.Columns.Add("DisplayText", GetType(String))
+
+            ' Add type data with combined display format: fld_code - fld_name - fld_arabic_name
+            For Each row As DataRow In typeTable.Rows
+                Dim newRow As DataRow = displayTable.NewRow()
+                newRow("fld_code") = row("fld_code").ToString()
+
+                Dim displayText As String = $"{row("fld_code")} - {row("fld_name")}"
+                If Not String.IsNullOrEmpty(row("fld_arabic_name").ToString()) Then
+                    displayText += $" - {row("fld_arabic_name")}"
+                End If
+
+                newRow("DisplayText") = displayText
+                displayTable.Rows.Add(newRow)
+            Next
+
+            ' Bind to ComboBox and store original data for search
+            TypeCB.DataSource = displayTable
+            TypeCB.Tag = displayTable
+
+            ' Set up search functionality
+            SetupTypeSearch()
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات النوع: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
     Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs)
         ' Handle checkbox clicks in the Select column
         If e.RowIndex >= 0 AndAlso e.ColumnIndex = 0 Then
@@ -697,7 +1314,21 @@ Public Class Customers
         End If
     End Sub
 
+    Private Sub MarketCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MarketCB.SelectedIndexChanged
 
+    End Sub
+
+    Private Sub CatogeryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CatogeryCB.SelectedIndexChanged
+
+    End Sub
+
+    Private Sub GroupsCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles GroupsCB.SelectedIndexChanged
+
+    End Sub
+
+    Private Sub TypeCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles TypeCB.SelectedIndexChanged
+
+    End Sub
 End Class
 
 

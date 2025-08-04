@@ -32,6 +32,14 @@ Partial Class Customers
         GroupBox6 = New GroupBox()
         CurrencyDGV = New DataGridView()
         GroupBox4 = New GroupBox()
+        Label23 = New Label()
+        Label22 = New Label()
+        Label21 = New Label()
+        Label12 = New Label()
+        TypeCB = New ComboBox()
+        CatogeryCB = New ComboBox()
+        GroupsCB = New ComboBox()
+        MarketCB = New ComboBox()
         BranchesInfoDGV = New DataGridView()
         GroupBox3 = New GroupBox()
         TextBox16 = New TextBox()
@@ -120,6 +128,7 @@ Partial Class Customers
         ' 
         GroupBox6.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         GroupBox6.Controls.Add(CurrencyDGV)
+        GroupBox6.ForeColor = SystemColors.Highlight
         GroupBox6.Location = New Point(-1, 13)
         GroupBox6.Name = "GroupBox6"
         GroupBox6.Size = New Size(880, 171)
@@ -144,7 +153,7 @@ Partial Class Customers
         DataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle2.BackColor = SystemColors.Window
         DataGridViewCellStyle2.Font = New Font("Segoe UI", 9.0F)
-        DataGridViewCellStyle2.ForeColor = SystemColors.ControlText
+        DataGridViewCellStyle2.ForeColor = SystemColors.Highlight
         DataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight
         DataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText
         DataGridViewCellStyle2.WrapMode = DataGridViewTriState.False
@@ -159,13 +168,112 @@ Partial Class Customers
         ' GroupBox4
         ' 
         GroupBox4.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
+        GroupBox4.Controls.Add(Label23)
+        GroupBox4.Controls.Add(Label22)
+        GroupBox4.Controls.Add(Label21)
+        GroupBox4.Controls.Add(Label12)
+        GroupBox4.Controls.Add(TypeCB)
+        GroupBox4.Controls.Add(CatogeryCB)
+        GroupBox4.Controls.Add(GroupsCB)
+        GroupBox4.Controls.Add(MarketCB)
         GroupBox4.Controls.Add(BranchesInfoDGV)
+        GroupBox4.ForeColor = SystemColors.Highlight
         GroupBox4.Location = New Point(6, 197)
         GroupBox4.Name = "GroupBox4"
         GroupBox4.Size = New Size(873, 679)
         GroupBox4.TabIndex = 4
         GroupBox4.TabStop = False
         GroupBox4.Text = "معلومات الفرع"
+        ' 
+        ' Label23
+        ' 
+        Label23.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        Label23.AutoSize = True
+        Label23.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label23.ForeColor = SystemColors.Highlight
+        Label23.Location = New Point(345, 520)
+        Label23.Margin = New Padding(2, 0, 2, 0)
+        Label23.Name = "Label23"
+        Label23.Size = New Size(40, 20)
+        Label23.TabIndex = 43
+        Label23.Text = "النوع"
+        ' 
+        ' Label22
+        ' 
+        Label22.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        Label22.AutoSize = True
+        Label22.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label22.ForeColor = SystemColors.Highlight
+        Label22.Location = New Point(744, 520)
+        Label22.Margin = New Padding(2, 0, 2, 0)
+        Label22.Name = "Label22"
+        Label22.Size = New Size(80, 20)
+        Label22.TabIndex = 42
+        Label22.Text = "المجموعات"
+        ' 
+        ' Label21
+        ' 
+        Label21.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        Label21.AutoSize = True
+        Label21.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label21.ForeColor = SystemColors.Highlight
+        Label21.Location = New Point(332, 449)
+        Label21.Margin = New Padding(2, 0, 2, 0)
+        Label21.Name = "Label21"
+        Label21.Size = New Size(53, 20)
+        Label21.TabIndex = 41
+        Label21.Text = "الصنف"
+        ' 
+        ' Label12
+        ' 
+        Label12.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        Label12.AutoSize = True
+        Label12.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label12.ForeColor = SystemColors.Highlight
+        Label12.Location = New Point(767, 450)
+        Label12.Margin = New Padding(2, 0, 2, 0)
+        Label12.Name = "Label12"
+        Label12.Size = New Size(58, 20)
+        Label12.TabIndex = 40
+        Label12.Text = "الاسواق"
+        ' 
+        ' TypeCB
+        ' 
+        TypeCB.FormattingEnabled = True
+        TypeCB.Location = New Point(27, 544)
+        TypeCB.Margin = New Padding(2, 3, 2, 3)
+        TypeCB.Name = "TypeCB"
+        TypeCB.Size = New Size(362, 28)
+        TypeCB.TabIndex = 39
+        ' 
+        ' CatogeryCB
+        ' 
+        CatogeryCB.FormattingEnabled = True
+        CatogeryCB.Location = New Point(27, 472)
+        CatogeryCB.Margin = New Padding(2, 3, 2, 3)
+        CatogeryCB.Name = "CatogeryCB"
+        CatogeryCB.Size = New Size(362, 28)
+        CatogeryCB.TabIndex = 38
+        ' 
+        ' GroupsCB
+        ' 
+        GroupsCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        GroupsCB.FormattingEnabled = True
+        GroupsCB.Location = New Point(435, 543)
+        GroupsCB.Margin = New Padding(2, 3, 2, 3)
+        GroupsCB.Name = "GroupsCB"
+        GroupsCB.Size = New Size(393, 28)
+        GroupsCB.TabIndex = 37
+        ' 
+        ' MarketCB
+        ' 
+        MarketCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        MarketCB.FormattingEnabled = True
+        MarketCB.Location = New Point(435, 473)
+        MarketCB.Margin = New Padding(2, 3, 2, 3)
+        MarketCB.Name = "MarketCB"
+        MarketCB.Size = New Size(393, 28)
+        MarketCB.TabIndex = 36
         ' 
         ' BranchesInfoDGV
         ' 
@@ -183,7 +291,7 @@ Partial Class Customers
         DataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle4.BackColor = SystemColors.Window
         DataGridViewCellStyle4.Font = New Font("Segoe UI", 9.0F)
-        DataGridViewCellStyle4.ForeColor = SystemColors.ControlText
+        DataGridViewCellStyle4.ForeColor = SystemColors.Highlight
         DataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight
         DataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText
         DataGridViewCellStyle4.WrapMode = DataGridViewTriState.False
@@ -192,7 +300,7 @@ Partial Class Customers
         BranchesInfoDGV.Name = "BranchesInfoDGV"
         BranchesInfoDGV.ReadOnly = True
         BranchesInfoDGV.RowHeadersWidth = 51
-        BranchesInfoDGV.Size = New Size(861, 649)
+        BranchesInfoDGV.Size = New Size(861, 386)
         BranchesInfoDGV.TabIndex = 5
         ' 
         ' GroupBox3
@@ -578,6 +686,7 @@ Partial Class Customers
         ' 
         Label9.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label9.AutoSize = True
+        Label9.ForeColor = SystemColors.Highlight
         Label9.Location = New Point(373, 273)
         Label9.Margin = New Padding(2, 0, 2, 0)
         Label9.Name = "Label9"
@@ -589,6 +698,7 @@ Partial Class Customers
         ' 
         Label8.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label8.AutoSize = True
+        Label8.ForeColor = SystemColors.Highlight
         Label8.Location = New Point(345, 340)
         Label8.Margin = New Padding(2, 0, 2, 0)
         Label8.Name = "Label8"
@@ -797,7 +907,7 @@ Partial Class Customers
         ' 
         ' Customers
         ' 
-        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
+        AutoScaleDimensions = New SizeF(8F, 20F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
         ClientSize = New Size(1622, 968)
@@ -815,6 +925,7 @@ Partial Class Customers
         GroupBox6.ResumeLayout(False)
         CType(CurrencyDGV, ComponentModel.ISupportInitialize).EndInit()
         GroupBox4.ResumeLayout(False)
+        GroupBox4.PerformLayout()
         CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).EndInit()
         GroupBox3.ResumeLayout(False)
         GroupBox3.PerformLayout()
@@ -886,5 +997,13 @@ Partial Class Customers
     Friend WithEvents CurrencyDGV As DataGridView
     Friend WithEvents GroupBox4 As GroupBox
     Friend WithEvents BranchesInfoDGV As DataGridView
+    Friend WithEvents Label23 As Label
+    Friend WithEvents Label22 As Label
+    Friend WithEvents Label21 As Label
+    Friend WithEvents Label12 As Label
+    Friend WithEvents TypeCB As ComboBox
+    Friend WithEvents CatogeryCB As ComboBox
+    Friend WithEvents GroupsCB As ComboBox
+    Friend WithEvents MarketCB As ComboBox
 
 End Class

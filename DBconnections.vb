@@ -1950,7 +1950,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT contryCode, description, shortname, areacode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
+            Dim query As String = "SELECT contryCode, description, shortname FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CountryCode", countryCode)
             da = New SqlDataAdapter(cmd)
@@ -1958,6 +1958,126 @@ ORDER BY p.Name"
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل المناطق: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Get Market Data from CMGADB2024 Database========================
+    Public Function GetMarketData() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT code, description, shortname FROM [CMGADB2024].[dbo].[CusTransactionMaster] ORDER BY description"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات السوق: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Get Category Data from CMGADB2024 Database========================
+    Public Function GetCategoryData() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM [CMGADB2024].[dbo].[CustomerCategory] ORDER BY fld_arabic_name"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات الفئة: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Get Groups Data from CMGADB2024 Database========================
+    Public Function GetGroupsData() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT code, description, shortname FROM [CMGADB2024].[dbo].[CusGradeMaster] ORDER BY description"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات المجموعات: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
+    End Function
+
+    ' =====================Get Type Data from CMGADB2024 Database========================
+    Public Function GetTypeData() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM [CMGADB2024].[dbo].[CustomerType] ORDER BY fld_arabic_name"
+            cmd = New SqlCommand(query, conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات النوع: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             If da IsNot Nothing Then da.Dispose()
             If cmd IsNot Nothing Then cmd.Dispose()
