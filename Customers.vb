@@ -67,19 +67,7 @@ Public Class Customers
             ' Store original data for filtering
             CountryCB.Tag = displayTable
 
-            ' Set Saudi Arabia as default selection
-            Dim foundSaudi As Boolean = False
-            ' Set "Saudi Arabia" as the default selection in CountryCB using its country code (00966)
-            For i As Integer = 0 To displayTable.Rows.Count - 1
-                If displayTable.Rows(i)("countrycode").ToString() = "00966" Then
-                    CountryCB.SelectedIndex = i
-                    Exit For
-                End If
-            Next
 
-            If Not foundSaudi Then
-                MessageBox.Show("Saudi Arabia (00966) not found in countries list", "Default Selection Error", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            End If
 
             ' Set up additional search functionality
             SetupCountrySearch()
