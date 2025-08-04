@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class Form1
+Partial Class Customers
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -23,7 +23,11 @@ Partial Class Form1
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         components = New ComponentModel.Container()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
+        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
         GroupBox1 = New GroupBox()
         GroupBox6 = New GroupBox()
         CurrencyDGV = New DataGridView()
@@ -51,9 +55,9 @@ Partial Class Form1
         RichTextBox1 = New RichTextBox()
         TextBox4 = New TextBox()
         CheckBox1 = New CheckBox()
-        TextBox3 = New TextBox()
-        TextBox2 = New TextBox()
-        TextBox1 = New TextBox()
+        CustomerAccountNumber = New TextBox()
+        AccountNumber = New TextBox()
+        identityNB = New TextBox()
         Label19 = New Label()
         Label18 = New Label()
         Label17 = New Label()
@@ -108,48 +112,87 @@ Partial Class Form1
         GroupBox1.Name = "GroupBox1"
         GroupBox1.Padding = New Padding(3, 4, 3, 4)
         GroupBox1.RightToLeft = RightToLeft.Yes
-        GroupBox1.Size = New Size(1246, 663)
+        GroupBox1.Size = New Size(1546, 885)
         GroupBox1.TabIndex = 0
         GroupBox1.TabStop = False
         ' 
         ' GroupBox6
         ' 
-        GroupBox6.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
+        GroupBox6.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         GroupBox6.Controls.Add(CurrencyDGV)
         GroupBox6.Location = New Point(-1, 13)
         GroupBox6.Name = "GroupBox6"
-        GroupBox6.Size = New Size(580, 243)
+        GroupBox6.Size = New Size(880, 171)
         GroupBox6.TabIndex = 5
         GroupBox6.TabStop = False
         GroupBox6.Text = "العمله"
         ' 
         ' CurrencyDGV
         ' 
+        CurrencyDGV.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
+        CurrencyDGV.BackgroundColor = SystemColors.ButtonHighlight
+        CurrencyDGV.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None
+        DataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle1.BackColor = SystemColors.Control
+        DataGridViewCellStyle1.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle1.ForeColor = SystemColors.WindowText
+        DataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle1.WrapMode = DataGridViewTriState.True
+        CurrencyDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
         CurrencyDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        DataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle2.BackColor = SystemColors.Window
+        DataGridViewCellStyle2.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle2.ForeColor = SystemColors.ControlText
+        DataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle2.WrapMode = DataGridViewTriState.False
+        CurrencyDGV.DefaultCellStyle = DataGridViewCellStyle2
         CurrencyDGV.Location = New Point(7, 26)
         CurrencyDGV.Name = "CurrencyDGV"
+        CurrencyDGV.ReadOnly = True
         CurrencyDGV.RowHeadersWidth = 51
-        CurrencyDGV.Size = New Size(567, 206)
+        CurrencyDGV.Size = New Size(867, 139)
         CurrencyDGV.TabIndex = 4
         ' 
         ' GroupBox4
         ' 
         GroupBox4.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         GroupBox4.Controls.Add(BranchesInfoDGV)
-        GroupBox4.Location = New Point(6, 262)
+        GroupBox4.Location = New Point(6, 197)
         GroupBox4.Name = "GroupBox4"
-        GroupBox4.Size = New Size(573, 331)
+        GroupBox4.Size = New Size(873, 679)
         GroupBox4.TabIndex = 4
         GroupBox4.TabStop = False
         GroupBox4.Text = "معلومات الفرع"
         ' 
         ' BranchesInfoDGV
         ' 
+        BranchesInfoDGV.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
+        BranchesInfoDGV.BackgroundColor = SystemColors.ButtonHighlight
+        DataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle3.BackColor = SystemColors.Control
+        DataGridViewCellStyle3.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle3.ForeColor = SystemColors.WindowText
+        DataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle3.WrapMode = DataGridViewTriState.True
+        BranchesInfoDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle3
         BranchesInfoDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        DataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle4.BackColor = SystemColors.Window
+        DataGridViewCellStyle4.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle4.ForeColor = SystemColors.ControlText
+        DataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle4.WrapMode = DataGridViewTriState.False
+        BranchesInfoDGV.DefaultCellStyle = DataGridViewCellStyle4
         BranchesInfoDGV.Location = New Point(6, 24)
         BranchesInfoDGV.Name = "BranchesInfoDGV"
+        BranchesInfoDGV.ReadOnly = True
         BranchesInfoDGV.RowHeadersWidth = 51
-        BranchesInfoDGV.Size = New Size(561, 286)
+        BranchesInfoDGV.Size = New Size(861, 649)
         BranchesInfoDGV.TabIndex = 5
         ' 
         ' GroupBox3
@@ -176,9 +219,9 @@ Partial Class Form1
         GroupBox3.Controls.Add(RichTextBox1)
         GroupBox3.Controls.Add(TextBox4)
         GroupBox3.Controls.Add(CheckBox1)
-        GroupBox3.Controls.Add(TextBox3)
-        GroupBox3.Controls.Add(TextBox2)
-        GroupBox3.Controls.Add(TextBox1)
+        GroupBox3.Controls.Add(CustomerAccountNumber)
+        GroupBox3.Controls.Add(AccountNumber)
+        GroupBox3.Controls.Add(identityNB)
         GroupBox3.Controls.Add(Label19)
         GroupBox3.Controls.Add(Label18)
         GroupBox3.Controls.Add(Label17)
@@ -197,11 +240,11 @@ Partial Class Form1
         GroupBox3.Controls.Add(Label3)
         GroupBox3.Controls.Add(Label2)
         GroupBox3.Controls.Add(Label1)
-        GroupBox3.Location = New Point(584, 13)
+        GroupBox3.Location = New Point(884, 13)
         GroupBox3.Margin = New Padding(2, 3, 2, 3)
         GroupBox3.Name = "GroupBox3"
         GroupBox3.Padding = New Padding(2, 3, 2, 3)
-        GroupBox3.Size = New Size(657, 616)
+        GroupBox3.Size = New Size(657, 865)
         GroupBox3.TabIndex = 2
         GroupBox3.TabStop = False
         ' 
@@ -405,32 +448,32 @@ Partial Class Form1
         CheckBox1.Text = "مفعل / غير مفعل"
         CheckBox1.UseVisualStyleBackColor = True
         ' 
-        ' TextBox3
+        ' CustomerAccountNumber
         ' 
-        TextBox3.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox3.Location = New Point(470, 147)
-        TextBox3.Margin = New Padding(2, 3, 2, 3)
-        TextBox3.Name = "TextBox3"
-        TextBox3.Size = New Size(174, 27)
-        TextBox3.TabIndex = 21
+        CustomerAccountNumber.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        CustomerAccountNumber.Location = New Point(470, 147)
+        CustomerAccountNumber.Margin = New Padding(2, 3, 2, 3)
+        CustomerAccountNumber.Name = "CustomerAccountNumber"
+        CustomerAccountNumber.Size = New Size(174, 27)
+        CustomerAccountNumber.TabIndex = 21
         ' 
-        ' TextBox2
+        ' AccountNumber
         ' 
-        TextBox2.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox2.Location = New Point(250, 85)
-        TextBox2.Margin = New Padding(2, 3, 2, 3)
-        TextBox2.Name = "TextBox2"
-        TextBox2.Size = New Size(191, 27)
-        TextBox2.TabIndex = 20
+        AccountNumber.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        AccountNumber.Location = New Point(250, 85)
+        AccountNumber.Margin = New Padding(2, 3, 2, 3)
+        AccountNumber.Name = "AccountNumber"
+        AccountNumber.Size = New Size(191, 27)
+        AccountNumber.TabIndex = 20
         ' 
-        ' TextBox1
+        ' identityNB
         ' 
-        TextBox1.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox1.Location = New Point(466, 85)
-        TextBox1.Margin = New Padding(2, 3, 2, 3)
-        TextBox1.Name = "TextBox1"
-        TextBox1.Size = New Size(179, 27)
-        TextBox1.TabIndex = 19
+        identityNB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        identityNB.Location = New Point(466, 85)
+        identityNB.Margin = New Padding(2, 3, 2, 3)
+        identityNB.Name = "identityNB"
+        identityNB.Size = New Size(179, 27)
+        identityNB.TabIndex = 19
         ' 
         ' Label19
         ' 
@@ -639,7 +682,7 @@ Partial Class Form1
         GroupBox5.Name = "GroupBox5"
         GroupBox5.Padding = New Padding(3, 4, 3, 4)
         GroupBox5.RightToLeft = RightToLeft.Yes
-        GroupBox5.Size = New Size(1308, 73)
+        GroupBox5.Size = New Size(1608, 73)
         GroupBox5.TabIndex = 1
         GroupBox5.TabStop = False
         ' 
@@ -667,7 +710,7 @@ Partial Class Form1
         GroupBox2.Controls.Add(AddAttachmentsBT)
         GroupBox2.Controls.Add(PictureBox5)
         GroupBox2.Font = New Font("Segoe UI Black", 8.0F, FontStyle.Bold)
-        GroupBox2.Location = New Point(1252, 125)
+        GroupBox2.Location = New Point(1552, 125)
         GroupBox2.Margin = New Padding(3, 4, 3, 4)
         GroupBox2.Name = "GroupBox2"
         GroupBox2.Padding = New Padding(3, 4, 3, 4)
@@ -752,21 +795,22 @@ Partial Class Form1
         NotifyIcon1.Text = "NotifyIcon1"
         NotifyIcon1.Visible = True
         ' 
-        ' Form1
+        ' Customers
         ' 
         AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
-        ClientSize = New Size(1322, 746)
+        ClientSize = New Size(1622, 968)
         Controls.Add(GroupBox2)
         Controls.Add(GroupBox5)
         Controls.Add(GroupBox1)
         Icon = CType(resources.GetObject("$this.Icon"), Icon)
         Margin = New Padding(3, 4, 3, 4)
-        Name = "Form1"
+        MaximizeBox = False
+        MinimizeBox = False
+        Name = "Customers"
         StartPosition = FormStartPosition.CenterScreen
         Text = "الـعــمــــــــلاء"
-        WindowState = FormWindowState.Maximized
         GroupBox1.ResumeLayout(False)
         GroupBox6.ResumeLayout(False)
         CType(CurrencyDGV, ComponentModel.ISupportInitialize).EndInit()
@@ -809,9 +853,9 @@ Partial Class Form1
     Friend WithEvents Label3 As Label
     Friend WithEvents Label2 As Label
     Friend WithEvents Label1 As Label
-    Friend WithEvents TextBox3 As TextBox
-    Friend WithEvents TextBox2 As TextBox
-    Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents CustomerAccountNumber As TextBox
+    Friend WithEvents AccountNumber As TextBox
+    Friend WithEvents identityNB As TextBox
     Friend WithEvents Label19 As Label
     Friend WithEvents Label18 As Label
     Friend WithEvents Label17 As Label

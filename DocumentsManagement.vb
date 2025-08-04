@@ -64,7 +64,7 @@
 
         ' Try to get the same image resource as AddAttachmentsBT
         Try
-            Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
+            Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
             Dim attachmentIcon As Image = CType(resources.GetObject("AddAttachmentsBT.Image"), Image)
             If attachmentIcon IsNot Nothing Then
                 ' Resize icon to fit in cell
@@ -1106,7 +1106,7 @@
     ' Get the view file icon (tries to use Form1 resource, falls back to custom icon)
     Private Function GetViewFileIcon() As Image
         Try
-            Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
+            Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
             Dim attachmentIcon As Image = CType(resources.GetObject("AddAttachmentsBT.Image"), Image)
             If attachmentIcon IsNot Nothing Then
                 Return New Bitmap(attachmentIcon, New Size(24, 24))

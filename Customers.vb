@@ -1,4 +1,6 @@
-﻿Public Class Form1
+﻿Imports System.Linq
+
+Public Class Customers
 
     Private dbConn As New DBconnections()
 
@@ -30,15 +32,15 @@
             ' Load countries from CMGADB2024 database
             Dim countriesTable As DataTable = dbConn.GetCountries()
 
-            ' Debug: Show row count
-            MessageBox.Show($"تم استرجاع {countriesTable.Rows.Count} بلد من قاعدة البيانات", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
             ' Clear existing items
             CountryCB.Items.Clear()
 
-            ' Set up CountryCB properties
+            ' Set up CountryCB properties for enhanced search functionality
             CountryCB.DisplayMember = "DisplayText"
             CountryCB.ValueMember = "countrycode"
+            CountryCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            CountryCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            CountryCB.DropDownStyle = ComboBoxStyle.DropDown
 
             ' Create a new DataTable with combined display text
             Dim displayTable As New DataTable()
@@ -56,11 +58,215 @@
             ' Bind to ComboBox
             CountryCB.DataSource = displayTable
 
-            ' Debug: Show final count
-            MessageBox.Show($"تم إضافة {displayTable.Rows.Count} بلد إلى القائمة", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            ' Store original data for filtering
+            CountryCB.Tag = displayTable
+
+            ' Set up additional search functionality
+            SetupCountrySearch()
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل البلدان: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub LoadAreas(countryCode As String)
+        Try
+            ' Load areas from CMGADB2024 database for specific country
+            Dim areasTable As DataTable = dbConn.GetAreas(countryCode)
+
+            ' Clear existing items
+            AreaCB.Items.Clear()
+
+            ' Set up AreaCB properties for enhanced search functionality
+            AreaCB.DisplayMember = "DisplayText"
+            AreaCB.ValueMember = "areacode"
+            AreaCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            AreaCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            AreaCB.DropDownStyle = ComboBoxStyle.DropDown
+
+            ' Create a new DataTable with combined display text
+            Dim displayTable As New DataTable()
+            displayTable.Columns.Add("areacode", GetType(String))
+            displayTable.Columns.Add("DisplayText", GetType(String))
+
+            ' Add areas to ComboBox with combined display format
+            For Each row As DataRow In areasTable.Rows
+                Dim newRow As DataRow = displayTable.NewRow()
+                newRow("areacode") = row("areacode").ToString()
+                
+                ' Create display text with area code, description, and short name
+                Dim displayText As String = $"{row("areacode")} - {row("description")}"
+                If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
+                    displayText += $" - {row("shortname")}"
+                End If
+                
+                newRow("DisplayText") = displayText
+                displayTable.Rows.Add(newRow)
+            Next
+
+            ' Bind to ComboBox
+            AreaCB.DataSource = displayTable
+
+            ' Store original data for filtering
+            AreaCB.Tag = displayTable
+
+            ' Set up additional search functionality
+            SetupAreaSearch()
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل المناطق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub SetupCountrySearch()
+        ' Enable advanced search functionality for CountryCB
+        AddHandler CountryCB.KeyUp, AddressOf CountryCB_KeyUp
+        AddHandler CountryCB.TextChanged, AddressOf CountryCB_TextChanged
+        AddHandler CountryCB.Leave, AddressOf CountryCB_Leave
+    End Sub
+
+    Private Sub SetupAreaSearch()
+        ' Enable advanced search functionality for AreaCB
+        AddHandler AreaCB.KeyUp, AddressOf AreaCB_KeyUp
+        AddHandler AreaCB.TextChanged, AddressOf AreaCB_TextChanged
+        AddHandler AreaCB.Leave, AddressOf AreaCB_Leave
+    End Sub
+
+    Private Sub CountryCB_KeyUp(sender As Object, e As KeyEventArgs)
+        ' Handle key navigation in dropdown
+        If e.KeyCode = Keys.Enter Then
+            CountryCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            CountryCB.DroppedDown = True
+        End If
+    End Sub
+
+    Private Sub CountryCB_TextChanged(sender As Object, e As EventArgs)
+        ' Enhanced search functionality - filter items based on typed text
+        Try
+            Dim searchText As String = CountryCB.Text.ToLower()
+            If String.IsNullOrEmpty(searchText) Then Return
+
+            ' Get the original data
+            Dim originalData As DataTable = CType(CountryCB.Tag, DataTable)
+            If originalData Is Nothing Then Return
+
+            ' Filter the data based on search text
+            Dim filteredRows = originalData.AsEnumerable().Where(Function(row)
+                Dim displayText As String = row("DisplayText").ToString().ToLower()
+                Return displayText.Contains(searchText)
+            End Function)
+
+            If filteredRows.Any() Then
+                ' Create filtered DataTable
+                Dim filteredTable As DataTable = originalData.Clone()
+                For Each row In filteredRows
+                    filteredTable.ImportRow(row)
+                Next
+
+                ' Update ComboBox with filtered data
+                CountryCB.DataSource = filteredTable
+                CountryCB.DroppedDown = True
+
+                ' Move cursor to end of text
+                CountryCB.SelectionStart = CountryCB.Text.Length
+                CountryCB.SelectionLength = 0
+            End If
+
+        Catch ex As Exception
+            ' Ignore any errors during text change
+        End Try
+    End Sub
+
+    Private Sub AreaCB_KeyUp(sender As Object, e As KeyEventArgs)
+        ' Handle key navigation in dropdown
+        If e.KeyCode = Keys.Enter Then
+            AreaCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            AreaCB.DroppedDown = True
+        End If
+    End Sub
+
+    Private Sub AreaCB_TextChanged(sender As Object, e As EventArgs)
+        ' Enhanced search functionality - filter items based on typed text
+        Try
+            Dim searchText As String = AreaCB.Text.ToLower()
+            If String.IsNullOrEmpty(searchText) Then Return
+
+            ' Get the original data
+            Dim originalData As DataTable = CType(AreaCB.Tag, DataTable)
+            If originalData Is Nothing Then Return
+
+            ' Filter the data based on search text
+            Dim filteredRows = originalData.AsEnumerable().Where(Function(row)
+                Dim displayText As String = row("DisplayText").ToString().ToLower()
+                Return displayText.Contains(searchText)
+            End Function)
+
+            If filteredRows.Any() Then
+                ' Create filtered DataTable
+                Dim filteredTable As DataTable = originalData.Clone()
+                For Each row In filteredRows
+                    filteredTable.ImportRow(row)
+                Next
+
+                ' Update ComboBox with filtered data
+                AreaCB.DataSource = filteredTable
+                AreaCB.DroppedDown = True
+
+                ' Move cursor to end of text
+                AreaCB.SelectionStart = AreaCB.Text.Length
+                AreaCB.SelectionLength = 0
+            End If
+
+        Catch ex As Exception
+            ' Ignore any errors during text change
+        End Try
+    End Sub
+
+    Private Sub CountryCB_Leave(sender As Object, e As EventArgs)
+        ' Restore full list when leaving the control
+        Try
+            Dim originalData As DataTable = CType(CountryCB.Tag, DataTable)
+            If originalData IsNot Nothing Then
+                CountryCB.DataSource = originalData
+            End If
+        Catch ex As Exception
+            ' Ignore errors
+        End Try
+    End Sub
+
+    Private Sub AreaCB_Leave(sender As Object, e As EventArgs)
+        ' Restore full list when leaving the control
+        Try
+            Dim originalData As DataTable = CType(AreaCB.Tag, DataTable)
+            If originalData IsNot Nothing Then
+                AreaCB.DataSource = originalData
+            End If
+        Catch ex As Exception
+            ' Ignore errors
+        End Try
+    End Sub
+
+    Private Sub CountryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CountryCB.SelectedIndexChanged
+        Try
+            If CountryCB.SelectedItem IsNot Nothing Then
+                Dim selectedCountry As DataRowView = CType(CountryCB.SelectedItem, DataRowView)
+                Dim countryCode As String = selectedCountry("countrycode").ToString()
+                Dim displayText As String = selectedCountry("DisplayText").ToString()
+
+                ' Check if Saudi Arabia is selected (looking for SA or السعودية in the display text)
+                If countryCode = "SA" OrElse displayText.Contains("السعودية") OrElse displayText.Contains("Saudi") Then
+                    ' Auto-populate AreaCB with areas from database for Saudi Arabia
+                    LoadAreas(countryCode)
+                Else
+                    ' Clear AreaCB for other countries
+                    AreaCB.DataSource = Nothing
+                    AreaCB.Items.Clear()
+                End If
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديد البلد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -147,9 +353,6 @@
             ' Load branches from CMGADB2024 database
             Dim branchesTable As DataTable = dbConn.GetBranches()
 
-            ' Debug: Show row count
-            MessageBox.Show($"تم استرجاع {branchesTable.Rows.Count} فرع من قاعدة البيانات", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
             ' Clear existing rows
             BranchesInfoDGV.Rows.Clear()
 
@@ -166,9 +369,6 @@
                 }
                 BranchesInfoDGV.Rows.Add(newRow)
             Next
-
-            ' Debug: Show final count
-            MessageBox.Show($"تم إضافة {BranchesInfoDGV.Rows.Count} فرع إلى الجدول", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل الفروع: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -318,9 +518,6 @@
             ' Load currency from CMGADB2024 database
             Dim currencyTable As DataTable = dbConn.GetCurrency()
 
-            ' Debug: Show row count
-            MessageBox.Show($"تم استرجاع {currencyTable.Rows.Count} عملة من قاعدة البيانات", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
             ' Clear existing rows
             CurrencyDGV.Rows.Clear()
 
@@ -334,9 +531,6 @@
                 }
                 CurrencyDGV.Rows.Add(newRow)
             Next
-
-            ' Debug: Show final count
-            MessageBox.Show($"تم إضافة {CurrencyDGV.Rows.Count} عملة إلى الجدول", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل العملات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -502,6 +696,7 @@
             End If
         End If
     End Sub
+
 
 End Class
 

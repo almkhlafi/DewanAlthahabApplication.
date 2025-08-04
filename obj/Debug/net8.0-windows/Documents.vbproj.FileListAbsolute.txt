@@ -14,7 +14,6 @@ C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documen
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.genruntimeconfig.cache
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\ref\Documents.dll
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.AttachmentsManagement.resources
-C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.Form1.resources
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.vbproj.AssemblyReference.cache
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Azure.Core.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Azure.Identity.dll
@@ -59,3 +58,4 @@ C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documen
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.sourcelink.json
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.CustomerSearchForm.resources
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.AutoCloseMessageForm.resources
+C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.Customers.resources

@@ -1807,22 +1807,13 @@ ORDER BY p.Name"
         Dim da As SqlDataAdapter = Nothing
 
         Try
-            ' Debug: Test connection string
-            MessageBox.Show("محاولة الاتصال بقاعدة البيانات CMGADB2024...", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            
             conn = New SqlConnection(connpath2)
             conn.Open()
-            
-            ' Debug: Connection successful
-            MessageBox.Show("تم الاتصال بقاعدة البيانات بنجاح!", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
             Dim query As String = "SELECT countrycode, countryName, contryarname FROM CountryMaster WHERE active = 'True' ORDER BY contryarname"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
-            
-            ' Debug: Query executed
-            MessageBox.Show($"تم تنفيذ الاستعلام - العثور على {dt.Rows.Count} سجل", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل البلدان: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1846,9 +1837,6 @@ ORDER BY p.Name"
         Dim da As SqlDataAdapter = Nothing
 
         Try
-            ' Debug: Test connection
-            MessageBox.Show("محاولة تحميل الفروع من قاعدة البيانات...", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            
             conn = New SqlConnection(connpath2)
             conn.Open()
 
@@ -1856,9 +1844,6 @@ ORDER BY p.Name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
-            
-            ' Debug: Query result
-            MessageBox.Show($"تم تحميل {dt.Rows.Count} فرع من جدول Branchs", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل الفروع: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1882,9 +1867,6 @@ ORDER BY p.Name"
         Dim da As SqlDataAdapter = Nothing
 
         Try
-            ' Debug: Test connection
-            MessageBox.Show("محاولة تحميل العملات من قاعدة البيانات...", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            
             conn = New SqlConnection(connpath2)
             conn.Open()
 
@@ -1892,9 +1874,6 @@ ORDER BY p.Name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
-            
-            ' Debug: Query result
-            MessageBox.Show($"تم تحميل {dt.Rows.Count} عملة من جدول CurrencyMaster", "معلومات التصحيح", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل العملات: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1958,6 +1937,37 @@ ORDER BY p.Name"
         End Try
 
         Return success
+    End Function
+
+    ' =====================Get Areas from CMGADB2024 Database========================
+    Public Function GetAreas(countryCode As String) As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            Dim query As String = "SELECT contryCode, description, shortname, areacode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
+            cmd = New SqlCommand(query, conn)
+            cmd.Parameters.AddWithValue("@CountryCode", countryCode)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل المناطق: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
     End Function
 
 

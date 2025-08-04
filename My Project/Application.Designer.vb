@@ -33,7 +33,7 @@ Namespace My
             
             If loginForm.ShowDialog() = DialogResult.OK Then
                 ' Login successful, show main form
-                Me.MainForm = New Form1()
+                Me.MainForm = New Customers()
             Else
                 ' Login failed or cancelled, don't create main form
                 Me.MainForm.Close()
