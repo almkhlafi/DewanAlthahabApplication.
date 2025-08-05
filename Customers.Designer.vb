@@ -25,6 +25,7 @@ Partial Class Customers
         components = New ComponentModel.Container()
         Dim GroupBox1 As GroupBox
         Dim GroupBox6 As GroupBox
+        Dim CurrencyDGV As DataGridView
         Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox4 As GroupBox
@@ -32,15 +33,44 @@ Partial Class Customers
         Dim Label22 As Label
         Dim Label21 As Label
         Dim Label12 As Label
+        Dim TypeCB As ComboBox
+        Dim CatogeryCB As ComboBox
+        Dim GroupsCB As ComboBox
+        Dim MarketCB As ComboBox
+        Dim BranchesInfoDGV As DataGridView
         Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox3 As GroupBox
+        Dim downCustomerPB As PictureBox
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
+        Dim upCustomerPB As PictureBox
+        Dim SaveInfo As PictureBox
         Dim Label24 As Label
+        Dim telephoneNumberZipcodeTB As TextBox
         Dim phoneNumber1ZipCodeTB As TextBox
+        Dim ReferralNumberTB As TextBox
+        Dim FaxNumberTB As TextBox
+        Dim telephoneNumberTB As TextBox
         Dim phoneNumber2TB As TextBox
         Dim phoneNumber1TB As TextBox
+        Dim emailTB As TextBox
+        Dim VTRnumberTB As TextBox
+        Dim IdentityCommercialNameOptionCB As ComboBox
+        Dim CustomerSupplierCB As ComboBox
+        Dim VTRAppliedCKB As CheckBox
+        Dim CommercialNameTB As TextBox
         Dim Label20 As Label
+        Dim FormalNameTB As TextBox
+        Dim AreaCB As ComboBox
+        Dim CountryCB As ComboBox
+        Dim MangerNumberTB As TextBox
+        Dim ManagerIDTB As TextBox
+        Dim ManagerTB As TextBox
+        Dim AddressTA As RichTextBox
+        Dim NameInEnglishTB As TextBox
+        Dim ActiveNoActiveCKB As CheckBox
+        Dim CustomerAccountNumberTB As TextBox
+        Dim CommercialRecordAndIdentityTB As TextBox
         Dim Label19 As Label
         Dim Label18 As Label
         Dim Label17 As Label
@@ -604,20 +634,20 @@ Partial Class Customers
         ' 
         AreaCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         AreaCB.FormattingEnabled = True
-        AreaCB.Location = New Point(89, 363)
+        AreaCB.Location = New Point(12, 363)
         AreaCB.Margin = New Padding(2, 3, 2, 3)
         AreaCB.Name = "AreaCB"
-        AreaCB.Size = New Size(320, 28)
+        AreaCB.Size = New Size(397, 28)
         AreaCB.TabIndex = 29
         ' 
         ' CountryCB
         ' 
         CountryCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         CountryCB.FormattingEnabled = True
-        CountryCB.Location = New Point(89, 295)
+        CountryCB.Location = New Point(12, 295)
         CountryCB.Margin = New Padding(2, 3, 2, 3)
         CountryCB.Name = "CountryCB"
-        CountryCB.Size = New Size(320, 28)
+        CountryCB.Size = New Size(397, 28)
         CountryCB.TabIndex = 28
         ' 
         ' MangerNumberTB
@@ -649,10 +679,10 @@ Partial Class Customers
         ' 
         ' AddressTA
         ' 
-        AddressTA.Location = New Point(89, 83)
+        AddressTA.Location = New Point(12, 83)
         AddressTA.Margin = New Padding(2, 3, 2, 3)
         AddressTA.Name = "AddressTA"
-        AddressTA.Size = New Size(237, 59)
+        AddressTA.Size = New Size(314, 59)
         AddressTA.TabIndex = 24
         AddressTA.Text = ""
         ' 
@@ -920,7 +950,7 @@ Partial Class Customers
         GroupBox2.Controls.Add(PictureBox3)
         GroupBox2.Controls.Add(AddAttachmentsBT)
         GroupBox2.Controls.Add(PictureBox5)
-        GroupBox2.Font = New Font("Segoe UI Black", 8F, FontStyle.Bold)
+        GroupBox2.Font = New Font("Segoe UI Black", 8.0F, FontStyle.Bold)
         GroupBox2.Location = New Point(1552, 125)
         GroupBox2.Margin = New Padding(3, 4, 3, 4)
         GroupBox2.Name = "GroupBox2"
@@ -1005,7 +1035,7 @@ Partial Class Customers
         ' 
         ' Customers
         ' 
-        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
         ClientSize = New Size(1622, 968)
