@@ -32,26 +32,15 @@ Partial Class Customers
         Dim Label22 As Label
         Dim Label21 As Label
         Dim Label12 As Label
-        Dim TypeCB As ComboBox
-        Dim CatogeryCB As ComboBox
-        Dim GroupsCB As ComboBox
-        Dim MarketCB As ComboBox
         Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox3 As GroupBox
-        Dim downCustomerPB As PictureBox
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
-        Dim upCustomerPB As PictureBox
-        Dim SaveInfo As PictureBox
         Dim Label24 As Label
         Dim phoneNumber1ZipCodeTB As TextBox
         Dim phoneNumber2TB As TextBox
         Dim phoneNumber1TB As TextBox
-        Dim IdentityCommercialNameOptionCB As ComboBox
-        Dim CustomerSupplierCB As ComboBox
         Dim Label20 As Label
-        Dim AreaCB As ComboBox
-        Dim CountryCB As ComboBox
         Dim Label19 As Label
         Dim Label18 As Label
         Dim Label17 As Label
