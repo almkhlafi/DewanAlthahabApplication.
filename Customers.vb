@@ -23,7 +23,7 @@ Public Class Customers
 
         ' Setup and load branches DataGridView
         SetupBranchesDataGridView()
-        LoadBranches(GetBranchesInfoDGV())
+        LoadBranches()
 
         ' Setup and load currency DataGridView
         SetupCurrencyDataGridView()
@@ -835,18 +835,17 @@ Public Class Customers
         AddHandler BranchesInfoDGV.ColumnHeaderMouseClick, AddressOf BranchesInfoDGV_ColumnHeaderMouseClick
     End Sub
 
-    Private Function GetBranchesInfoDGV() As DataGridView
-        Return BranchesInfoDGV
-    End Function
-
-    Private Sub LoadBranches(branchesInfoDGV As DataGridView)
+    Private Sub LoadBranches()
         Try
-
+            ' Safety check - ensure BranchesInfoDGV is initialized
+            If BranchesInfoDGV Is Nothing Then
+                MessageBox.Show("BranchesInfoDGV is not initialized in LoadBranches!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
 
             ' Load branches from CMGADB2024 database
             Dim branchesTable As DataTable = dbConn.GetBranches()
-            branchesInfoDGV.Rows.Clear()
-
+            BranchesInfoDGV.Rows.Clear()
             ' Add branches to DataGridView - only populate Arabic and English names from database
             ' Other columns (Select, Active, RefNo, Locked) will be filled by users later
             For Each row As DataRow In branchesTable.Rows
@@ -859,7 +858,7 @@ Public Class Customers
                     "", ' Ref NO (empty - user will fill)
                     False ' Locked status (default unchecked - user will set)
                 }
-                branchesInfoDGV.Rows.Add(newRow)
+                BranchesInfoDGV.Rows.Add(newRow)
             Next
 
         Catch ex As Exception

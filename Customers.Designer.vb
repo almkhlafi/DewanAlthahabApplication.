@@ -25,7 +25,6 @@ Partial Class Customers
         components = New ComponentModel.Container()
         Dim GroupBox1 As GroupBox
         Dim GroupBox6 As GroupBox
-        Dim CurrencyDGV As DataGridView
         Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox4 As GroupBox
@@ -37,7 +36,6 @@ Partial Class Customers
         Dim CatogeryCB As ComboBox
         Dim GroupsCB As ComboBox
         Dim MarketCB As ComboBox
-        Dim BranchesInfoDGV As DataGridView
         Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox3 As GroupBox
