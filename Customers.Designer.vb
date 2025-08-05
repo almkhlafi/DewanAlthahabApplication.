@@ -25,7 +25,6 @@ Partial Class Customers
         components = New ComponentModel.Container()
         Dim GroupBox1 As GroupBox
         Dim GroupBox6 As GroupBox
-        Dim CurrencyDGV As DataGridView
         Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox4 As GroupBox
@@ -33,18 +32,10 @@ Partial Class Customers
         Dim Label22 As Label
         Dim Label21 As Label
         Dim Label12 As Label
-        Dim TypeCB As ComboBox
-        Dim CatogeryCB As ComboBox
-        Dim GroupsCB As ComboBox
-        Dim MarketCB As ComboBox
-        Dim BranchesInfoDGV As DataGridView
         Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim GroupBox3 As GroupBox
-        Dim SaveInfo As PictureBox
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
-        Dim upCustomerPB As PictureBox
-        Dim downCustomerPB As PictureBox
         Dim Label24 As Label
         Dim telephoneNumberZipcodeTB As TextBox
         Dim phoneNumber1ZipCodeTB As TextBox
@@ -55,14 +46,10 @@ Partial Class Customers
         Dim phoneNumber1TB As TextBox
         Dim emailTB As TextBox
         Dim VTRnumberTB As TextBox
-        Dim IdentityCommercialNameOptionCB As ComboBox
-        Dim CustomerSupplierCB As ComboBox
         Dim VTRAppliedCKB As CheckBox
         Dim CommercialNameTB As TextBox
         Dim Label20 As Label
         Dim FormalNameTB As TextBox
-        Dim AreaCB As ComboBox
-        Dim CountryCB As ComboBox
         Dim MangerNumberTB As TextBox
         Dim ManagerIDTB As TextBox
         Dim ManagerTB As TextBox
@@ -1138,5 +1125,8 @@ Partial Class Customers
     Friend WithEvents phoneNumber1ZipCodeTB As TextBox
     Friend WithEvents Label24 As Label
     Friend WithEvents NotifyIcon1 As NotifyIcon
+    Friend WithEvents SaveInfo As PictureBox
+    Friend WithEvents upCustomerPB As PictureBox
+    Friend WithEvents downCustomerPB As PictureBox
 
 End Class

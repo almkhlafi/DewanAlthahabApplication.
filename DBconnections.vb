@@ -1799,7 +1799,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Countries from CMGADB2024 Database========================
+    ' =====================Get Countries from CustomerAccountsMaster Database========================
     Public Function GetCountries() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -1829,7 +1829,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Branches from CMGADB2024 Database========================
+    ' =====================Get Branches from CustomerAccountsMaster Database========================
     Public Function GetBranches() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -1859,7 +1859,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Currency from CMGADB2024 Database========================
+    ' =====================Get Currency from CustomerAccountsMaster Database========================
     Public Function GetCurrency() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -1939,7 +1939,7 @@ ORDER BY p.Name"
         Return success
     End Function
 
-    ' =====================Get Areas from CMGADB2024 Database========================
+    ' =====================Get Areas from CustomerAccountsMaster Database========================
     Public Function GetAreas(countryCode As String) As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -1970,7 +1970,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Market Data from CMGADB2024 Database========================
+    ' =====================Get Market Data from CustomerAccountsMaster Database========================
     Public Function GetMarketData() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -2000,7 +2000,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Category Data from CMGADB2024 Database========================
+    ' =====================Get Category Data from CustomerAccountsMaster Database========================
     Public Function GetCategoryData() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -2030,7 +2030,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Groups Data from CMGADB2024 Database========================
+    ' =====================Get Groups Data from CustomerAccountsMaster Database========================
     Public Function GetGroupsData() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -2060,7 +2060,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' =====================Get Type Data from CMGADB2024 Database========================
+    ' =====================Get Type Data from CustomerAccountsMaster Database========================
     Public Function GetTypeData() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -2091,27 +2091,27 @@ ORDER BY p.Name"
     End Function
 
     ' =====================Customer/Supplier Management========================
-    
+
     ' Generate next code for Customer or Supplier
     Public Function GenerateNextCode(isCustomer As Boolean) As String
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
         Dim nextNumber As Integer = 1
-        
+
         Try
             conn = GetConnection2() ' Use CMGADB2024 database
             conn.Open()
-            
+
             Dim prefix As String = If(isCustomer, "C", "S")
-            Dim query As String = $"SELECT MAX(CAST(SUBSTRING(code, 2, 4) AS INT)) FROM [CMGADB2024].[dbo].[CustomerSupplier] WHERE code LIKE '{prefix}%'"
-            
+            Dim query As String = $"SELECT MAX(CAST(SUBSTRING(code, 2, 4) AS INT)) FROM [CustomerAccountsMaster] WHERE code LIKE '{prefix}%'"
+
             cmd = New SqlCommand(query, conn)
             Dim result = cmd.ExecuteScalar()
-            
+
             If result IsNot Nothing AndAlso Not IsDBNull(result) Then
                 nextNumber = Convert.ToInt32(result) + 1
             End If
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في توليد الكود: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
@@ -2121,25 +2121,25 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Dim prefix2 As String = If(isCustomer, "C", "S")
         Return $"{prefix2}{nextNumber.ToString("D4")}"
     End Function
-    
+
     ' Save or Update Customer/Supplier
     Public Function SaveCustomerSupplier(customerData As CustomerSupplierData) As Boolean
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
-        
+
         Try
             conn = GetConnection2() ' Use CMGADB2024 database
             conn.Open()
-            
+
             Dim query As String = ""
-            
+
             If customerData.IsUpdate AndAlso Not String.IsNullOrEmpty(customerData.ExistingCode) Then
-                ' Update existing record
-                query = "UPDATE [CMGADB2024].[dbo].[CustomerSupplier] SET " &
+                ' Update existing record - removed identity_type field temporarily
+                query = "UPDATE [CustomerAccountsMaster] SET " &
                        "c_type = @c_type, " &
                        "name = @name, " &
                        "fld_arabic_name = @fld_arabic_name, " &
@@ -2157,24 +2157,23 @@ ORDER BY p.Name"
                        "fld_fax_no = @fld_fax_no, " &
                        "fld_ref_no = @fld_ref_no, " &
                        "fld_indvl_id_no = @fld_indvl_id_no, " &
-                       "fld_cr_no = @fld_cr_no, " &
-                       "identity_type = @identity_type " &
+                       "fld_cr_no = @fld_cr_no " &
                        "WHERE code = @code"
             Else
-                ' Insert new record
-                query = "INSERT INTO [CMGADB2024].[dbo].[CustomerSupplier] " &
+                ' Insert new record - removed identity_type field temporarily
+                query = "INSERT INTO [CustomerAccountsMaster] " &
                        "(code, c_type, name, fld_arabic_name, shortname, bussiness_address, " &
                        "acc_manager, bank_acc_name, bank_acc_no, fld_state, fld_dist, " &
                        "vat_tin_no, email, fld_contry_code_mobile, country, fld_fax_no, " &
-                       "fld_ref_no, fld_indvl_id_no, fld_cr_no, identity_type) " &
+                       "fld_ref_no, fld_indvl_id_no, fld_cr_no) " &
                        "VALUES (@code, @c_type, @name, @fld_arabic_name, @shortname, @bussiness_address, " &
                        "@acc_manager, @bank_acc_name, @bank_acc_no, @fld_state, @fld_dist, " &
                        "@vat_tin_no, @email, @fld_contry_code_mobile, @country, @fld_fax_no, " &
-                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @identity_type)"
+                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no)"
             End If
-            
+
             cmd = New SqlCommand(query, conn)
-            
+
             ' Add parameters
             cmd.Parameters.AddWithValue("@code", customerData.Code)
             cmd.Parameters.AddWithValue("@c_type", customerData.CustomerType)
@@ -2195,11 +2194,10 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@fld_ref_no", If(String.IsNullOrEmpty(customerData.ReferralNumber), DBNull.Value, customerData.ReferralNumber))
             cmd.Parameters.AddWithValue("@fld_indvl_id_no", If(String.IsNullOrEmpty(customerData.IndividualID), DBNull.Value, customerData.IndividualID))
             cmd.Parameters.AddWithValue("@fld_cr_no", If(String.IsNullOrEmpty(customerData.CommercialRecord), DBNull.Value, customerData.CommercialRecord))
-            cmd.Parameters.AddWithValue("@identity_type", customerData.IdentityType)
-            
+
             Dim result As Integer = cmd.ExecuteNonQuery()
             Return result > 0
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
@@ -2211,49 +2209,61 @@ ORDER BY p.Name"
             End If
         End Try
     End Function
-    
+
     ' Load Customer/Supplier by code
     Public Function GetCustomerSupplierByCode(code As String) As CustomerSupplierData
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
         Dim reader As SqlDataReader = Nothing
         Dim customerData As New CustomerSupplierData()
-        
+
         Try
             conn = GetConnection2() ' Use CMGADB2024 database
             conn.Open()
-            
-            Dim query As String = "SELECT * FROM [CMGADB2024].[dbo].[CustomerSupplier] WHERE code = @code"
+
+            Dim query As String = "SELECT * FROM [CustomerAccountsMaster] WHERE code = @code"
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@code", code)
-            
+
             reader = cmd.ExecuteReader()
-            
+
             If reader.Read() Then
-                customerData.Code = If(reader("code") IsNot DBNull.Value, reader("code").ToString(), "")
-                customerData.CustomerType = If(reader("c_type") IsNot DBNull.Value, reader("c_type").ToString(), "")
-                customerData.EnglishName = If(reader("name") IsNot DBNull.Value, reader("name").ToString(), "")
-                customerData.ArabicName = If(reader("fld_arabic_name") IsNot DBNull.Value, reader("fld_arabic_name").ToString(), "")
-                customerData.CommercialName = If(reader("shortname") IsNot DBNull.Value, reader("shortname").ToString(), "")
-                customerData.Address = If(reader("bussiness_address") IsNot DBNull.Value, reader("bussiness_address").ToString(), "")
-                customerData.Manager = If(reader("acc_manager") IsNot DBNull.Value, reader("acc_manager").ToString(), "")
-                customerData.ManagerID = If(reader("bank_acc_name") IsNot DBNull.Value, reader("bank_acc_name").ToString(), "")
-                customerData.ManagerNumber = If(reader("bank_acc_no") IsNot DBNull.Value, reader("bank_acc_no").ToString(), "")
-                customerData.Country = If(reader("fld_state") IsNot DBNull.Value, reader("fld_state").ToString(), "")
-                customerData.Area = If(reader("fld_dist") IsNot DBNull.Value, reader("fld_dist").ToString(), "")
-                customerData.VATNumber = If(reader("vat_tin_no") IsNot DBNull.Value, reader("vat_tin_no").ToString(), "")
-                customerData.Email = If(reader("email") IsNot DBNull.Value, reader("email").ToString(), "")
-                customerData.MobileCountryCode = If(reader("fld_contry_code_mobile") IsNot DBNull.Value, reader("fld_contry_code_mobile").ToString(), "")
-                customerData.CountryName = If(reader("country") IsNot DBNull.Value, reader("country").ToString(), "")
-                customerData.FaxNumber = If(reader("fld_fax_no") IsNot DBNull.Value, reader("fld_fax_no").ToString(), "")
-                customerData.ReferralNumber = If(reader("fld_ref_no") IsNot DBNull.Value, reader("fld_ref_no").ToString(), "")
-                customerData.IndividualID = If(reader("fld_indvl_id_no") IsNot DBNull.Value, reader("fld_indvl_id_no").ToString(), "")
-                customerData.CommercialRecord = If(reader("fld_cr_no") IsNot DBNull.Value, reader("fld_cr_no").ToString(), "")
-                customerData.IdentityType = If(reader("identity_type") IsNot DBNull.Value, reader("identity_type").ToString(), "")
-                customerData.IsUpdate = True
-                customerData.ExistingCode = code
+                Try
+                    customerData.Code = If(reader("code") IsNot DBNull.Value, reader("code").ToString(), "")
+                    customerData.CustomerType = If(reader("c_type") IsNot DBNull.Value, reader("c_type").ToString(), "")
+                    customerData.EnglishName = If(reader("name") IsNot DBNull.Value, reader("name").ToString(), "")
+                    customerData.ArabicName = If(reader("fld_arabic_name") IsNot DBNull.Value, reader("fld_arabic_name").ToString(), "")
+                    customerData.CommercialName = If(reader("shortname") IsNot DBNull.Value, reader("shortname").ToString(), "")
+                    customerData.Address = If(reader("bussiness_address") IsNot DBNull.Value, reader("bussiness_address").ToString(), "")
+                    customerData.Manager = If(reader("acc_manager") IsNot DBNull.Value, reader("acc_manager").ToString(), "")
+                    customerData.ManagerID = If(reader("bank_acc_name") IsNot DBNull.Value, reader("bank_acc_name").ToString(), "")
+                    customerData.ManagerNumber = If(reader("bank_acc_no") IsNot DBNull.Value, reader("bank_acc_no").ToString(), "")
+                    customerData.Country = If(reader("fld_state") IsNot DBNull.Value, reader("fld_state").ToString(), "")
+                    customerData.Area = If(reader("fld_dist") IsNot DBNull.Value, reader("fld_dist").ToString(), "")
+                    customerData.VATNumber = If(reader("vat_tin_no") IsNot DBNull.Value, reader("vat_tin_no").ToString(), "")
+                    customerData.Email = If(reader("email") IsNot DBNull.Value, reader("email").ToString(), "")
+                    customerData.MobileCountryCode = If(reader("fld_contry_code_mobile") IsNot DBNull.Value, reader("fld_contry_code_mobile").ToString(), "")
+                    customerData.CountryName = If(reader("country") IsNot DBNull.Value, reader("country").ToString(), "")
+                    customerData.FaxNumber = If(reader("fld_fax_no") IsNot DBNull.Value, reader("fld_fax_no").ToString(), "")
+                    customerData.ReferralNumber = If(reader("fld_ref_no") IsNot DBNull.Value, reader("fld_ref_no").ToString(), "")
+                    customerData.IndividualID = If(reader("fld_indvl_id_no") IsNot DBNull.Value, reader("fld_indvl_id_no").ToString(), "")
+                    customerData.CommercialRecord = If(reader("fld_cr_no") IsNot DBNull.Value, reader("fld_cr_no").ToString(), "")
+                    
+                    ' Try to read identity_type field with error handling
+                    Try
+                        customerData.IdentityType = If(reader("identity_type") IsNot DBNull.Value, reader("identity_type").ToString(), "فردي")
+                    Catch ex As Exception
+                        ' Field might not exist or have different name, set default value
+                        customerData.IdentityType = "فردي"
+                    End Try
+                    
+                    customerData.IsUpdate = True
+                    customerData.ExistingCode = code
+                Catch fieldEx As Exception
+                    Throw New Exception($"خطأ في قراءة الحقل: {fieldEx.Message}")
+                End Try
             End If
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل بيانات العميل/المورد: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
@@ -2264,31 +2274,31 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return customerData
     End Function
-    
+
     ' Get all customer/supplier codes for navigation
     Public Function GetAllCustomerSupplierCodes() As List(Of String)
         Dim codes As New List(Of String)()
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
         Dim reader As SqlDataReader = Nothing
-        
+
         Try
             conn = GetConnection2() ' Use CMGADB2024 database
             conn.Open()
-            
-            Dim query As String = "SELECT code FROM [CMGADB2024].[dbo].[CustomerSupplier] ORDER BY code"
+
+            Dim query As String = "SELECT code FROM [CustomerAccountsMaster] ORDER BY code"
             cmd = New SqlCommand(query, conn)
             reader = cmd.ExecuteReader()
-            
+
             While reader.Read()
                 If reader("code") IsNot DBNull.Value Then
                     codes.Add(reader("code").ToString())
                 End If
             End While
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل قائمة العملاء/الموردين: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
@@ -2299,7 +2309,7 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return codes
     End Function
 

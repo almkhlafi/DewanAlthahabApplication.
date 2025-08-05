@@ -1461,79 +1461,6 @@ Public Class Customers
         End Try
     End Sub
 
-    ' Save Customer/Supplier data
-    Public Sub SaveCustomerSupplierData()
-        Try
-            ' Create customer data object
-            Dim customerData As New CustomerSupplierData()
-
-            ' Generate code if this is a new customer
-            If String.IsNullOrEmpty(customerData.ExistingCode) Then
-                Dim isCustomer As Boolean = CustomerSupplierCB.SelectedItem.ToString() = "Customer"
-                customerData.Code = dbConn.GenerateNextCode(isCustomer)
-            Else
-                customerData.Code = customerData.ExistingCode
-            End If
-
-            ' Map form data to customer data object
-            customerData.CustomerType = If(CustomerSupplierCB.SelectedItem IsNot Nothing, CustomerSupplierCB.SelectedItem.ToString(), "Customer")
-            customerData.EnglishName = If(NameInEnglishTB IsNot Nothing, NameInEnglishTB.Text.Trim(), "")
-            customerData.ArabicName = If(FormalNameTB IsNot Nothing, FormalNameTB.Text.Trim(), "")
-            customerData.CommercialName = If(CommercialNameTB IsNot Nothing, CommercialNameTB.Text.Trim(), "")
-            customerData.Address = If(AddressTA IsNot Nothing, AddressTA.Text.Trim(), "")
-            customerData.Manager = If(ManagerTB IsNot Nothing, ManagerTB.Text.Trim(), "")
-            customerData.ManagerID = If(ManagerIDTB IsNot Nothing, ManagerIDTB.Text.Trim(), "")
-            customerData.ManagerNumber = If(MangerNumberTB IsNot Nothing, MangerNumberTB.Text.Trim(), "")
-
-            ' Get selected country and area
-            If CountryCB.SelectedItem IsNot Nothing Then
-                Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
-                customerData.Country = selectedCountry("countrycode").ToString()
-                customerData.CountryName = selectedCountry("DisplayText").ToString()
-            End If
-
-            If AreaCB.SelectedItem IsNot Nothing Then
-                Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
-                customerData.Area = selectedArea("description").ToString()
-            End If
-
-            customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
-            customerData.Email = If(emailTB IsNot Nothing, emailTB.Text.Trim(), "")
-            customerData.MobileCountryCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "")
-            customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
-            customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
-
-            ' Handle identity type and corresponding field mapping
-            If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
-                customerData.IdentityType = IdentityCommercialNameOptionCB.SelectedItem.ToString()
-
-                If customerData.IdentityType = "فردي" Then
-                    ' Individual - save to fld_indvl_id_no
-                    customerData.IndividualID = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
-                    customerData.CommercialRecord = ""
-                ElseIf customerData.IdentityType = "تجاري" Then
-                    ' Commercial - save to fld_cr_no
-                    customerData.CommercialRecord = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
-                    customerData.IndividualID = ""
-                End If
-            End If
-
-            ' Save to database
-            Dim success As Boolean = dbConn.SaveCustomerSupplier(customerData)
-
-            If success Then
-                MessageBox.Show($"تم حفظ بيانات {If(customerData.IsCustomer, "العميل", "المورد")} بنجاح!" & vbCrLf & $"الكود: {customerData.Code}", "نجح الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-                ' Clear form after successful save (optional)
-                ' ClearForm()
-            Else
-                MessageBox.Show("فشل في حفظ البيانات. يرجى المحاولة مرة أخرى.", "خطأ في الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Error)
-            End If
-
-        Catch ex As Exception
-            MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        End Try
-    End Sub
 
     ' Load existing customer/supplier data by code
     Public Sub LoadCustomerSupplierData(code As String)
@@ -1617,15 +1544,15 @@ Public Class Customers
     End Sub
 
     ' =====================Navigation and Save Methods========================
-    
+
     Private Sub SaveInfo_Click(sender As Object, e As EventArgs) Handles SaveInfo.Click
         ' Save current customer/supplier data
         SaveCustomerSupplierData()
-        
+
         ' Refresh customer list after save to include any new records
         LoadCustomerListForNavigation()
     End Sub
-    
+
     Private Sub downCustomerPB_Click(sender As Object, e As EventArgs) Handles downCustomerPB.Click
         ' Navigate to next customer
         NavigateToNextCustomer()
@@ -1635,12 +1562,12 @@ Public Class Customers
         ' Navigate to previous customer
         NavigateToPreviousCustomer()
     End Sub
-    
+
     Private Sub LoadCustomerListForNavigation()
         Try
             ' Load all customer/supplier codes from database
             customerList = dbConn.GetAllCustomerSupplierCodes()
-            
+
             ' If we have customers, load the first one
             If customerList.Count > 0 Then
                 currentCustomerIndex = 0
@@ -1649,70 +1576,70 @@ Public Class Customers
                 currentCustomerIndex = -1
                 ClearForm()
             End If
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل قائمة العملاء: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
-    
+
     Private Sub NavigateToNextCustomer()
         Try
             If customerList.Count = 0 Then
                 MessageBox.Show("لا توجد سجلات عملاء/موردين.", "لا توجد سجلات", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
-            
+
             ' Move to next customer (with wrapping)
             currentCustomerIndex += 1
             If currentCustomerIndex >= customerList.Count Then
                 currentCustomerIndex = 0 ' Wrap to first customer
             End If
-            
+
             LoadCustomerByIndex(currentCustomerIndex)
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في الانتقال للعميل التالي: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
-    
+
     Private Sub NavigateToPreviousCustomer()
         Try
             If customerList.Count = 0 Then
                 MessageBox.Show("لا توجد سجلات عملاء/موردين.", "لا توجد سجلات", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
-            
+
             ' Move to previous customer (with wrapping)
             currentCustomerIndex -= 1
             If currentCustomerIndex < 0 Then
                 currentCustomerIndex = customerList.Count - 1 ' Wrap to last customer
             End If
-            
+
             LoadCustomerByIndex(currentCustomerIndex)
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في الانتقال للعميل السابق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
-    
+
     Private Sub LoadCustomerByIndex(index As Integer)
         Try
             If index < 0 OrElse index >= customerList.Count Then
                 Return
             End If
-            
+
             isNavigating = True
             Dim customerCode As String = customerList(index)
-            
+
             ' Load customer data
             Dim customerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(customerCode)
-            
+
             If Not String.IsNullOrEmpty(customerData.Code) Then
                 ' Populate form with loaded data (without showing success message)
                 If CustomerSupplierCB IsNot Nothing Then
                     CustomerSupplierCB.SelectedItem = customerData.CustomerType
                 End If
-                
+
                 If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = customerData.EnglishName
                 If FormalNameTB IsNot Nothing Then FormalNameTB.Text = customerData.ArabicName
                 If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
@@ -1725,12 +1652,12 @@ Public Class Customers
                 If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = customerData.MobileCountryCode
                 If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
                 If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
-                
+
                 ' Set identity type and corresponding field
                 If IdentityCommercialNameOptionCB IsNot Nothing Then
                     IdentityCommercialNameOptionCB.SelectedItem = customerData.IdentityType
                     UpdateIdentityLabel(customerData.IdentityType)
-                    
+
                     If CommercialRecordAndIdentityTB IsNot Nothing Then
                         If customerData.IsIndividual Then
                             CommercialRecordAndIdentityTB.Text = customerData.IndividualID
@@ -1740,27 +1667,27 @@ Public Class Customers
                     End If
                 End If
             End If
-            
+
             ' Update current selected customer info
             currentSelectedCustomerName = customerCode
-            
+
             ' Show navigation info in title
             Me.Text = $"العملاء - {index + 1} من {customerList.Count} - {customerCode}"
-            
+
             isNavigating = False
-            
+
         Catch ex As Exception
             isNavigating = False
             MessageBox.Show("خطأ في تحميل بيانات العميل: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
-    
+
     ' Override the existing SaveCustomerSupplierData method to handle navigation context
     Public Shadows Sub SaveCustomerSupplierData()
         Try
             ' Create customer data object
             Dim customerData As New CustomerSupplierData()
-            
+
             ' Check if we're updating an existing customer or creating new one
             If currentCustomerIndex >= 0 AndAlso currentCustomerIndex < customerList.Count Then
                 ' We're updating an existing customer
@@ -1773,7 +1700,7 @@ Public Class Customers
                 customerData.Code = dbConn.GenerateNextCode(isCustomer)
                 customerData.IsUpdate = False
             End If
-            
+
             ' Map form data to customer data object (same as before)
             customerData.CustomerType = If(CustomerSupplierCB.SelectedItem IsNot Nothing, CustomerSupplierCB.SelectedItem.ToString(), "Customer")
             customerData.EnglishName = If(NameInEnglishTB IsNot Nothing, NameInEnglishTB.Text.Trim(), "")
@@ -1783,29 +1710,29 @@ Public Class Customers
             customerData.Manager = If(ManagerTB IsNot Nothing, ManagerTB.Text.Trim(), "")
             customerData.ManagerID = If(ManagerIDTB IsNot Nothing, ManagerIDTB.Text.Trim(), "")
             customerData.ManagerNumber = If(MangerNumberTB IsNot Nothing, MangerNumberTB.Text.Trim(), "")
-            
+
             ' Get selected country and area
             If CountryCB.SelectedItem IsNot Nothing Then
                 Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
                 customerData.Country = selectedCountry("countrycode").ToString()
                 customerData.CountryName = selectedCountry("DisplayText").ToString()
             End If
-            
+
             If AreaCB.SelectedItem IsNot Nothing Then
                 Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
                 customerData.Area = selectedArea("description").ToString()
             End If
-            
+
             customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
             customerData.Email = If(emailTB IsNot Nothing, emailTB.Text.Trim(), "")
             customerData.MobileCountryCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "")
             customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
             customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
-            
+
             ' Handle identity type and corresponding field mapping
             If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
                 customerData.IdentityType = IdentityCommercialNameOptionCB.SelectedItem.ToString()
-                
+
                 If customerData.IdentityType = "فردي" Then
                     ' Individual - save to fld_indvl_id_no
                     customerData.IndividualID = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
@@ -1816,13 +1743,13 @@ Public Class Customers
                     customerData.IndividualID = ""
                 End If
             End If
-            
+
             ' Save to database
             Dim success As Boolean = dbConn.SaveCustomerSupplier(customerData)
-            
+
             If success Then
                 MessageBox.Show($"تم حفظ بيانات {If(customerData.IsCustomer, "العميل", "المورد")} بنجاح!" & vbCrLf & $"الكود: {customerData.Code}", "نجح الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Information)
-                
+
                 ' If this was a new customer, add it to the list and navigate to it
                 If Not customerData.IsUpdate Then
                     customerList.Add(customerData.Code)
@@ -1832,7 +1759,7 @@ Public Class Customers
             Else
                 MessageBox.Show("فشل في حفظ البيانات. يرجى المحاولة مرة أخرى.", "خطأ في الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
-            
+
         Catch ex As Exception
             MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
