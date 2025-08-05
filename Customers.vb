@@ -23,7 +23,7 @@ Public Class Customers
 
         ' Setup and load branches DataGridView
         SetupBranchesDataGridView()
-        LoadBranches()
+        LoadBranches(GetBranchesInfoDGV())
 
         ' Setup and load currency DataGridView
         SetupCurrencyDataGridView()
@@ -45,6 +45,8 @@ Public Class Customers
 
         ' Load customer list for navigation
         LoadCustomerListForNavigation()
+
+
     End Sub
 
     Private Sub LoadCountries()
@@ -749,6 +751,7 @@ Public Class Customers
     End Sub
 
     Private Sub SetupBranchesDataGridView()
+        Dim BranchesInfoDGV As DataGridView = Me.BranchesInfoDGV
         ' Safety check - ensure BranchesInfoDGV is initialized
         If BranchesInfoDGV Is Nothing Then
             MessageBox.Show("BranchesInfoDGV is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -832,13 +835,17 @@ Public Class Customers
         AddHandler BranchesInfoDGV.ColumnHeaderMouseClick, AddressOf BranchesInfoDGV_ColumnHeaderMouseClick
     End Sub
 
-    Private Sub LoadBranches()
+    Private Function GetBranchesInfoDGV() As DataGridView
+        Return BranchesInfoDGV
+    End Function
+
+    Private Sub LoadBranches(branchesInfoDGV As DataGridView)
         Try
+
+
             ' Load branches from CMGADB2024 database
             Dim branchesTable As DataTable = dbConn.GetBranches()
-
-            ' Clear existing rows
-            BranchesInfoDGV.Rows.Clear()
+            branchesInfoDGV.Rows.Clear()
 
             ' Add branches to DataGridView - only populate Arabic and English names from database
             ' Other columns (Select, Active, RefNo, Locked) will be filled by users later
@@ -852,7 +859,7 @@ Public Class Customers
                     "", ' Ref NO (empty - user will fill)
                     False ' Locked status (default unchecked - user will set)
                 }
-                BranchesInfoDGV.Rows.Add(newRow)
+                branchesInfoDGV.Rows.Add(newRow)
             Next
 
         Catch ex As Exception
@@ -1009,6 +1016,7 @@ Public Class Customers
             ' Load currency from CMGADB2024 database
             Dim currencyTable As DataTable = dbConn.GetCurrency()
 
+            Dim CurrencyDGV As DataGridView = Me.CurrencyDGV
             ' Clear existing rows
             CurrencyDGV.Rows.Clear()
 
@@ -1720,6 +1728,37 @@ Public Class Customers
                         CustomerAccountNumberTB.Refresh()
                     End If
 
+                    ' Add all the missing controls you mentioned
+                    If ActiveNoActiveCKB IsNot Nothing Then
+                        ActiveNoActiveCKB.Checked = False ' Default value, no field mapping specified
+                        ActiveNoActiveCKB.Refresh()
+                    End If
+
+                    If VTRAppliedCKB IsNot Nothing Then
+                        VTRAppliedCKB.Checked = False ' Default value, no field mapping specified  
+                        VTRAppliedCKB.Refresh()
+                    End If
+
+                    If phoneNumber1TB IsNot Nothing Then
+                        phoneNumber1TB.Text = "" ' No direct mapping specified in your table
+                        phoneNumber1TB.Refresh()
+                    End If
+
+                    If phoneNumber2TB IsNot Nothing Then
+                        phoneNumber2TB.Text = "" ' No direct mapping specified in your table
+                        phoneNumber2TB.Refresh()
+                    End If
+
+                    If telephoneNumberTB IsNot Nothing Then
+                        telephoneNumberTB.Text = "" ' No direct mapping specified in your table
+                        telephoneNumberTB.Refresh()
+                    End If
+
+                    If telephoneNumberZipcodeTB IsNot Nothing Then
+                        telephoneNumberZipcodeTB.Text = "" ' Maps to pld_limit but no data available yet
+                        telephoneNumberZipcodeTB.Refresh()
+                    End If
+
                     ' Set identity type and corresponding field
                     If IdentityCommercialNameOptionCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.IdentityType) Then
                         For i As Integer = 0 To IdentityCommercialNameOptionCB.Items.Count - 1
@@ -1856,6 +1895,9 @@ Public Class Customers
                     customerData.CommercialRecord = commercialRecordValue
                     customerData.IndividualID = ""
                 End If
+
+
+
             End If
 
             ' Save to database
@@ -1878,6 +1920,8 @@ Public Class Customers
             MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
+
+
 End Class
 
 

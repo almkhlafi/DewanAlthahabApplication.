@@ -2091,7 +2091,6 @@ ORDER BY p.Name"
     End Function
 
     ' =====================Customer/Supplier Management========================
-
     ' Generate next code for Customer or Supplier
     Public Function GenerateNextCode(isCustomer As Boolean) As String
         Dim conn As SqlConnection = Nothing
@@ -2134,6 +2133,7 @@ ORDER BY p.Name"
         Try
             conn = GetConnection2() ' Use CMGADB2024 database
             conn.Open()
+
 
             Dim query As String = ""
 
@@ -2248,7 +2248,7 @@ ORDER BY p.Name"
                     customerData.ReferralNumber = If(reader("fld_ref_no") IsNot DBNull.Value, reader("fld_ref_no").ToString(), "")
                     customerData.IndividualID = If(reader("fld_indvl_id_no") IsNot DBNull.Value, reader("fld_indvl_id_no").ToString(), "")
                     customerData.CommercialRecord = If(reader("fld_cr_no") IsNot DBNull.Value, reader("fld_cr_no").ToString(), "")
-                    
+
                     ' Try to read identity_type field with error handling
                     Try
                         customerData.IdentityType = If(reader("identity_type") IsNot DBNull.Value, reader("identity_type").ToString(), "فردي")
@@ -2256,7 +2256,7 @@ ORDER BY p.Name"
                         ' Field might not exist or have different name, set default value
                         customerData.IdentityType = "فردي"
                     End Try
-                    
+
                     customerData.IsUpdate = True
                     customerData.ExistingCode = code
                 Catch fieldEx As Exception
