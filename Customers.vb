@@ -1568,6 +1568,7 @@ Public Class Customers
             ' Load all customer/supplier codes from database
             customerList = dbConn.GetAllCustomerSupplierCodes()
 
+
             ' If we have customers, load the first one
             If customerList.Count > 0 Then
                 currentCustomerIndex = 0
@@ -1575,6 +1576,7 @@ Public Class Customers
             Else
                 currentCustomerIndex = -1
                 ClearForm()
+                MessageBox.Show("لا توجد عملاء/موردين في قاعدة البيانات", "لا توجد بيانات", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
 
         Catch ex As Exception
@@ -1634,38 +1636,143 @@ Public Class Customers
             ' Load customer data
             Dim customerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(customerCode)
 
+
             If Not String.IsNullOrEmpty(customerData.Code) Then
-                ' Populate form with loaded data (without showing success message)
-                If CustomerSupplierCB IsNot Nothing Then
-                    CustomerSupplierCB.SelectedItem = customerData.CustomerType
-                End If
+                ' Populate form with loaded data - force UI update
+                Try
+                    ' Clear all fields first
+                    ClearForm()
 
-                If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = customerData.EnglishName
-                If FormalNameTB IsNot Nothing Then FormalNameTB.Text = customerData.ArabicName
-                If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
-                If AddressTA IsNot Nothing Then AddressTA.Text = customerData.Address
-                If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
-                If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = customerData.ManagerID
-                If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = customerData.ManagerNumber
-                If VTRnumberTB IsNot Nothing Then VTRnumberTB.Text = customerData.VATNumber
-                If emailTB IsNot Nothing Then emailTB.Text = customerData.Email
-                If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = customerData.MobileCountryCode
-                If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
-                If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
+                    ' Populate Customer/Supplier Type
+                    If CustomerSupplierCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CustomerType) Then
+                        For i As Integer = 0 To CustomerSupplierCB.Items.Count - 1
+                            If CustomerSupplierCB.Items(i).ToString() = customerData.CustomerType Then
+                                CustomerSupplierCB.SelectedIndex = i
+                                Exit For
+                            End If
+                        Next
+                    End If
 
-                ' Set identity type and corresponding field
-                If IdentityCommercialNameOptionCB IsNot Nothing Then
-                    IdentityCommercialNameOptionCB.SelectedItem = customerData.IdentityType
-                    UpdateIdentityLabel(customerData.IdentityType)
+                    ' Populate all text fields with data
+                    If NameInEnglishTB IsNot Nothing Then
+                        NameInEnglishTB.Text = If(String.IsNullOrEmpty(customerData.EnglishName), "", customerData.EnglishName)
+                        NameInEnglishTB.Refresh()
+                    End If
 
-                    If CommercialRecordAndIdentityTB IsNot Nothing Then
-                        If customerData.IsIndividual Then
-                            CommercialRecordAndIdentityTB.Text = customerData.IndividualID
-                        ElseIf customerData.IsCommercial Then
-                            CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                    If FormalNameTB IsNot Nothing Then
+                        FormalNameTB.Text = If(String.IsNullOrEmpty(customerData.ArabicName), "", customerData.ArabicName)
+                        FormalNameTB.Refresh()
+                    End If
+
+                    If CommercialNameTB IsNot Nothing Then
+                        CommercialNameTB.Text = If(String.IsNullOrEmpty(customerData.CommercialName), "", customerData.CommercialName)
+                        CommercialNameTB.Refresh()
+                    End If
+
+                    If AddressTA IsNot Nothing Then
+                        AddressTA.Text = If(String.IsNullOrEmpty(customerData.Address), "", customerData.Address)
+                        AddressTA.Refresh()
+                    End If
+
+                    If ManagerTB IsNot Nothing Then
+                        ManagerTB.Text = If(String.IsNullOrEmpty(customerData.Manager), "", customerData.Manager)
+                        ManagerTB.Refresh()
+                    End If
+
+                    If ManagerIDTB IsNot Nothing Then
+                        ManagerIDTB.Text = If(String.IsNullOrEmpty(customerData.ManagerID), "", customerData.ManagerID)
+                        ManagerIDTB.Refresh()
+                    End If
+
+                    If MangerNumberTB IsNot Nothing Then
+                        MangerNumberTB.Text = If(String.IsNullOrEmpty(customerData.ManagerNumber), "", customerData.ManagerNumber)
+                        MangerNumberTB.Refresh()
+                    End If
+
+                    If VTRnumberTB IsNot Nothing Then
+                        VTRnumberTB.Text = If(String.IsNullOrEmpty(customerData.VATNumber), "", customerData.VATNumber)
+                        VTRnumberTB.Refresh()
+                    End If
+
+                    If emailTB IsNot Nothing Then
+                        emailTB.Text = If(String.IsNullOrEmpty(customerData.Email), "", customerData.Email)
+                        emailTB.Refresh()
+                    End If
+
+                    If phoneNumber1ZipCodeTB IsNot Nothing Then
+                        phoneNumber1ZipCodeTB.Text = If(String.IsNullOrEmpty(customerData.MobileCountryCode), "", customerData.MobileCountryCode)
+                        phoneNumber1ZipCodeTB.Refresh()
+                    End If
+
+                    If FaxNumberTB IsNot Nothing Then
+                        FaxNumberTB.Text = If(String.IsNullOrEmpty(customerData.FaxNumber), "", customerData.FaxNumber)
+                        FaxNumberTB.Refresh()
+                    End If
+
+                    If ReferralNumberTB IsNot Nothing Then
+                        ReferralNumberTB.Text = If(String.IsNullOrEmpty(customerData.ReferralNumber), "", customerData.ReferralNumber)
+                        ReferralNumberTB.Refresh()
+                    End If
+
+                    ' Add missing fields from the field mapping specification
+                    If CustomerAccountNumberTB IsNot Nothing Then
+                        CustomerAccountNumberTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                        CustomerAccountNumberTB.Refresh()
+                    End If
+
+                    ' Set identity type and corresponding field
+                    If IdentityCommercialNameOptionCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.IdentityType) Then
+                        For i As Integer = 0 To IdentityCommercialNameOptionCB.Items.Count - 1
+                            If IdentityCommercialNameOptionCB.Items(i).ToString() = customerData.IdentityType Then
+                                IdentityCommercialNameOptionCB.SelectedIndex = i
+                                Exit For
+                            End If
+                        Next
+                        UpdateIdentityLabel(customerData.IdentityType)
+
+                        If CommercialRecordAndIdentityTB IsNot Nothing Then
+                            If customerData.IsIndividual Then
+                                CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.IndividualID), "", customerData.IndividualID)
+                            ElseIf customerData.IsCommercial Then
+                                CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                            End If
+                            CommercialRecordAndIdentityTB.Refresh()
                         End If
                     End If
-                End If
+
+                    ' Set country ComboBox
+                    If Not String.IsNullOrEmpty(customerData.Country) AndAlso CountryCB IsNot Nothing AndAlso CountryCB.DataSource IsNot Nothing Then
+                        Dim countryTable As DataTable = CType(CountryCB.DataSource, DataTable)
+                        For i As Integer = 0 To countryTable.Rows.Count - 1
+                            If countryTable.Rows(i)("countrycode").ToString() = customerData.Country Then
+                                CountryCB.SelectedIndex = i
+                                ' Load areas for this country
+                                LoadAreas(customerData.Country)
+                                Exit For
+                            End If
+                        Next
+                    End If
+
+                    ' Set area ComboBox  
+                    If Not String.IsNullOrEmpty(customerData.Area) AndAlso AreaCB IsNot Nothing AndAlso AreaCB.DataSource IsNot Nothing Then
+                        Dim areaTable As DataTable = CType(AreaCB.DataSource, DataTable)
+                        For i As Integer = 0 To areaTable.Rows.Count - 1
+                            If areaTable.Rows(i)("description").ToString() = customerData.Area Then
+                                AreaCB.SelectedIndex = i
+                                Exit For
+                            End If
+                        Next
+                    End If
+
+                    ' Force form refresh
+                    Me.Refresh()
+                    Application.DoEvents()
+
+                Catch fieldEx As Exception
+                    MessageBox.Show("خطأ في تعبئة الحقول: " & fieldEx.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                End Try
+            Else
+                MessageBox.Show("لم يتم العثور على بيانات العميل: " & customerCode, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
 
             ' Update current selected customer info
@@ -1729,17 +1836,24 @@ Public Class Customers
             customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
             customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
 
-            ' Handle identity type and corresponding field mapping
+            ' Handle identity type and corresponding field mapping per specification
             If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
                 customerData.IdentityType = IdentityCommercialNameOptionCB.SelectedItem.ToString()
 
                 If customerData.IdentityType = "فردي" Then
                     ' Individual - save to fld_indvl_id_no
                     customerData.IndividualID = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
-                    customerData.CommercialRecord = ""
+                    ' CustomerAccountNumberTB also maps to fld_cr_no per specification, but for Individual it should be empty
+                    customerData.CommercialRecord = If(CustomerAccountNumberTB IsNot Nothing, CustomerAccountNumberTB.Text.Trim(), "")
                 ElseIf customerData.IdentityType = "تجاري" Then
-                    ' Commercial - save to fld_cr_no
-                    customerData.CommercialRecord = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
+                    ' Commercial - save to fld_cr_no (both CommercialRecordAndIdentityTB and CustomerAccountNumberTB map to this)
+                    Dim commercialRecordValue As String = ""
+                    If CommercialRecordAndIdentityTB IsNot Nothing AndAlso Not String.IsNullOrEmpty(CommercialRecordAndIdentityTB.Text.Trim()) Then
+                        commercialRecordValue = CommercialRecordAndIdentityTB.Text.Trim()
+                    ElseIf CustomerAccountNumberTB IsNot Nothing AndAlso Not String.IsNullOrEmpty(CustomerAccountNumberTB.Text.Trim()) Then
+                        commercialRecordValue = CustomerAccountNumberTB.Text.Trim()
+                    End If
+                    customerData.CommercialRecord = commercialRecordValue
                     customerData.IndividualID = ""
                 End If
             End If
