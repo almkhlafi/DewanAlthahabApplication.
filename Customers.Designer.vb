@@ -23,11 +23,80 @@ Partial Class Customers
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         components = New ComponentModel.Container()
+        Dim GroupBox1 As GroupBox
+        Dim GroupBox6 As GroupBox
+        Dim CurrencyDGV As DataGridView
         Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim GroupBox4 As GroupBox
+        Dim Label23 As Label
+        Dim Label22 As Label
+        Dim Label21 As Label
+        Dim Label12 As Label
+        Dim TypeCB As ComboBox
+        Dim CatogeryCB As ComboBox
+        Dim GroupsCB As ComboBox
+        Dim MarketCB As ComboBox
+        Dim BranchesInfoDGV As DataGridView
         Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim GroupBox3 As GroupBox
+        Dim SaveInfo As PictureBox
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
+        Dim upCustomerPB As PictureBox
+        Dim downCustomerPB As PictureBox
+        Dim Label24 As Label
+        Dim telephoneNumberZipcodeTB As TextBox
+        Dim phoneNumber1ZipCodeTB As TextBox
+        Dim ReferralNumberTB As TextBox
+        Dim FaxNumberTB As TextBox
+        Dim telephoneNumberTB As TextBox
+        Dim phoneNumber2TB As TextBox
+        Dim phoneNumber1TB As TextBox
+        Dim emailTB As TextBox
+        Dim VTRnumberTB As TextBox
+        Dim IdentityCommercialNameOptionCB As ComboBox
+        Dim CustomerSupplierCB As ComboBox
+        Dim VTRAppliedCKB As CheckBox
+        Dim CommercialNameTB As TextBox
+        Dim Label20 As Label
+        Dim FormalNameTB As TextBox
+        Dim AreaCB As ComboBox
+        Dim CountryCB As ComboBox
+        Dim MangerNumberTB As TextBox
+        Dim ManagerIDTB As TextBox
+        Dim ManagerTB As TextBox
+        Dim AddressTA As RichTextBox
+        Dim NameInEnglishTB As TextBox
+        Dim ActiveNoActiveCKB As CheckBox
+        Dim CustomerAccountNumberTB As TextBox
+        Dim CommercialRecordAndIdentityTB As TextBox
+        Dim Label19 As Label
+        Dim Label18 As Label
+        Dim Label17 As Label
+        Dim Label16 As Label
+        Dim Label15 As Label
+        Dim Label14 As Label
+        Dim Label13 As Label
+        Dim Label11 As Label
+        Dim Label10 As Label
+        Dim Label9 As Label
+        Dim Label8 As Label
+        Dim Label7 As Label
+        Dim Label6 As Label
+        Dim Label5 As Label
+        Dim Label4 As Label
+        Dim Label3 As Label
+        Dim CommercialRecordAndIdentityLB As Label
+        Dim GroupBox5 As GroupBox
+        Dim PictureBox1 As PictureBox
+        Dim GroupBox2 As GroupBox
+        Dim Delegations As PictureBox
+        Dim DocumentsSettings As PictureBox
+        Dim PictureBox3 As PictureBox
+        Dim AddAttachmentsBT As PictureBox
+        Dim PictureBox5 As PictureBox
+        NotifyIcon1 = New NotifyIcon(components)
         GroupBox1 = New GroupBox()
         GroupBox6 = New GroupBox()
         CurrencyDGV = New DataGridView()
@@ -42,30 +111,35 @@ Partial Class Customers
         MarketCB = New ComboBox()
         BranchesInfoDGV = New DataGridView()
         GroupBox3 = New GroupBox()
-        TextBox16 = New TextBox()
-        TextBox15 = New TextBox()
-        TextBox14 = New TextBox()
-        TextBox13 = New TextBox()
-        TextBox12 = New TextBox()
-        TextBox11 = New TextBox()
-        TextBox10 = New TextBox()
-        ComboBox2 = New ComboBox()
-        ComboBox1 = New ComboBox()
-        CheckBox2 = New CheckBox()
-        TextBox9 = New TextBox()
+        SaveInfo = New PictureBox()
+        upCustomerPB = New PictureBox()
+        downCustomerPB = New PictureBox()
+        Label24 = New Label()
+        telephoneNumberZipcodeTB = New TextBox()
+        phoneNumber1ZipCodeTB = New TextBox()
+        ReferralNumberTB = New TextBox()
+        FaxNumberTB = New TextBox()
+        telephoneNumberTB = New TextBox()
+        phoneNumber2TB = New TextBox()
+        phoneNumber1TB = New TextBox()
+        emailTB = New TextBox()
+        VTRnumberTB = New TextBox()
+        IdentityCommercialNameOptionCB = New ComboBox()
+        CustomerSupplierCB = New ComboBox()
+        VTRAppliedCKB = New CheckBox()
+        CommercialNameTB = New TextBox()
         Label20 = New Label()
-        TextBox8 = New TextBox()
+        FormalNameTB = New TextBox()
         AreaCB = New ComboBox()
         CountryCB = New ComboBox()
-        TextBox7 = New TextBox()
-        TextBox6 = New TextBox()
-        TextBox5 = New TextBox()
-        RichTextBox1 = New RichTextBox()
-        TextBox4 = New TextBox()
-        CheckBox1 = New CheckBox()
-        CustomerAccountNumber = New TextBox()
-        AccountNumber = New TextBox()
-        identityNB = New TextBox()
+        MangerNumberTB = New TextBox()
+        ManagerIDTB = New TextBox()
+        ManagerTB = New TextBox()
+        AddressTA = New RichTextBox()
+        NameInEnglishTB = New TextBox()
+        ActiveNoActiveCKB = New CheckBox()
+        CustomerAccountNumberTB = New TextBox()
+        CommercialRecordAndIdentityTB = New TextBox()
         Label19 = New Label()
         Label18 = New Label()
         Label17 = New Label()
@@ -82,8 +156,7 @@ Partial Class Customers
         Label5 = New Label()
         Label4 = New Label()
         Label3 = New Label()
-        Label2 = New Label()
-        Label1 = New Label()
+        CommercialRecordAndIdentityLB = New Label()
         GroupBox5 = New GroupBox()
         PictureBox1 = New PictureBox()
         GroupBox2 = New GroupBox()
@@ -92,13 +165,15 @@ Partial Class Customers
         PictureBox3 = New PictureBox()
         AddAttachmentsBT = New PictureBox()
         PictureBox5 = New PictureBox()
-        NotifyIcon1 = New NotifyIcon(components)
         GroupBox1.SuspendLayout()
         GroupBox6.SuspendLayout()
         CType(CurrencyDGV, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox4.SuspendLayout()
         CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox3.SuspendLayout()
+        CType(SaveInfo, ComponentModel.ISupportInitialize).BeginInit()
+        CType(upCustomerPB, ComponentModel.ISupportInitialize).BeginInit()
+        CType(downCustomerPB, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox5.SuspendLayout()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox2.SuspendLayout()
@@ -306,30 +381,35 @@ Partial Class Customers
         ' GroupBox3
         ' 
         GroupBox3.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Right
-        GroupBox3.Controls.Add(TextBox16)
-        GroupBox3.Controls.Add(TextBox15)
-        GroupBox3.Controls.Add(TextBox14)
-        GroupBox3.Controls.Add(TextBox13)
-        GroupBox3.Controls.Add(TextBox12)
-        GroupBox3.Controls.Add(TextBox11)
-        GroupBox3.Controls.Add(TextBox10)
-        GroupBox3.Controls.Add(ComboBox2)
-        GroupBox3.Controls.Add(ComboBox1)
-        GroupBox3.Controls.Add(CheckBox2)
-        GroupBox3.Controls.Add(TextBox9)
+        GroupBox3.Controls.Add(SaveInfo)
+        GroupBox3.Controls.Add(upCustomerPB)
+        GroupBox3.Controls.Add(downCustomerPB)
+        GroupBox3.Controls.Add(Label24)
+        GroupBox3.Controls.Add(telephoneNumberZipcodeTB)
+        GroupBox3.Controls.Add(phoneNumber1ZipCodeTB)
+        GroupBox3.Controls.Add(ReferralNumberTB)
+        GroupBox3.Controls.Add(FaxNumberTB)
+        GroupBox3.Controls.Add(telephoneNumberTB)
+        GroupBox3.Controls.Add(phoneNumber2TB)
+        GroupBox3.Controls.Add(phoneNumber1TB)
+        GroupBox3.Controls.Add(emailTB)
+        GroupBox3.Controls.Add(VTRnumberTB)
+        GroupBox3.Controls.Add(IdentityCommercialNameOptionCB)
+        GroupBox3.Controls.Add(CustomerSupplierCB)
+        GroupBox3.Controls.Add(VTRAppliedCKB)
+        GroupBox3.Controls.Add(CommercialNameTB)
         GroupBox3.Controls.Add(Label20)
-        GroupBox3.Controls.Add(TextBox8)
+        GroupBox3.Controls.Add(FormalNameTB)
         GroupBox3.Controls.Add(AreaCB)
         GroupBox3.Controls.Add(CountryCB)
-        GroupBox3.Controls.Add(TextBox7)
-        GroupBox3.Controls.Add(TextBox6)
-        GroupBox3.Controls.Add(TextBox5)
-        GroupBox3.Controls.Add(RichTextBox1)
-        GroupBox3.Controls.Add(TextBox4)
-        GroupBox3.Controls.Add(CheckBox1)
-        GroupBox3.Controls.Add(CustomerAccountNumber)
-        GroupBox3.Controls.Add(AccountNumber)
-        GroupBox3.Controls.Add(identityNB)
+        GroupBox3.Controls.Add(MangerNumberTB)
+        GroupBox3.Controls.Add(ManagerIDTB)
+        GroupBox3.Controls.Add(ManagerTB)
+        GroupBox3.Controls.Add(AddressTA)
+        GroupBox3.Controls.Add(NameInEnglishTB)
+        GroupBox3.Controls.Add(ActiveNoActiveCKB)
+        GroupBox3.Controls.Add(CustomerAccountNumberTB)
+        GroupBox3.Controls.Add(CommercialRecordAndIdentityTB)
         GroupBox3.Controls.Add(Label19)
         GroupBox3.Controls.Add(Label18)
         GroupBox3.Controls.Add(Label17)
@@ -346,8 +426,7 @@ Partial Class Customers
         GroupBox3.Controls.Add(Label5)
         GroupBox3.Controls.Add(Label4)
         GroupBox3.Controls.Add(Label3)
-        GroupBox3.Controls.Add(Label2)
-        GroupBox3.Controls.Add(Label1)
+        GroupBox3.Controls.Add(CommercialRecordAndIdentityLB)
         GroupBox3.Location = New Point(884, 13)
         GroupBox3.Margin = New Padding(2, 3, 2, 3)
         GroupBox3.Name = "GroupBox3"
@@ -356,107 +435,181 @@ Partial Class Customers
         GroupBox3.TabIndex = 2
         GroupBox3.TabStop = False
         ' 
-        ' TextBox16
+        ' SaveInfo
         ' 
-        TextBox16.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox16.Location = New Point(162, 809)
-        TextBox16.Margin = New Padding(2, 3, 2, 3)
-        TextBox16.Name = "TextBox16"
-        TextBox16.Size = New Size(257, 27)
-        TextBox16.TabIndex = 42
+        SaveInfo.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        SaveInfo.BackColor = Color.Transparent
+        SaveInfo.BackgroundImageLayout = ImageLayout.None
+        SaveInfo.Image = CType(resources.GetObject("SaveInfo.Image"), Image)
+        SaveInfo.ImageLocation = ""
+        SaveInfo.Location = New Point(41, 803)
+        SaveInfo.Margin = New Padding(3, 4, 3, 4)
+        SaveInfo.Name = "SaveInfo"
+        SaveInfo.Size = New Size(58, 55)
+        SaveInfo.SizeMode = PictureBoxSizeMode.StretchImage
+        SaveInfo.TabIndex = 50
+        SaveInfo.TabStop = False
         ' 
-        ' TextBox15
+        ' upCustomerPB
         ' 
-        TextBox15.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox15.Location = New Point(162, 755)
-        TextBox15.Margin = New Padding(2, 3, 2, 3)
-        TextBox15.Name = "TextBox15"
-        TextBox15.Size = New Size(257, 27)
-        TextBox15.TabIndex = 41
+        upCustomerPB.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        upCustomerPB.BackColor = Color.Transparent
+        upCustomerPB.BackgroundImageLayout = ImageLayout.None
+        upCustomerPB.Image = CType(resources.GetObject("upCustomerPB.Image"), Image)
+        upCustomerPB.ImageLocation = ""
+        upCustomerPB.Location = New Point(5, 15)
+        upCustomerPB.Margin = New Padding(3, 4, 3, 4)
+        upCustomerPB.Name = "upCustomerPB"
+        upCustomerPB.Size = New Size(30, 29)
+        upCustomerPB.SizeMode = PictureBoxSizeMode.StretchImage
+        upCustomerPB.TabIndex = 49
+        upCustomerPB.TabStop = False
         ' 
-        ' TextBox14
+        ' downCustomerPB
         ' 
-        TextBox14.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox14.Location = New Point(483, 809)
-        TextBox14.Margin = New Padding(2, 3, 2, 3)
-        TextBox14.Name = "TextBox14"
-        TextBox14.Size = New Size(166, 27)
-        TextBox14.TabIndex = 40
+        downCustomerPB.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        downCustomerPB.BackColor = Color.Transparent
+        downCustomerPB.BackgroundImageLayout = ImageLayout.None
+        downCustomerPB.Image = CType(resources.GetObject("downCustomerPB.Image"), Image)
+        downCustomerPB.ImageLocation = ""
+        downCustomerPB.Location = New Point(41, 16)
+        downCustomerPB.Margin = New Padding(3, 4, 3, 4)
+        downCustomerPB.Name = "downCustomerPB"
+        downCustomerPB.Size = New Size(27, 28)
+        downCustomerPB.SizeMode = PictureBoxSizeMode.StretchImage
+        downCustomerPB.TabIndex = 48
+        downCustomerPB.TabStop = False
         ' 
-        ' TextBox13
+        ' Label24
         ' 
-        TextBox13.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox13.Location = New Point(479, 757)
-        TextBox13.Margin = New Padding(2, 3, 2, 3)
-        TextBox13.Name = "TextBox13"
-        TextBox13.Size = New Size(166, 27)
-        TextBox13.TabIndex = 39
+        Label24.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        Label24.AutoSize = True
+        Label24.Location = New Point(604, 677)
+        Label24.Margin = New Padding(2, 0, 2, 0)
+        Label24.Name = "Label24"
+        Label24.Size = New Size(43, 20)
+        Label24.TabIndex = 46
+        Label24.Text = "+000"
         ' 
-        ' TextBox12
+        ' telephoneNumberZipcodeTB
         ' 
-        TextBox12.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox12.Location = New Point(479, 705)
-        TextBox12.Margin = New Padding(2, 3, 2, 3)
-        TextBox12.Name = "TextBox12"
-        TextBox12.Size = New Size(166, 27)
-        TextBox12.TabIndex = 38
+        telephoneNumberZipcodeTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        telephoneNumberZipcodeTB.Location = New Point(597, 803)
+        telephoneNumberZipcodeTB.Margin = New Padding(2, 3, 2, 3)
+        telephoneNumberZipcodeTB.Name = "telephoneNumberZipcodeTB"
+        telephoneNumberZipcodeTB.Size = New Size(56, 27)
+        telephoneNumberZipcodeTB.TabIndex = 45
         ' 
-        ' TextBox11
+        ' phoneNumber1ZipCodeTB
         ' 
-        TextBox11.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox11.Location = New Point(283, 624)
-        TextBox11.Margin = New Padding(2, 3, 2, 3)
-        TextBox11.Name = "TextBox11"
-        TextBox11.Size = New Size(166, 27)
-        TextBox11.TabIndex = 37
+        phoneNumber1ZipCodeTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        phoneNumber1ZipCodeTB.Location = New Point(597, 700)
+        phoneNumber1ZipCodeTB.Margin = New Padding(2, 3, 2, 3)
+        phoneNumber1ZipCodeTB.Name = "phoneNumber1ZipCodeTB"
+        phoneNumber1ZipCodeTB.Size = New Size(56, 27)
+        phoneNumber1ZipCodeTB.TabIndex = 43
         ' 
-        ' TextBox10
+        ' ReferralNumberTB
         ' 
-        TextBox10.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox10.Location = New Point(466, 624)
-        TextBox10.Margin = New Padding(2, 3, 2, 3)
-        TextBox10.Name = "TextBox10"
-        TextBox10.Size = New Size(166, 27)
-        TextBox10.TabIndex = 36
+        ReferralNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        ReferralNumberTB.Location = New Point(89, 757)
+        ReferralNumberTB.Margin = New Padding(2, 3, 2, 3)
+        ReferralNumberTB.Name = "ReferralNumberTB"
+        ReferralNumberTB.Size = New Size(257, 27)
+        ReferralNumberTB.TabIndex = 42
         ' 
-        ' ComboBox2
+        ' FaxNumberTB
         ' 
-        ComboBox2.FormattingEnabled = True
-        ComboBox2.Location = New Point(363, 16)
-        ComboBox2.Margin = New Padding(2, 3, 2, 3)
-        ComboBox2.Name = "ComboBox2"
-        ComboBox2.Size = New Size(143, 28)
-        ComboBox2.TabIndex = 35
+        FaxNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        FaxNumberTB.Location = New Point(89, 703)
+        FaxNumberTB.Margin = New Padding(2, 3, 2, 3)
+        FaxNumberTB.Name = "FaxNumberTB"
+        FaxNumberTB.Size = New Size(257, 27)
+        FaxNumberTB.TabIndex = 41
         ' 
-        ' ComboBox1
+        ' telephoneNumberTB
         ' 
-        ComboBox1.FormattingEnabled = True
-        ComboBox1.Location = New Point(510, 16)
-        ComboBox1.Margin = New Padding(2, 3, 2, 3)
-        ComboBox1.Name = "ComboBox1"
-        ComboBox1.Size = New Size(143, 28)
-        ComboBox1.TabIndex = 34
+        telephoneNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        telephoneNumberTB.Location = New Point(427, 803)
+        telephoneNumberTB.Margin = New Padding(2, 3, 2, 3)
+        telephoneNumberTB.Name = "telephoneNumberTB"
+        telephoneNumberTB.Size = New Size(166, 27)
+        telephoneNumberTB.TabIndex = 40
         ' 
-        ' CheckBox2
+        ' phoneNumber2TB
         ' 
-        CheckBox2.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        CheckBox2.AutoSize = True
-        CheckBox2.Location = New Point(478, 556)
-        CheckBox2.Margin = New Padding(2, 3, 2, 3)
-        CheckBox2.Name = "CheckBox2"
-        CheckBox2.Size = New Size(165, 24)
-        CheckBox2.TabIndex = 33
-        CheckBox2.Text = "خاضع للرقم الضريبي "
-        CheckBox2.UseVisualStyleBackColor = True
+        phoneNumber2TB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        phoneNumber2TB.Location = New Point(426, 751)
+        phoneNumber2TB.Margin = New Padding(2, 3, 2, 3)
+        phoneNumber2TB.Name = "phoneNumber2TB"
+        phoneNumber2TB.Size = New Size(166, 27)
+        phoneNumber2TB.TabIndex = 39
         ' 
-        ' TextBox9
+        ' phoneNumber1TB
         ' 
-        TextBox9.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox9.Location = New Point(152, 467)
-        TextBox9.Margin = New Padding(2, 3, 2, 3)
-        TextBox9.Name = "TextBox9"
-        TextBox9.Size = New Size(257, 27)
-        TextBox9.TabIndex = 32
+        phoneNumber1TB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        phoneNumber1TB.Location = New Point(426, 701)
+        phoneNumber1TB.Margin = New Padding(2, 3, 2, 3)
+        phoneNumber1TB.Name = "phoneNumber1TB"
+        phoneNumber1TB.Size = New Size(166, 27)
+        phoneNumber1TB.TabIndex = 38
+        ' 
+        ' emailTB
+        ' 
+        emailTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        emailTB.Location = New Point(283, 624)
+        emailTB.Margin = New Padding(2, 3, 2, 3)
+        emailTB.Name = "emailTB"
+        emailTB.Size = New Size(166, 27)
+        emailTB.TabIndex = 37
+        ' 
+        ' VTRnumberTB
+        ' 
+        VTRnumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        VTRnumberTB.Location = New Point(466, 624)
+        VTRnumberTB.Margin = New Padding(2, 3, 2, 3)
+        VTRnumberTB.Name = "VTRnumberTB"
+        VTRnumberTB.Size = New Size(166, 27)
+        VTRnumberTB.TabIndex = 36
+        ' 
+        ' IdentityCommercialNameOptionCB
+        ' 
+        IdentityCommercialNameOptionCB.FormattingEnabled = True
+        IdentityCommercialNameOptionCB.Location = New Point(363, 16)
+        IdentityCommercialNameOptionCB.Margin = New Padding(2, 3, 2, 3)
+        IdentityCommercialNameOptionCB.Name = "IdentityCommercialNameOptionCB"
+        IdentityCommercialNameOptionCB.Size = New Size(143, 28)
+        IdentityCommercialNameOptionCB.TabIndex = 35
+        ' 
+        ' CustomerSupplierCB
+        ' 
+        CustomerSupplierCB.FormattingEnabled = True
+        CustomerSupplierCB.Location = New Point(510, 16)
+        CustomerSupplierCB.Margin = New Padding(2, 3, 2, 3)
+        CustomerSupplierCB.Name = "CustomerSupplierCB"
+        CustomerSupplierCB.Size = New Size(143, 28)
+        CustomerSupplierCB.TabIndex = 34
+        ' 
+        ' VTRAppliedCKB
+        ' 
+        VTRAppliedCKB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        VTRAppliedCKB.AutoSize = True
+        VTRAppliedCKB.Location = New Point(478, 556)
+        VTRAppliedCKB.Margin = New Padding(2, 3, 2, 3)
+        VTRAppliedCKB.Name = "VTRAppliedCKB"
+        VTRAppliedCKB.Size = New Size(165, 24)
+        VTRAppliedCKB.TabIndex = 33
+        VTRAppliedCKB.Text = "خاضع للرقم الضريبي "
+        VTRAppliedCKB.UseVisualStyleBackColor = True
+        ' 
+        ' CommercialNameTB
+        ' 
+        CommercialNameTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        CommercialNameTB.Location = New Point(152, 467)
+        CommercialNameTB.Margin = New Padding(2, 3, 2, 3)
+        CommercialNameTB.Name = "CommercialNameTB"
+        CommercialNameTB.Size = New Size(257, 27)
+        CommercialNameTB.TabIndex = 32
         ' 
         ' Label20
         ' 
@@ -469,14 +622,14 @@ Partial Class Customers
         Label20.TabIndex = 31
         Label20.Text = "الاسم التجاري"
         ' 
-        ' TextBox8
+        ' FormalNameTB
         ' 
-        TextBox8.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox8.Location = New Point(427, 467)
-        TextBox8.Margin = New Padding(2, 3, 2, 3)
-        TextBox8.Name = "TextBox8"
-        TextBox8.Size = New Size(212, 27)
-        TextBox8.TabIndex = 30
+        FormalNameTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        FormalNameTB.Location = New Point(427, 467)
+        FormalNameTB.Margin = New Padding(2, 3, 2, 3)
+        FormalNameTB.Name = "FormalNameTB"
+        FormalNameTB.Size = New Size(212, 27)
+        FormalNameTB.TabIndex = 30
         ' 
         ' AreaCB
         ' 
@@ -498,96 +651,87 @@ Partial Class Customers
         CountryCB.Size = New Size(319, 28)
         CountryCB.TabIndex = 28
         ' 
-        ' TextBox7
+        ' MangerNumberTB
         ' 
-        TextBox7.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox7.Location = New Point(427, 401)
-        TextBox7.Margin = New Padding(2, 3, 2, 3)
-        TextBox7.Name = "TextBox7"
-        TextBox7.Size = New Size(217, 27)
-        TextBox7.TabIndex = 27
+        MangerNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        MangerNumberTB.Location = New Point(427, 401)
+        MangerNumberTB.Margin = New Padding(2, 3, 2, 3)
+        MangerNumberTB.Name = "MangerNumberTB"
+        MangerNumberTB.Size = New Size(217, 27)
+        MangerNumberTB.TabIndex = 27
         ' 
-        ' TextBox6
+        ' ManagerIDTB
         ' 
-        TextBox6.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox6.Location = New Point(427, 297)
-        TextBox6.Margin = New Padding(2, 3, 2, 3)
-        TextBox6.Name = "TextBox6"
-        TextBox6.Size = New Size(217, 27)
-        TextBox6.TabIndex = 26
+        ManagerIDTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        ManagerIDTB.Location = New Point(427, 297)
+        ManagerIDTB.Margin = New Padding(2, 3, 2, 3)
+        ManagerIDTB.Name = "ManagerIDTB"
+        ManagerIDTB.Size = New Size(217, 27)
+        ManagerIDTB.TabIndex = 26
         ' 
-        ' TextBox5
+        ' ManagerTB
         ' 
-        TextBox5.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox5.Location = New Point(426, 347)
-        TextBox5.Margin = New Padding(2, 3, 2, 3)
-        TextBox5.Name = "TextBox5"
-        TextBox5.Size = New Size(217, 27)
-        TextBox5.TabIndex = 25
+        ManagerTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        ManagerTB.Location = New Point(426, 347)
+        ManagerTB.Margin = New Padding(2, 3, 2, 3)
+        ManagerTB.Name = "ManagerTB"
+        ManagerTB.Size = New Size(217, 27)
+        ManagerTB.TabIndex = 25
         ' 
-        ' RichTextBox1
+        ' AddressTA
         ' 
-        RichTextBox1.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        RichTextBox1.Location = New Point(5, 91)
-        RichTextBox1.Margin = New Padding(2, 3, 2, 3)
-        RichTextBox1.Name = "RichTextBox1"
-        RichTextBox1.Size = New Size(238, 143)
-        RichTextBox1.TabIndex = 24
-        RichTextBox1.Text = ""
+        AddressTA.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        AddressTA.Location = New Point(5, 91)
+        AddressTA.Margin = New Padding(2, 3, 2, 3)
+        AddressTA.Name = "AddressTA"
+        AddressTA.Size = New Size(238, 143)
+        AddressTA.TabIndex = 24
+        AddressTA.Text = ""
         ' 
-        ' TextBox4
+        ' NameInEnglishTB
         ' 
-        TextBox4.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        TextBox4.Location = New Point(250, 205)
-        TextBox4.Margin = New Padding(2, 3, 2, 3)
-        TextBox4.Name = "TextBox4"
-        TextBox4.Size = New Size(394, 27)
-        TextBox4.TabIndex = 23
+        NameInEnglishTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        NameInEnglishTB.Location = New Point(250, 205)
+        NameInEnglishTB.Margin = New Padding(2, 3, 2, 3)
+        NameInEnglishTB.Name = "NameInEnglishTB"
+        NameInEnglishTB.Size = New Size(394, 27)
+        NameInEnglishTB.TabIndex = 23
         ' 
-        ' CheckBox1
+        ' ActiveNoActiveCKB
         ' 
-        CheckBox1.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        CheckBox1.AutoSize = True
-        CheckBox1.Location = New Point(295, 147)
-        CheckBox1.Margin = New Padding(2, 3, 2, 3)
-        CheckBox1.Name = "CheckBox1"
-        CheckBox1.Size = New Size(141, 24)
-        CheckBox1.TabIndex = 22
-        CheckBox1.Text = "مفعل / غير مفعل"
-        CheckBox1.UseVisualStyleBackColor = True
+        ActiveNoActiveCKB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        ActiveNoActiveCKB.AutoSize = True
+        ActiveNoActiveCKB.Location = New Point(256, 147)
+        ActiveNoActiveCKB.Margin = New Padding(2, 3, 2, 3)
+        ActiveNoActiveCKB.Name = "ActiveNoActiveCKB"
+        ActiveNoActiveCKB.Size = New Size(141, 24)
+        ActiveNoActiveCKB.TabIndex = 22
+        ActiveNoActiveCKB.Text = "مفعل / غير مفعل"
+        ActiveNoActiveCKB.UseVisualStyleBackColor = True
         ' 
-        ' CustomerAccountNumber
+        ' CustomerAccountNumberTB
         ' 
-        CustomerAccountNumber.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        CustomerAccountNumber.Location = New Point(470, 147)
-        CustomerAccountNumber.Margin = New Padding(2, 3, 2, 3)
-        CustomerAccountNumber.Name = "CustomerAccountNumber"
-        CustomerAccountNumber.Size = New Size(174, 27)
-        CustomerAccountNumber.TabIndex = 21
+        CustomerAccountNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        CustomerAccountNumberTB.Location = New Point(401, 147)
+        CustomerAccountNumberTB.Margin = New Padding(2, 3, 2, 3)
+        CustomerAccountNumberTB.Name = "CustomerAccountNumberTB"
+        CustomerAccountNumberTB.Size = New Size(243, 27)
+        CustomerAccountNumberTB.TabIndex = 21
         ' 
-        ' AccountNumber
+        ' CommercialRecordAndIdentityTB
         ' 
-        AccountNumber.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        AccountNumber.Location = New Point(250, 85)
-        AccountNumber.Margin = New Padding(2, 3, 2, 3)
-        AccountNumber.Name = "AccountNumber"
-        AccountNumber.Size = New Size(191, 27)
-        AccountNumber.TabIndex = 20
-        ' 
-        ' identityNB
-        ' 
-        identityNB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        identityNB.Location = New Point(466, 85)
-        identityNB.Margin = New Padding(2, 3, 2, 3)
-        identityNB.Name = "identityNB"
-        identityNB.Size = New Size(179, 27)
-        identityNB.TabIndex = 19
+        CommercialRecordAndIdentityTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        CommercialRecordAndIdentityTB.Location = New Point(373, 85)
+        CommercialRecordAndIdentityTB.Margin = New Padding(2, 3, 2, 3)
+        CommercialRecordAndIdentityTB.Name = "CommercialRecordAndIdentityTB"
+        CommercialRecordAndIdentityTB.Size = New Size(272, 27)
+        CommercialRecordAndIdentityTB.TabIndex = 19
         ' 
         ' Label19
         ' 
         Label19.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label19.AutoSize = True
-        Label19.Location = New Point(342, 787)
+        Label19.Location = New Point(269, 735)
         Label19.Margin = New Padding(2, 0, 2, 0)
         Label19.Name = "Label19"
         Label19.Size = New Size(77, 20)
@@ -598,7 +742,7 @@ Partial Class Customers
         ' 
         Label18.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label18.AutoSize = True
-        Label18.Location = New Point(335, 733)
+        Label18.Location = New Point(262, 681)
         Label18.Margin = New Padding(2, 0, 2, 0)
         Label18.Name = "Label18"
         Label18.Size = New Size(86, 20)
@@ -609,7 +753,7 @@ Partial Class Customers
         ' 
         Label17.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label17.AutoSize = True
-        Label17.Location = New Point(567, 787)
+        Label17.Location = New Point(514, 781)
         Label17.Margin = New Padding(2, 0, 2, 0)
         Label17.Name = "Label17"
         Label17.Size = New Size(80, 20)
@@ -620,7 +764,7 @@ Partial Class Customers
         ' 
         Label16.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label16.AutoSize = True
-        Label16.Location = New Point(558, 735)
+        Label16.Location = New Point(502, 729)
         Label16.Margin = New Padding(2, 0, 2, 0)
         Label16.Name = "Label16"
         Label16.Size = New Size(91, 20)
@@ -631,7 +775,7 @@ Partial Class Customers
         ' 
         Label15.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label15.AutoSize = True
-        Label15.Location = New Point(559, 683)
+        Label15.Location = New Point(506, 679)
         Label15.Margin = New Padding(2, 0, 2, 0)
         Label15.Name = "Label15"
         Label15.Size = New Size(91, 20)
@@ -761,27 +905,16 @@ Partial Class Customers
         Label3.TabIndex = 2
         Label3.Text = "رقم حساب العميل"
         ' 
-        ' Label2
+        ' CommercialRecordAndIdentityLB
         ' 
-        Label2.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        Label2.AutoSize = True
-        Label2.Location = New Point(382, 63)
-        Label2.Margin = New Padding(2, 0, 2, 0)
-        Label2.Name = "Label2"
-        Label2.Size = New Size(81, 20)
-        Label2.TabIndex = 1
-        Label2.Text = "رقم السجيل"
-        ' 
-        ' Label1
-        ' 
-        Label1.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        Label1.AutoSize = True
-        Label1.Location = New Point(568, 63)
-        Label1.Margin = New Padding(2, 0, 2, 0)
-        Label1.Name = "Label1"
-        Label1.Size = New Size(74, 20)
-        Label1.TabIndex = 0
-        Label1.Text = "رقم الهويه"
+        CommercialRecordAndIdentityLB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        CommercialRecordAndIdentityLB.AutoSize = True
+        CommercialRecordAndIdentityLB.Location = New Point(568, 63)
+        CommercialRecordAndIdentityLB.Margin = New Padding(2, 0, 2, 0)
+        CommercialRecordAndIdentityLB.Name = "CommercialRecordAndIdentityLB"
+        CommercialRecordAndIdentityLB.Size = New Size(74, 20)
+        CommercialRecordAndIdentityLB.TabIndex = 0
+        CommercialRecordAndIdentityLB.Text = "رقم الهويه"
         ' 
         ' GroupBox5
         ' 
@@ -899,15 +1032,12 @@ Partial Class Customers
         ' 
         ' NotifyIcon1
         ' 
-        NotifyIcon1.BalloonTipText = "تم بنجاح"
-        NotifyIcon1.BalloonTipTitle = "تم مسح اختيار العميل بنجاح"
-        NotifyIcon1.Icon = CType(resources.GetObject("NotifyIcon1.Icon"), Icon)
         NotifyIcon1.Text = "NotifyIcon1"
         NotifyIcon1.Visible = True
         ' 
         ' Customers
         ' 
-        AutoScaleDimensions = New SizeF(8F, 20F)
+        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
         ClientSize = New Size(1622, 968)
@@ -929,6 +1059,9 @@ Partial Class Customers
         CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).EndInit()
         GroupBox3.ResumeLayout(False)
         GroupBox3.PerformLayout()
+        CType(SaveInfo, ComponentModel.ISupportInitialize).EndInit()
+        CType(upCustomerPB, ComponentModel.ISupportInitialize).EndInit()
+        CType(downCustomerPB, ComponentModel.ISupportInitialize).EndInit()
         GroupBox5.ResumeLayout(False)
         CType(PictureBox1, ComponentModel.ISupportInitialize).EndInit()
         GroupBox2.ResumeLayout(False)
@@ -948,7 +1081,6 @@ Partial Class Customers
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents AddAttachmentsBT As PictureBox
     Friend WithEvents PictureBox5 As PictureBox
-    Friend WithEvents NotifyIcon1 As NotifyIcon
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents GroupBox3 As GroupBox
     Friend WithEvents Label14 As Label
@@ -962,37 +1094,35 @@ Partial Class Customers
     Friend WithEvents Label5 As Label
     Friend WithEvents Label4 As Label
     Friend WithEvents Label3 As Label
-    Friend WithEvents Label2 As Label
-    Friend WithEvents Label1 As Label
-    Friend WithEvents CustomerAccountNumber As TextBox
-    Friend WithEvents AccountNumber As TextBox
-    Friend WithEvents identityNB As TextBox
+    Friend WithEvents CommercialRecordAndIdentityLB As Label
+    Friend WithEvents CustomerAccountNumberTB As TextBox
+    Friend WithEvents CommercialRecordAndIdentityTB As TextBox
     Friend WithEvents Label19 As Label
     Friend WithEvents Label18 As Label
     Friend WithEvents Label17 As Label
     Friend WithEvents Label16 As Label
     Friend WithEvents Label15 As Label
-    Friend WithEvents CheckBox1 As CheckBox
-    Friend WithEvents TextBox4 As TextBox
-    Friend WithEvents CheckBox2 As CheckBox
-    Friend WithEvents TextBox9 As TextBox
+    Friend WithEvents ActiveNoActiveCKB As CheckBox
+    Friend WithEvents NameInEnglishTB As TextBox
+    Friend WithEvents VTRAppliedCKB As CheckBox
+    Friend WithEvents CommercialNameTB As TextBox
     Friend WithEvents Label20 As Label
-    Friend WithEvents TextBox8 As TextBox
+    Friend WithEvents FormalNameTB As TextBox
     Friend WithEvents AreaCB As ComboBox
     Friend WithEvents CountryCB As ComboBox
-    Friend WithEvents TextBox7 As TextBox
-    Friend WithEvents TextBox6 As TextBox
-    Friend WithEvents TextBox5 As TextBox
-    Friend WithEvents RichTextBox1 As RichTextBox
-    Friend WithEvents TextBox16 As TextBox
-    Friend WithEvents TextBox15 As TextBox
-    Friend WithEvents TextBox14 As TextBox
-    Friend WithEvents TextBox13 As TextBox
-    Friend WithEvents TextBox12 As TextBox
-    Friend WithEvents TextBox11 As TextBox
-    Friend WithEvents TextBox10 As TextBox
-    Friend WithEvents ComboBox2 As ComboBox
-    Friend WithEvents ComboBox1 As ComboBox
+    Friend WithEvents MangerNumberTB As TextBox
+    Friend WithEvents ManagerIDTB As TextBox
+    Friend WithEvents ManagerTB As TextBox
+    Friend WithEvents AddressTA As RichTextBox
+    Friend WithEvents ReferralNumberTB As TextBox
+    Friend WithEvents FaxNumberTB As TextBox
+    Friend WithEvents telephoneNumberTB As TextBox
+    Friend WithEvents phoneNumber2TB As TextBox
+    Friend WithEvents phoneNumber1TB As TextBox
+    Friend WithEvents emailTB As TextBox
+    Friend WithEvents VTRnumberTB As TextBox
+    Friend WithEvents IdentityCommercialNameOptionCB As ComboBox
+    Friend WithEvents CustomerSupplierCB As ComboBox
     Friend WithEvents GroupBox6 As GroupBox
     Friend WithEvents CurrencyDGV As DataGridView
     Friend WithEvents GroupBox4 As GroupBox
@@ -1005,5 +1135,8 @@ Partial Class Customers
     Friend WithEvents CatogeryCB As ComboBox
     Friend WithEvents GroupsCB As ComboBox
     Friend WithEvents MarketCB As ComboBox
+    Friend WithEvents phoneNumber1ZipCodeTB As TextBox
+    Friend WithEvents Label24 As Label
+    Friend WithEvents NotifyIcon1 As NotifyIcon
 
 End Class

@@ -8,6 +8,11 @@ Public Class Customers
     Private currentSelectedCustomerId As Integer = 0
     Private currentSelectedCustomerName As String = ""
 
+    ' Variables for customer navigation
+    Private customerList As List(Of String) = New List(Of String)()
+    Private currentCustomerIndex As Integer = -1
+    Private isNavigating As Boolean = False
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ' Form initialization
         ' Setup NotifyIcon
@@ -15,8 +20,6 @@ Public Class Customers
         NotifyIcon1.Visible = True
         NotifyIcon1.Text = "العملاء"
 
-        ' Load countries into CountryCB
-        LoadCountries()
 
         ' Setup and load branches DataGridView
         SetupBranchesDataGridView()
@@ -31,10 +34,27 @@ Public Class Customers
         LoadCategoryData()
         LoadGroupsData()
         LoadTypeData()
+
+        ' Load countries into CountryCB
+        LoadCountries()
+        ' Set up AreaCB search functionality early
+        SetupAreaSearch()
+
+        ' Initialize Customer/Supplier ComboBoxes
+        InitializeCustomerSupplierComboBoxes()
+
+        ' Load customer list for navigation
+        LoadCustomerListForNavigation()
     End Sub
 
     Private Sub LoadCountries()
         Try
+            ' Safety check - ensure CountryCB is initialized
+            If CountryCB Is Nothing Then
+                MessageBox.Show("CountryCB is not initialized in LoadCountries!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
             ' Load countries from CMGADB2024 database
             Dim countriesTable As DataTable = dbConn.GetCountries()
 
@@ -67,7 +87,15 @@ Public Class Customers
             ' Store original data for filtering
             CountryCB.Tag = displayTable
 
-
+            ' Set Saudi Arabia as default selection
+            For i As Integer = 0 To displayTable.Rows.Count - 1
+                If displayTable.Rows(i)("countrycode").ToString() = "00966" Then
+                    CountryCB.SelectedIndex = i
+                    ' Manually trigger areas loading for Saudi Arabia
+                    LoadAreas("00966")
+                    Exit For
+                End If
+            Next
 
             ' Set up additional search functionality
             SetupCountrySearch()
@@ -85,11 +113,6 @@ Public Class Customers
             ' Load areas from CMGADB2024 database for specific country
             Dim areasTable As DataTable = dbConn.GetAreas(countryCode)
 
-            ' Debug: Show exact results from database
-            If areasTable.Rows.Count > 0 Then
-                Dim firstRow = areasTable.Rows(0)
-                MessageBox.Show($"Found {areasTable.Rows.Count} areas for '{countryCode}'{vbCrLf}First area: {firstRow("description")} - {firstRow("shortname")}", "Database Results", MessageBoxButtons.OK, MessageBoxIcon.Information)
-            End If
 
             ' Check if areas were found
             If areasTable.Rows.Count = 0 Then
@@ -210,6 +233,9 @@ Public Class Customers
     End Sub
 
     Private Sub CountryCB_KeyUp(sender As Object, e As KeyEventArgs)
+        ' Safety check - ensure CountryCB is initialized and form is loaded
+        If CountryCB Is Nothing OrElse Not Me.IsHandleCreated Then Return
+
         ' Handle key navigation in dropdown
         If e.KeyCode = Keys.Enter Then
             CountryCB.DroppedDown = False
@@ -221,6 +247,9 @@ Public Class Customers
     Private isUpdatingCountryData As Boolean = False
 
     Private Sub CountryCB_TextChanged(sender As Object, e As EventArgs)
+        ' Safety check - ensure CountryCB is initialized and form is loaded
+        If CountryCB Is Nothing OrElse Not Me.IsHandleCreated Then Return
+
         ' Prevent recursive calls when updating data
         If isUpdatingCountryData Then Return
 
@@ -243,15 +272,30 @@ Public Class Customers
             End If
 
             ' Sort data: matching items first, then non-matching items
+            ' Search by country code OR country name (Arabic or English)
             Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
-                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
-                                                                     Return displayText.Contains(searchText)
-                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
+                                                                     Try
+                                                                         Dim countryCode As String = If(row("countrycode") IsNot Nothing AndAlso row("countrycode") IsNot DBNull.Value, row("countrycode").ToString().ToLower(), "")
+                                                                         Dim displayText As String = If(row("DisplayText") IsNot Nothing AndAlso row("DisplayText") IsNot DBNull.Value, row("DisplayText").ToString().ToLower(), "")
+
+                                                                         ' Match by country code OR by any part of the display text
+                                                                         Return countryCode.Contains(searchText) OrElse displayText.Contains(searchText)
+                                                                     Catch
+                                                                         Return False
+                                                                     End Try
+                                                                 End Function).OrderBy(Function(row) If(row("DisplayText") IsNot Nothing, row("DisplayText").ToString(), ""))
 
             Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
-                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
-                                                                        Return Not displayText.Contains(searchText)
-                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
+                                                                        Try
+                                                                            Dim countryCode As String = If(row("countrycode") IsNot Nothing AndAlso row("countrycode") IsNot DBNull.Value, row("countrycode").ToString().ToLower(), "")
+                                                                            Dim displayText As String = If(row("DisplayText") IsNot Nothing AndAlso row("DisplayText") IsNot DBNull.Value, row("DisplayText").ToString().ToLower(), "")
+
+                                                                            ' No match by country code OR display text
+                                                                            Return Not (countryCode.Contains(searchText) OrElse displayText.Contains(searchText))
+                                                                        Catch
+                                                                            Return True
+                                                                        End Try
+                                                                    End Function).OrderBy(Function(row) If(row("DisplayText") IsNot Nothing, row("DisplayText").ToString(), ""))
 
             ' Create reordered DataTable with matches first
             Dim reorderedTable As DataTable = originalData.Clone()
@@ -267,17 +311,19 @@ Public Class Customers
             Next
 
             ' Update ComboBox with reordered data without changing text
-            isUpdatingCountryData = True
-            Dim userText As String = CountryCB.Text
-            CountryCB.DataSource = reorderedTable
-            CountryCB.Text = userText
-            CountryCB.SelectionStart = currentCursorPosition
-            CountryCB.SelectionLength = 0
-            ' Only open dropdown if CountryCB has focus and user is actively typing
-            If CountryCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
-                CountryCB.DroppedDown = True
+            If CountryCB IsNot Nothing Then
+                isUpdatingCountryData = True
+                Dim userText As String = CountryCB.Text
+                CountryCB.DataSource = reorderedTable
+                CountryCB.Text = userText
+                CountryCB.SelectionStart = currentCursorPosition
+                CountryCB.SelectionLength = 0
+                ' Only open dropdown if CountryCB has focus and user is actively typing
+                If CountryCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
+                    CountryCB.DroppedDown = True
+                End If
+                isUpdatingCountryData = False
             End If
-            isUpdatingCountryData = False
 
         Catch ex As Exception
             isUpdatingCountryData = False
@@ -703,6 +749,12 @@ Public Class Customers
     End Sub
 
     Private Sub SetupBranchesDataGridView()
+        ' Safety check - ensure BranchesInfoDGV is initialized
+        If BranchesInfoDGV Is Nothing Then
+            MessageBox.Show("BranchesInfoDGV is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
+
         ' Clear existing columns
         BranchesInfoDGV.Columns.Clear()
 
@@ -897,6 +949,12 @@ Public Class Customers
     End Sub
 
     Private Sub SetupCurrencyDataGridView()
+        ' Safety check - ensure CurrencyDGV is initialized
+        If CurrencyDGV Is Nothing Then
+            MessageBox.Show("CurrencyDGV is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return
+        End If
+
         ' Clear existing columns
         CurrencyDGV.Columns.Clear()
 
@@ -972,6 +1030,12 @@ Public Class Customers
 
     Private Sub LoadMarketData()
         Try
+            ' Safety check - ensure MarketCB is initialized
+            If MarketCB Is Nothing Then
+                MessageBox.Show("MarketCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
             ' Load market data from CMGADB2024 database
             Dim marketTable As DataTable = dbConn.GetMarketData()
 
@@ -1015,6 +1079,12 @@ Public Class Customers
 
     Private Sub LoadCategoryData()
         Try
+            ' Safety check - ensure CatogeryCB is initialized
+            If CatogeryCB Is Nothing Then
+                MessageBox.Show("CatogeryCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
             ' Load category data from CMGADB2024 database
             Dim categoryTable As DataTable = dbConn.GetCategoryData()
 
@@ -1058,6 +1128,12 @@ Public Class Customers
 
     Private Sub LoadGroupsData()
         Try
+            ' Safety check - ensure GroupsCB is initialized
+            If GroupsCB Is Nothing Then
+                MessageBox.Show("GroupsCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
             ' Load groups data from CMGADB2024 database
             Dim groupsTable As DataTable = dbConn.GetGroupsData()
 
@@ -1101,6 +1177,12 @@ Public Class Customers
 
     Private Sub LoadTypeData()
         Try
+            ' Safety check - ensure TypeCB is initialized
+            If TypeCB Is Nothing Then
+                MessageBox.Show("TypeCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
             ' Load type data from CMGADB2024 database
             Dim typeTable As DataTable = dbConn.GetTypeData()
 
@@ -1268,11 +1350,6 @@ Public Class Customers
         currentSelectedCustomerId = 0
         currentSelectedCustomerName = ""
 
-        ' Show NotifyIcon balloon
-        NotifyIcon1.BalloonTipTitle = "تم بنجاح"
-        NotifyIcon1.BalloonTipText = "تم مسح اختيار العميل بنجاح!"
-        NotifyIcon1.BalloonTipIcon = ToolTipIcon.Info
-        NotifyIcon1.ShowBalloonTip(1000)
 
         ' Optional: Auto-closing popup window (like MessageBox)
         Dim toast As New AutoCloseMessageForm("تم مسح اختيار العميل بنجاح  ↻", 1000)
@@ -1316,6 +1393,449 @@ Public Class Customers
 
     Private Sub TypeCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles TypeCB.SelectedIndexChanged
 
+    End Sub
+
+    ' =====================Customer/Supplier Management========================
+
+    Private Sub InitializeCustomerSupplierComboBoxes()
+        Try
+            ' Initialize CustomerSupplierCB
+            If CustomerSupplierCB IsNot Nothing Then
+                CustomerSupplierCB.Items.Clear()
+                CustomerSupplierCB.Items.Add("Customer")
+                CustomerSupplierCB.Items.Add("Supplier")
+                CustomerSupplierCB.SelectedIndex = 0 ' Default to Customer
+            End If
+
+            ' Initialize IdentityCommercialNameOptionCB
+            If IdentityCommercialNameOptionCB IsNot Nothing Then
+                IdentityCommercialNameOptionCB.Items.Clear()
+                IdentityCommercialNameOptionCB.Items.Add("فردي") ' Individual
+                IdentityCommercialNameOptionCB.Items.Add("تجاري") ' Commercial
+                IdentityCommercialNameOptionCB.SelectedIndex = 0 ' Default to Individual
+
+                ' Set initial label
+                UpdateIdentityLabel("فردي")
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تهيئة قوائم العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub CustomerSupplierCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CustomerSupplierCB.SelectedIndexChanged
+        ' Handle customer/supplier type selection
+        Try
+            If CustomerSupplierCB.SelectedItem IsNot Nothing Then
+                ' Could add any specific logic here based on customer vs supplier selection
+                ' For now, the main difference is in the code generation (C vs S prefix)
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديد نوع العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub IdentityCommercialNameOptionCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles IdentityCommercialNameOptionCB.SelectedIndexChanged
+        ' Handle identity type selection and update label dynamically
+        Try
+            If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
+                Dim selectedType As String = IdentityCommercialNameOptionCB.SelectedItem.ToString()
+                UpdateIdentityLabel(selectedType)
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديد نوع الهوية: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub UpdateIdentityLabel(identityType As String)
+        Try
+            If CommercialRecordAndIdentityLB IsNot Nothing Then
+                If identityType = "فردي" Then
+                    CommercialRecordAndIdentityLB.Text = "رقم الهوية"
+                ElseIf identityType = "تجاري" Then
+                    CommercialRecordAndIdentityLB.Text = "رقم السجل"
+                End If
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديث تسمية الهوية: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Save Customer/Supplier data
+    Public Sub SaveCustomerSupplierData()
+        Try
+            ' Create customer data object
+            Dim customerData As New CustomerSupplierData()
+
+            ' Generate code if this is a new customer
+            If String.IsNullOrEmpty(customerData.ExistingCode) Then
+                Dim isCustomer As Boolean = CustomerSupplierCB.SelectedItem.ToString() = "Customer"
+                customerData.Code = dbConn.GenerateNextCode(isCustomer)
+            Else
+                customerData.Code = customerData.ExistingCode
+            End If
+
+            ' Map form data to customer data object
+            customerData.CustomerType = If(CustomerSupplierCB.SelectedItem IsNot Nothing, CustomerSupplierCB.SelectedItem.ToString(), "Customer")
+            customerData.EnglishName = If(NameInEnglishTB IsNot Nothing, NameInEnglishTB.Text.Trim(), "")
+            customerData.ArabicName = If(FormalNameTB IsNot Nothing, FormalNameTB.Text.Trim(), "")
+            customerData.CommercialName = If(CommercialNameTB IsNot Nothing, CommercialNameTB.Text.Trim(), "")
+            customerData.Address = If(AddressTA IsNot Nothing, AddressTA.Text.Trim(), "")
+            customerData.Manager = If(ManagerTB IsNot Nothing, ManagerTB.Text.Trim(), "")
+            customerData.ManagerID = If(ManagerIDTB IsNot Nothing, ManagerIDTB.Text.Trim(), "")
+            customerData.ManagerNumber = If(MangerNumberTB IsNot Nothing, MangerNumberTB.Text.Trim(), "")
+
+            ' Get selected country and area
+            If CountryCB.SelectedItem IsNot Nothing Then
+                Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
+                customerData.Country = selectedCountry("countrycode").ToString()
+                customerData.CountryName = selectedCountry("DisplayText").ToString()
+            End If
+
+            If AreaCB.SelectedItem IsNot Nothing Then
+                Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
+                customerData.Area = selectedArea("description").ToString()
+            End If
+
+            customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
+            customerData.Email = If(emailTB IsNot Nothing, emailTB.Text.Trim(), "")
+            customerData.MobileCountryCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "")
+            customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
+            customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
+
+            ' Handle identity type and corresponding field mapping
+            If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
+                customerData.IdentityType = IdentityCommercialNameOptionCB.SelectedItem.ToString()
+
+                If customerData.IdentityType = "فردي" Then
+                    ' Individual - save to fld_indvl_id_no
+                    customerData.IndividualID = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
+                    customerData.CommercialRecord = ""
+                ElseIf customerData.IdentityType = "تجاري" Then
+                    ' Commercial - save to fld_cr_no
+                    customerData.CommercialRecord = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
+                    customerData.IndividualID = ""
+                End If
+            End If
+
+            ' Save to database
+            Dim success As Boolean = dbConn.SaveCustomerSupplier(customerData)
+
+            If success Then
+                MessageBox.Show($"تم حفظ بيانات {If(customerData.IsCustomer, "العميل", "المورد")} بنجاح!" & vbCrLf & $"الكود: {customerData.Code}", "نجح الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+                ' Clear form after successful save (optional)
+                ' ClearForm()
+            Else
+                MessageBox.Show("فشل في حفظ البيانات. يرجى المحاولة مرة أخرى.", "خطأ في الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Load existing customer/supplier data by code
+    Public Sub LoadCustomerSupplierData(code As String)
+        Try
+            Dim customerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(code)
+
+            If Not String.IsNullOrEmpty(customerData.Code) Then
+                ' Populate form with loaded data
+                If CustomerSupplierCB IsNot Nothing Then
+                    CustomerSupplierCB.SelectedItem = customerData.CustomerType
+                End If
+
+                If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = customerData.EnglishName
+                If FormalNameTB IsNot Nothing Then FormalNameTB.Text = customerData.ArabicName
+                If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
+                If AddressTA IsNot Nothing Then AddressTA.Text = customerData.Address
+                If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
+                If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = customerData.ManagerID
+                If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = customerData.ManagerNumber
+                If VTRnumberTB IsNot Nothing Then VTRnumberTB.Text = customerData.VATNumber
+                If emailTB IsNot Nothing Then emailTB.Text = customerData.Email
+                If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = customerData.MobileCountryCode
+                If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
+                If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
+
+                ' Set identity type and corresponding field
+                If IdentityCommercialNameOptionCB IsNot Nothing Then
+                    IdentityCommercialNameOptionCB.SelectedItem = customerData.IdentityType
+                    UpdateIdentityLabel(customerData.IdentityType)
+
+                    If CommercialRecordAndIdentityTB IsNot Nothing Then
+                        If customerData.IsIndividual Then
+                            CommercialRecordAndIdentityTB.Text = customerData.IndividualID
+                        ElseIf customerData.IsCommercial Then
+                            CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                        End If
+                    End If
+                End If
+
+                ' TODO: Set CountryCB and AreaCB based on loaded data
+                ' This would require searching the ComboBox items for matching values
+
+                MessageBox.Show($"تم تحميل بيانات {If(customerData.IsCustomer, "العميل", "المورد")} بنجاح!", "تم التحميل", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Else
+                MessageBox.Show("لم يتم العثور على بيانات بالكود المحدد.", "غير موجود", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Clear form (helper method)
+    Private Sub ClearForm()
+        Try
+            ' Clear all text boxes
+            If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Clear()
+            If FormalNameTB IsNot Nothing Then FormalNameTB.Clear()
+            If CommercialNameTB IsNot Nothing Then CommercialNameTB.Clear()
+            If AddressTA IsNot Nothing Then AddressTA.Clear()
+            If ManagerTB IsNot Nothing Then ManagerTB.Clear()
+            If ManagerIDTB IsNot Nothing Then ManagerIDTB.Clear()
+            If MangerNumberTB IsNot Nothing Then MangerNumberTB.Clear()
+            If VTRnumberTB IsNot Nothing Then VTRnumberTB.Clear()
+            If emailTB IsNot Nothing Then emailTB.Clear()
+            If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Clear()
+            If FaxNumberTB IsNot Nothing Then FaxNumberTB.Clear()
+            If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Clear()
+            If CommercialRecordAndIdentityTB IsNot Nothing Then CommercialRecordAndIdentityTB.Clear()
+
+            ' Reset ComboBoxes to default
+            If CustomerSupplierCB IsNot Nothing Then CustomerSupplierCB.SelectedIndex = 0
+            If IdentityCommercialNameOptionCB IsNot Nothing Then
+                IdentityCommercialNameOptionCB.SelectedIndex = 0
+                UpdateIdentityLabel("فردي")
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في مسح النموذج: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' =====================Navigation and Save Methods========================
+    
+    Private Sub SaveInfo_Click(sender As Object, e As EventArgs) Handles SaveInfo.Click
+        ' Save current customer/supplier data
+        SaveCustomerSupplierData()
+        
+        ' Refresh customer list after save to include any new records
+        LoadCustomerListForNavigation()
+    End Sub
+    
+    Private Sub downCustomerPB_Click(sender As Object, e As EventArgs) Handles downCustomerPB.Click
+        ' Navigate to next customer
+        NavigateToNextCustomer()
+    End Sub
+
+    Private Sub upCustomerPB_Click(sender As Object, e As EventArgs) Handles upCustomerPB.Click
+        ' Navigate to previous customer
+        NavigateToPreviousCustomer()
+    End Sub
+    
+    Private Sub LoadCustomerListForNavigation()
+        Try
+            ' Load all customer/supplier codes from database
+            customerList = dbConn.GetAllCustomerSupplierCodes()
+            
+            ' If we have customers, load the first one
+            If customerList.Count > 0 Then
+                currentCustomerIndex = 0
+                LoadCustomerByIndex(currentCustomerIndex)
+            Else
+                currentCustomerIndex = -1
+                ClearForm()
+            End If
+            
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل قائمة العملاء: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+    
+    Private Sub NavigateToNextCustomer()
+        Try
+            If customerList.Count = 0 Then
+                MessageBox.Show("لا توجد سجلات عملاء/موردين.", "لا توجد سجلات", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Return
+            End If
+            
+            ' Move to next customer (with wrapping)
+            currentCustomerIndex += 1
+            If currentCustomerIndex >= customerList.Count Then
+                currentCustomerIndex = 0 ' Wrap to first customer
+            End If
+            
+            LoadCustomerByIndex(currentCustomerIndex)
+            
+        Catch ex As Exception
+            MessageBox.Show("خطأ في الانتقال للعميل التالي: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+    
+    Private Sub NavigateToPreviousCustomer()
+        Try
+            If customerList.Count = 0 Then
+                MessageBox.Show("لا توجد سجلات عملاء/موردين.", "لا توجد سجلات", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Return
+            End If
+            
+            ' Move to previous customer (with wrapping)
+            currentCustomerIndex -= 1
+            If currentCustomerIndex < 0 Then
+                currentCustomerIndex = customerList.Count - 1 ' Wrap to last customer
+            End If
+            
+            LoadCustomerByIndex(currentCustomerIndex)
+            
+        Catch ex As Exception
+            MessageBox.Show("خطأ في الانتقال للعميل السابق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+    
+    Private Sub LoadCustomerByIndex(index As Integer)
+        Try
+            If index < 0 OrElse index >= customerList.Count Then
+                Return
+            End If
+            
+            isNavigating = True
+            Dim customerCode As String = customerList(index)
+            
+            ' Load customer data
+            Dim customerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(customerCode)
+            
+            If Not String.IsNullOrEmpty(customerData.Code) Then
+                ' Populate form with loaded data (without showing success message)
+                If CustomerSupplierCB IsNot Nothing Then
+                    CustomerSupplierCB.SelectedItem = customerData.CustomerType
+                End If
+                
+                If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = customerData.EnglishName
+                If FormalNameTB IsNot Nothing Then FormalNameTB.Text = customerData.ArabicName
+                If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
+                If AddressTA IsNot Nothing Then AddressTA.Text = customerData.Address
+                If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
+                If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = customerData.ManagerID
+                If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = customerData.ManagerNumber
+                If VTRnumberTB IsNot Nothing Then VTRnumberTB.Text = customerData.VATNumber
+                If emailTB IsNot Nothing Then emailTB.Text = customerData.Email
+                If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = customerData.MobileCountryCode
+                If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
+                If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
+                
+                ' Set identity type and corresponding field
+                If IdentityCommercialNameOptionCB IsNot Nothing Then
+                    IdentityCommercialNameOptionCB.SelectedItem = customerData.IdentityType
+                    UpdateIdentityLabel(customerData.IdentityType)
+                    
+                    If CommercialRecordAndIdentityTB IsNot Nothing Then
+                        If customerData.IsIndividual Then
+                            CommercialRecordAndIdentityTB.Text = customerData.IndividualID
+                        ElseIf customerData.IsCommercial Then
+                            CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                        End If
+                    End If
+                End If
+            End If
+            
+            ' Update current selected customer info
+            currentSelectedCustomerName = customerCode
+            
+            ' Show navigation info in title
+            Me.Text = $"العملاء - {index + 1} من {customerList.Count} - {customerCode}"
+            
+            isNavigating = False
+            
+        Catch ex As Exception
+            isNavigating = False
+            MessageBox.Show("خطأ في تحميل بيانات العميل: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+    
+    ' Override the existing SaveCustomerSupplierData method to handle navigation context
+    Public Shadows Sub SaveCustomerSupplierData()
+        Try
+            ' Create customer data object
+            Dim customerData As New CustomerSupplierData()
+            
+            ' Check if we're updating an existing customer or creating new one
+            If currentCustomerIndex >= 0 AndAlso currentCustomerIndex < customerList.Count Then
+                ' We're updating an existing customer
+                customerData.ExistingCode = customerList(currentCustomerIndex)
+                customerData.IsUpdate = True
+                customerData.Code = customerData.ExistingCode
+            Else
+                ' We're creating a new customer
+                Dim isCustomer As Boolean = CustomerSupplierCB.SelectedItem?.ToString() = "Customer"
+                customerData.Code = dbConn.GenerateNextCode(isCustomer)
+                customerData.IsUpdate = False
+            End If
+            
+            ' Map form data to customer data object (same as before)
+            customerData.CustomerType = If(CustomerSupplierCB.SelectedItem IsNot Nothing, CustomerSupplierCB.SelectedItem.ToString(), "Customer")
+            customerData.EnglishName = If(NameInEnglishTB IsNot Nothing, NameInEnglishTB.Text.Trim(), "")
+            customerData.ArabicName = If(FormalNameTB IsNot Nothing, FormalNameTB.Text.Trim(), "")
+            customerData.CommercialName = If(CommercialNameTB IsNot Nothing, CommercialNameTB.Text.Trim(), "")
+            customerData.Address = If(AddressTA IsNot Nothing, AddressTA.Text.Trim(), "")
+            customerData.Manager = If(ManagerTB IsNot Nothing, ManagerTB.Text.Trim(), "")
+            customerData.ManagerID = If(ManagerIDTB IsNot Nothing, ManagerIDTB.Text.Trim(), "")
+            customerData.ManagerNumber = If(MangerNumberTB IsNot Nothing, MangerNumberTB.Text.Trim(), "")
+            
+            ' Get selected country and area
+            If CountryCB.SelectedItem IsNot Nothing Then
+                Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
+                customerData.Country = selectedCountry("countrycode").ToString()
+                customerData.CountryName = selectedCountry("DisplayText").ToString()
+            End If
+            
+            If AreaCB.SelectedItem IsNot Nothing Then
+                Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
+                customerData.Area = selectedArea("description").ToString()
+            End If
+            
+            customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
+            customerData.Email = If(emailTB IsNot Nothing, emailTB.Text.Trim(), "")
+            customerData.MobileCountryCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "")
+            customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
+            customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
+            
+            ' Handle identity type and corresponding field mapping
+            If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
+                customerData.IdentityType = IdentityCommercialNameOptionCB.SelectedItem.ToString()
+                
+                If customerData.IdentityType = "فردي" Then
+                    ' Individual - save to fld_indvl_id_no
+                    customerData.IndividualID = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
+                    customerData.CommercialRecord = ""
+                ElseIf customerData.IdentityType = "تجاري" Then
+                    ' Commercial - save to fld_cr_no
+                    customerData.CommercialRecord = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
+                    customerData.IndividualID = ""
+                End If
+            End If
+            
+            ' Save to database
+            Dim success As Boolean = dbConn.SaveCustomerSupplier(customerData)
+            
+            If success Then
+                MessageBox.Show($"تم حفظ بيانات {If(customerData.IsCustomer, "العميل", "المورد")} بنجاح!" & vbCrLf & $"الكود: {customerData.Code}", "نجح الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                
+                ' If this was a new customer, add it to the list and navigate to it
+                If Not customerData.IsUpdate Then
+                    customerList.Add(customerData.Code)
+                    currentCustomerIndex = customerList.Count - 1
+                    Me.Text = $"العملاء - {currentCustomerIndex + 1} من {customerList.Count} - {customerData.Code}"
+                End If
+            Else
+                MessageBox.Show("فشل في حفظ البيانات. يرجى المحاولة مرة أخرى.", "خطأ في الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End If
+            
+        Catch ex As Exception
+            MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 End Class
 

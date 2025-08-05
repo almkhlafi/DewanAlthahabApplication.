@@ -4,7 +4,9 @@
       "Bash(dotnet restore:*)",
       "Bash(dotnet build)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet run:*)"
+      "Bash(dotnet run:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout 5 dotnet run --project Documents.vbproj)"
     ],
     "deny": []
   }
