@@ -22,81 +22,20 @@ Partial Class Customers
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        components = New ComponentModel.Container()
-        Dim GroupBox1 As GroupBox
-        Dim GroupBox6 As GroupBox
-        Dim CurrencyDGV As DataGridView
         Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim GroupBox4 As GroupBox
-        Dim Label23 As Label
-        Dim Label22 As Label
-        Dim Label21 As Label
-        Dim Label12 As Label
-        Dim TypeCB As ComboBox
-        Dim CatogeryCB As ComboBox
-        Dim GroupsCB As ComboBox
-        Dim MarketCB As ComboBox
-        Dim BranchesInfoDGV As DataGridView
-        Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim GroupBox3 As GroupBox
-        Dim downCustomerPB As PictureBox
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
-        Dim upCustomerPB As PictureBox
-        Dim SaveInfo As PictureBox
-        Dim Label24 As Label
-        Dim telephoneNumberZipcodeTB As TextBox
-        Dim phoneNumber1ZipCodeTB As TextBox
-        Dim ReferralNumberTB As TextBox
-        Dim FaxNumberTB As TextBox
-        Dim telephoneNumberTB As TextBox
-        Dim phoneNumber2TB As TextBox
-        Dim phoneNumber1TB As TextBox
-        Dim emailTB As TextBox
-        Dim VTRnumberTB As TextBox
-        Dim IdentityCommercialNameOptionCB As ComboBox
-        Dim CustomerSupplierCB As ComboBox
-        Dim VTRAppliedCKB As CheckBox
-        Dim CommercialNameTB As TextBox
-        Dim Label20 As Label
-        Dim FormalNameTB As TextBox
-        Dim AreaCB As ComboBox
-        Dim CountryCB As ComboBox
-        Dim MangerNumberTB As TextBox
-        Dim ManagerIDTB As TextBox
-        Dim ManagerTB As TextBox
-        Dim AddressTA As RichTextBox
-        Dim NameInEnglishTB As TextBox
-        Dim ActiveNoActiveCKB As CheckBox
-        Dim CustomerAccountNumberTB As TextBox
-        Dim CommercialRecordAndIdentityTB As TextBox
-        Dim Label19 As Label
-        Dim Label18 As Label
-        Dim Label17 As Label
-        Dim Label16 As Label
-        Dim Label15 As Label
-        Dim Label14 As Label
-        Dim Label13 As Label
-        Dim Label11 As Label
-        Dim Label10 As Label
-        Dim Label9 As Label
-        Dim Label8 As Label
-        Dim Label7 As Label
-        Dim Label6 As Label
-        Dim Label5 As Label
-        Dim Label4 As Label
-        Dim Label3 As Label
-        Dim CommercialRecordAndIdentityLB As Label
-        Dim GroupBox5 As GroupBox
-        Dim PictureBox1 As PictureBox
-        Dim GroupBox2 As GroupBox
-        Dim Delegations As PictureBox
-        Dim DocumentsSettings As PictureBox
-        Dim PictureBox3 As PictureBox
-        Dim AddAttachmentsBT As PictureBox
-        Dim PictureBox5 As PictureBox
-        NotifyIcon1 = New NotifyIcon(components)
+
+        MarketCB = New ComboBox()
+        BranchesInfoDGV = New DataGridView()
+        TypeCB = New ComboBox()
+        CatogeryCB = New ComboBox()
+        GroupsCB = New ComboBox()
+        AddressTA = New RichTextBox()
+        downCustomersPB = New PictureBox()
+        UpCustomersPB = New PictureBox()
+        CountryCB = New ComboBox()
+        AreaCB = New ComboBox()
         GroupBox1 = New GroupBox()
         GroupBox6 = New GroupBox()
         CurrencyDGV = New DataGridView()
@@ -105,14 +44,7 @@ Partial Class Customers
         Label22 = New Label()
         Label21 = New Label()
         Label12 = New Label()
-        TypeCB = New ComboBox()
-        CatogeryCB = New ComboBox()
-        GroupsCB = New ComboBox()
-        MarketCB = New ComboBox()
-        BranchesInfoDGV = New DataGridView()
         GroupBox3 = New GroupBox()
-        downCustomerPB = New PictureBox()
-        upCustomerPB = New PictureBox()
         SaveInfo = New PictureBox()
         Label24 = New Label()
         telephoneNumberZipcodeTB = New TextBox()
@@ -130,12 +62,9 @@ Partial Class Customers
         CommercialNameTB = New TextBox()
         Label20 = New Label()
         FormalNameTB = New TextBox()
-        AreaCB = New ComboBox()
-        CountryCB = New ComboBox()
         MangerNumberTB = New TextBox()
         ManagerIDTB = New TextBox()
         ManagerTB = New TextBox()
-        AddressTA = New RichTextBox()
         NameInEnglishTB = New TextBox()
         ActiveNoActiveCKB = New CheckBox()
         CustomerAccountNumberTB = New TextBox()
@@ -162,7 +91,7 @@ Partial Class Customers
         GroupBox2 = New GroupBox()
         Delegations = New PictureBox()
         DocumentsSettings = New PictureBox()
-        PictureBox3 = New PictureBox()
+        refreshPB = New PictureBox()
         AddAttachmentsBT = New PictureBox()
         PictureBox5 = New PictureBox()
         GroupBox1.SuspendLayout()
@@ -171,15 +100,15 @@ Partial Class Customers
         GroupBox4.SuspendLayout()
         CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox3.SuspendLayout()
-        CType(downCustomerPB, ComponentModel.ISupportInitialize).BeginInit()
-        CType(upCustomerPB, ComponentModel.ISupportInitialize).BeginInit()
+        CType(downCustomersPB, ComponentModel.ISupportInitialize).BeginInit()
+        CType(UpCustomersPB, ComponentModel.ISupportInitialize).BeginInit()
         CType(SaveInfo, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox5.SuspendLayout()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox2.SuspendLayout()
         CType(Delegations, ComponentModel.ISupportInitialize).BeginInit()
         CType(DocumentsSettings, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox3, ComponentModel.ISupportInitialize).BeginInit()
+        CType(refreshPB, ComponentModel.ISupportInitialize).BeginInit()
         CType(AddAttachmentsBT, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox5, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
@@ -242,6 +171,8 @@ Partial Class Customers
         ' GroupBox4
         ' 
         GroupBox4.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left
+        GroupBox4.Controls.Add(MarketCB)
+        GroupBox4.Controls.Add(BranchesInfoDGV)
         GroupBox4.Controls.Add(Label23)
         GroupBox4.Controls.Add(Label22)
         GroupBox4.Controls.Add(Label21)
@@ -249,8 +180,6 @@ Partial Class Customers
         GroupBox4.Controls.Add(TypeCB)
         GroupBox4.Controls.Add(CatogeryCB)
         GroupBox4.Controls.Add(GroupsCB)
-        GroupBox4.Controls.Add(MarketCB)
-        GroupBox4.Controls.Add(BranchesInfoDGV)
         GroupBox4.ForeColor = SystemColors.Highlight
         GroupBox4.Location = New Point(6, 197)
         GroupBox4.Name = "GroupBox4"
@@ -258,6 +187,24 @@ Partial Class Customers
         GroupBox4.TabIndex = 4
         GroupBox4.TabStop = False
         GroupBox4.Text = "معلومات الفرع"
+        ' 
+        ' MarketCB
+        ' 
+        MarketCB.FormattingEnabled = True
+        MarketCB.Location = New Point(435, 486)
+        MarketCB.Name = "MarketCB"
+        MarketCB.Size = New Size(393, 28)
+        MarketCB.TabIndex = 46
+        ' 
+        ' BranchesInfoDGV
+        ' 
+        BranchesInfoDGV.BackgroundColor = SystemColors.ButtonHighlight
+        BranchesInfoDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        BranchesInfoDGV.Location = New Point(6, 26)
+        BranchesInfoDGV.Name = "BranchesInfoDGV"
+        BranchesInfoDGV.RowHeadersWidth = 51
+        BranchesInfoDGV.Size = New Size(861, 415)
+        BranchesInfoDGV.TabIndex = 44
         ' 
         ' Label23
         ' 
@@ -339,49 +286,14 @@ Partial Class Customers
         GroupsCB.Size = New Size(393, 28)
         GroupsCB.TabIndex = 37
         ' 
-        ' MarketCB
-        ' 
-        MarketCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        MarketCB.FormattingEnabled = True
-        MarketCB.Location = New Point(435, 473)
-        MarketCB.Margin = New Padding(2, 3, 2, 3)
-        MarketCB.Name = "MarketCB"
-        MarketCB.Size = New Size(393, 28)
-        MarketCB.TabIndex = 36
-        ' 
-        ' BranchesInfoDGV
-        ' 
-        BranchesInfoDGV.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
-        BranchesInfoDGV.BackgroundColor = SystemColors.ButtonHighlight
-        DataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle3.BackColor = SystemColors.Control
-        DataGridViewCellStyle3.Font = New Font("Segoe UI", 9.0F)
-        DataGridViewCellStyle3.ForeColor = SystemColors.WindowText
-        DataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle3.WrapMode = DataGridViewTriState.True
-        BranchesInfoDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle3
-        BranchesInfoDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        DataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle4.BackColor = SystemColors.Window
-        DataGridViewCellStyle4.Font = New Font("Segoe UI", 9.0F)
-        DataGridViewCellStyle4.ForeColor = SystemColors.Highlight
-        DataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle4.WrapMode = DataGridViewTriState.False
-        BranchesInfoDGV.DefaultCellStyle = DataGridViewCellStyle4
-        BranchesInfoDGV.Location = New Point(6, 24)
-        BranchesInfoDGV.Name = "BranchesInfoDGV"
-        BranchesInfoDGV.ReadOnly = True
-        BranchesInfoDGV.RowHeadersWidth = 51
-        BranchesInfoDGV.Size = New Size(861, 386)
-        BranchesInfoDGV.TabIndex = 5
-        ' 
         ' GroupBox3
         ' 
         GroupBox3.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Right
-        GroupBox3.Controls.Add(downCustomerPB)
-        GroupBox3.Controls.Add(upCustomerPB)
+        GroupBox3.Controls.Add(AddressTA)
+        GroupBox3.Controls.Add(downCustomersPB)
+        GroupBox3.Controls.Add(UpCustomersPB)
+        GroupBox3.Controls.Add(CountryCB)
+        GroupBox3.Controls.Add(AreaCB)
         GroupBox3.Controls.Add(SaveInfo)
         GroupBox3.Controls.Add(Label24)
         GroupBox3.Controls.Add(telephoneNumberZipcodeTB)
@@ -399,12 +311,9 @@ Partial Class Customers
         GroupBox3.Controls.Add(CommercialNameTB)
         GroupBox3.Controls.Add(Label20)
         GroupBox3.Controls.Add(FormalNameTB)
-        GroupBox3.Controls.Add(AreaCB)
-        GroupBox3.Controls.Add(CountryCB)
         GroupBox3.Controls.Add(MangerNumberTB)
         GroupBox3.Controls.Add(ManagerIDTB)
         GroupBox3.Controls.Add(ManagerTB)
-        GroupBox3.Controls.Add(AddressTA)
         GroupBox3.Controls.Add(NameInEnglishTB)
         GroupBox3.Controls.Add(ActiveNoActiveCKB)
         GroupBox3.Controls.Add(CustomerAccountNumberTB)
@@ -434,35 +343,51 @@ Partial Class Customers
         GroupBox3.TabIndex = 2
         GroupBox3.TabStop = False
         ' 
-        ' downCustomerPB
+        ' AddressTA
         ' 
-        downCustomerPB.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        downCustomerPB.BackColor = Color.Transparent
-        downCustomerPB.BackgroundImageLayout = ImageLayout.None
-        downCustomerPB.Image = CType(resources.GetObject("downCustomerPB.Image"), Image)
-        downCustomerPB.ImageLocation = ""
-        downCustomerPB.Location = New Point(53, 22)
-        downCustomerPB.Margin = New Padding(3, 4, 3, 4)
-        downCustomerPB.Name = "downCustomerPB"
-        downCustomerPB.Size = New Size(25, 23)
-        downCustomerPB.SizeMode = PictureBoxSizeMode.StretchImage
-        downCustomerPB.TabIndex = 48
-        downCustomerPB.TabStop = False
+        AddressTA.Location = New Point(14, 77)
+        AddressTA.Name = "AddressTA"
+        AddressTA.Size = New Size(339, 64)
+        AddressTA.TabIndex = 57
+        AddressTA.Text = ""
         ' 
-        ' upCustomerPB
+        ' downCustomersPB
         ' 
-        upCustomerPB.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        upCustomerPB.BackColor = Color.Transparent
-        upCustomerPB.BackgroundImageLayout = ImageLayout.None
-        upCustomerPB.Image = CType(resources.GetObject("upCustomerPB.Image"), Image)
-        upCustomerPB.ImageLocation = ""
-        upCustomerPB.Location = New Point(12, 21)
-        upCustomerPB.Margin = New Padding(3, 4, 3, 4)
-        upCustomerPB.Name = "upCustomerPB"
-        upCustomerPB.Size = New Size(26, 24)
-        upCustomerPB.SizeMode = PictureBoxSizeMode.StretchImage
-        upCustomerPB.TabIndex = 49
-        upCustomerPB.TabStop = False
+        downCustomersPB.Image = CType(resources.GetObject("downCustomersPB.Image"), Image)
+        downCustomersPB.Location = New Point(46, 16)
+        downCustomersPB.Name = "downCustomersPB"
+        downCustomersPB.Size = New Size(23, 22)
+        downCustomersPB.SizeMode = PictureBoxSizeMode.StretchImage
+        downCustomersPB.TabIndex = 56
+        downCustomersPB.TabStop = False
+        ' 
+        ' UpCustomersPB
+        ' 
+        UpCustomersPB.Image = CType(resources.GetObject("UpCustomersPB.Image"), Image)
+        UpCustomersPB.Location = New Point(12, 16)
+        UpCustomersPB.Name = "UpCustomersPB"
+        UpCustomersPB.Size = New Size(24, 22)
+        UpCustomersPB.SizeMode = PictureBoxSizeMode.StretchImage
+        UpCustomersPB.TabIndex = 55
+        UpCustomersPB.TabStop = False
+        ' 
+        ' CountryCB
+        ' 
+        CountryCB.AutoCompleteMode = AutoCompleteMode.SuggestAppend
+        CountryCB.AutoCompleteSource = AutoCompleteSource.ListItems
+        CountryCB.FormattingEnabled = True
+        CountryCB.Location = New Point(12, 309)
+        CountryCB.Name = "CountryCB"
+        CountryCB.Size = New Size(397, 28)
+        CountryCB.TabIndex = 52
+        ' 
+        ' AreaCB
+        ' 
+        AreaCB.FormattingEnabled = True
+        AreaCB.Location = New Point(12, 363)
+        AreaCB.Name = "AreaCB"
+        AreaCB.Size = New Size(397, 28)
+        AreaCB.TabIndex = 51
         ' 
         ' SaveInfo
         ' 
@@ -483,12 +408,13 @@ Partial Class Customers
         ' 
         Label24.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label24.AutoSize = True
-        Label24.Location = New Point(604, 677)
+        Label24.Location = New Point(601, 704)
         Label24.Margin = New Padding(2, 0, 2, 0)
         Label24.Name = "Label24"
-        Label24.Size = New Size(43, 20)
+        Label24.RightToLeft = RightToLeft.No
+        Label24.Size = New Size(55, 20)
         Label24.TabIndex = 46
-        Label24.Text = "+000"
+        Label24.Text = " 9 6 6+"
         ' 
         ' telephoneNumberZipcodeTB
         ' 
@@ -502,7 +428,7 @@ Partial Class Customers
         ' phoneNumber1ZipCodeTB
         ' 
         phoneNumber1ZipCodeTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        phoneNumber1ZipCodeTB.Location = New Point(597, 700)
+        phoneNumber1ZipCodeTB.Location = New Point(597, 751)
         phoneNumber1ZipCodeTB.Margin = New Padding(2, 3, 2, 3)
         phoneNumber1ZipCodeTB.Name = "phoneNumber1ZipCodeTB"
         phoneNumber1ZipCodeTB.Size = New Size(57, 27)
@@ -511,7 +437,7 @@ Partial Class Customers
         ' ReferralNumberTB
         ' 
         ReferralNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        ReferralNumberTB.Location = New Point(89, 757)
+        ReferralNumberTB.Location = New Point(126, 757)
         ReferralNumberTB.Margin = New Padding(2, 3, 2, 3)
         ReferralNumberTB.Name = "ReferralNumberTB"
         ReferralNumberTB.Size = New Size(258, 27)
@@ -520,7 +446,7 @@ Partial Class Customers
         ' FaxNumberTB
         ' 
         FaxNumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        FaxNumberTB.Location = New Point(89, 703)
+        FaxNumberTB.Location = New Point(126, 703)
         FaxNumberTB.Margin = New Padding(2, 3, 2, 3)
         FaxNumberTB.Name = "FaxNumberTB"
         FaxNumberTB.Size = New Size(258, 27)
@@ -556,19 +482,19 @@ Partial Class Customers
         ' emailTB
         ' 
         emailTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        emailTB.Location = New Point(283, 624)
+        emailTB.Location = New Point(126, 625)
         emailTB.Margin = New Padding(2, 3, 2, 3)
         emailTB.Name = "emailTB"
-        emailTB.Size = New Size(167, 27)
+        emailTB.Size = New Size(257, 27)
         emailTB.TabIndex = 37
         ' 
         ' VTRnumberTB
         ' 
         VTRnumberTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        VTRnumberTB.Location = New Point(466, 624)
+        VTRnumberTB.Location = New Point(426, 624)
         VTRnumberTB.Margin = New Padding(2, 3, 2, 3)
         VTRnumberTB.Name = "VTRnumberTB"
-        VTRnumberTB.Size = New Size(167, 27)
+        VTRnumberTB.Size = New Size(207, 27)
         VTRnumberTB.TabIndex = 36
         ' 
         ' IdentityCommercialNameOptionCB
@@ -604,17 +530,17 @@ Partial Class Customers
         ' CommercialNameTB
         ' 
         CommercialNameTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        CommercialNameTB.Location = New Point(152, 467)
+        CommercialNameTB.Location = New Point(12, 473)
         CommercialNameTB.Margin = New Padding(2, 3, 2, 3)
         CommercialNameTB.Name = "CommercialNameTB"
-        CommercialNameTB.Size = New Size(258, 27)
+        CommercialNameTB.Size = New Size(323, 27)
         CommercialNameTB.TabIndex = 32
         ' 
         ' Label20
         ' 
         Label20.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label20.AutoSize = True
-        Label20.Location = New Point(318, 445)
+        Label20.Location = New Point(244, 450)
         Label20.Margin = New Padding(2, 0, 2, 0)
         Label20.Name = "Label20"
         Label20.Size = New Size(91, 20)
@@ -624,31 +550,11 @@ Partial Class Customers
         ' FormalNameTB
         ' 
         FormalNameTB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        FormalNameTB.Location = New Point(427, 467)
+        FormalNameTB.Location = New Point(363, 467)
         FormalNameTB.Margin = New Padding(2, 3, 2, 3)
         FormalNameTB.Name = "FormalNameTB"
-        FormalNameTB.Size = New Size(213, 27)
+        FormalNameTB.Size = New Size(277, 27)
         FormalNameTB.TabIndex = 30
-        ' 
-        ' AreaCB
-        ' 
-        AreaCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        AreaCB.FormattingEnabled = True
-        AreaCB.Location = New Point(12, 363)
-        AreaCB.Margin = New Padding(2, 3, 2, 3)
-        AreaCB.Name = "AreaCB"
-        AreaCB.Size = New Size(397, 28)
-        AreaCB.TabIndex = 29
-        ' 
-        ' CountryCB
-        ' 
-        CountryCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        CountryCB.FormattingEnabled = True
-        CountryCB.Location = New Point(12, 295)
-        CountryCB.Margin = New Padding(2, 3, 2, 3)
-        CountryCB.Name = "CountryCB"
-        CountryCB.Size = New Size(397, 28)
-        CountryCB.TabIndex = 28
         ' 
         ' MangerNumberTB
         ' 
@@ -676,15 +582,6 @@ Partial Class Customers
         ManagerTB.Name = "ManagerTB"
         ManagerTB.Size = New Size(218, 27)
         ManagerTB.TabIndex = 25
-        ' 
-        ' AddressTA
-        ' 
-        AddressTA.Location = New Point(12, 83)
-        AddressTA.Margin = New Padding(2, 3, 2, 3)
-        AddressTA.Name = "AddressTA"
-        AddressTA.Size = New Size(314, 59)
-        AddressTA.TabIndex = 24
-        AddressTA.Text = ""
         ' 
         ' NameInEnglishTB
         ' 
@@ -729,7 +626,7 @@ Partial Class Customers
         ' 
         Label19.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label19.AutoSize = True
-        Label19.Location = New Point(269, 735)
+        Label19.Location = New Point(306, 735)
         Label19.Margin = New Padding(2, 0, 2, 0)
         Label19.Name = "Label19"
         Label19.Size = New Size(77, 20)
@@ -740,7 +637,7 @@ Partial Class Customers
         ' 
         Label18.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label18.AutoSize = True
-        Label18.Location = New Point(262, 681)
+        Label18.Location = New Point(299, 681)
         Label18.Margin = New Padding(2, 0, 2, 0)
         Label18.Name = "Label18"
         Label18.Size = New Size(86, 20)
@@ -784,7 +681,7 @@ Partial Class Customers
         ' 
         Label14.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label14.AutoSize = True
-        Label14.Location = New Point(394, 603)
+        Label14.Location = New Point(327, 604)
         Label14.Margin = New Padding(2, 0, 2, 0)
         Label14.Name = "Label14"
         Label14.Size = New Size(55, 20)
@@ -947,16 +844,16 @@ Partial Class Customers
         GroupBox2.BackColor = Color.Transparent
         GroupBox2.Controls.Add(Delegations)
         GroupBox2.Controls.Add(DocumentsSettings)
-        GroupBox2.Controls.Add(PictureBox3)
+        GroupBox2.Controls.Add(refreshPB)
         GroupBox2.Controls.Add(AddAttachmentsBT)
         GroupBox2.Controls.Add(PictureBox5)
         GroupBox2.Font = New Font("Segoe UI Black", 8.0F, FontStyle.Bold)
-        GroupBox2.Location = New Point(1552, 125)
+        GroupBox2.Location = New Point(1553, 154)
         GroupBox2.Margin = New Padding(3, 4, 3, 4)
         GroupBox2.Name = "GroupBox2"
         GroupBox2.Padding = New Padding(3, 4, 3, 4)
         GroupBox2.RightToLeft = RightToLeft.Yes
-        GroupBox2.Size = New Size(62, 469)
+        GroupBox2.Size = New Size(62, 434)
         GroupBox2.TabIndex = 6
         GroupBox2.TabStop = False
         ' 
@@ -989,20 +886,20 @@ Partial Class Customers
         DocumentsSettings.TabIndex = 7
         DocumentsSettings.TabStop = False
         ' 
-        ' PictureBox3
+        ' refreshPB
         ' 
-        PictureBox3.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        PictureBox3.BackColor = Color.Transparent
-        PictureBox3.BackgroundImageLayout = ImageLayout.None
-        PictureBox3.Image = CType(resources.GetObject("PictureBox3.Image"), Image)
-        PictureBox3.ImageLocation = ""
-        PictureBox3.Location = New Point(11, 20)
-        PictureBox3.Margin = New Padding(3, 4, 3, 4)
-        PictureBox3.Name = "PictureBox3"
-        PictureBox3.Size = New Size(39, 41)
-        PictureBox3.SizeMode = PictureBoxSizeMode.StretchImage
-        PictureBox3.TabIndex = 7
-        PictureBox3.TabStop = False
+        refreshPB.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        refreshPB.BackColor = Color.Transparent
+        refreshPB.BackgroundImageLayout = ImageLayout.None
+        refreshPB.Image = CType(resources.GetObject("refreshPB.Image"), Image)
+        refreshPB.ImageLocation = ""
+        refreshPB.Location = New Point(11, 33)
+        refreshPB.Margin = New Padding(3, 4, 3, 4)
+        refreshPB.Name = "refreshPB"
+        refreshPB.Size = New Size(39, 41)
+        refreshPB.SizeMode = PictureBoxSizeMode.StretchImage
+        refreshPB.TabIndex = 7
+        refreshPB.TabStop = False
         ' 
         ' AddAttachmentsBT
         ' 
@@ -1021,17 +918,12 @@ Partial Class Customers
         ' 
         PictureBox5.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         PictureBox5.Image = CType(resources.GetObject("PictureBox5.Image"), Image)
-        PictureBox5.Location = New Point(11, 72)
+        PictureBox5.Location = New Point(11, 85)
         PictureBox5.Margin = New Padding(3, 4, 3, 4)
         PictureBox5.Name = "PictureBox5"
         PictureBox5.Size = New Size(39, 45)
         PictureBox5.TabIndex = 8
         PictureBox5.TabStop = False
-        ' 
-        ' NotifyIcon1
-        ' 
-        NotifyIcon1.Text = "NotifyIcon1"
-        NotifyIcon1.Visible = True
         ' 
         ' Customers
         ' 
@@ -1057,20 +949,19 @@ Partial Class Customers
         CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).EndInit()
         GroupBox3.ResumeLayout(False)
         GroupBox3.PerformLayout()
-        CType(downCustomerPB, ComponentModel.ISupportInitialize).EndInit()
-        CType(upCustomerPB, ComponentModel.ISupportInitialize).EndInit()
+        CType(downCustomersPB, ComponentModel.ISupportInitialize).EndInit()
+        CType(UpCustomersPB, ComponentModel.ISupportInitialize).EndInit()
         CType(SaveInfo, ComponentModel.ISupportInitialize).EndInit()
         GroupBox5.ResumeLayout(False)
         CType(PictureBox1, ComponentModel.ISupportInitialize).EndInit()
         GroupBox2.ResumeLayout(False)
         CType(Delegations, ComponentModel.ISupportInitialize).EndInit()
         CType(DocumentsSettings, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox3, ComponentModel.ISupportInitialize).EndInit()
+        CType(refreshPB, ComponentModel.ISupportInitialize).EndInit()
         CType(AddAttachmentsBT, ComponentModel.ISupportInitialize).EndInit()
         CType(PictureBox5, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
     End Sub
-
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents GroupBox5 As GroupBox
     Friend WithEvents GroupBox2 As GroupBox
@@ -1078,6 +969,7 @@ Partial Class Customers
     Friend WithEvents DocumentsSettings As PictureBox
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents AddAttachmentsBT As PictureBox
+    Friend WithEvents refreshPB As PictureBox
     Friend WithEvents PictureBox5 As PictureBox
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents GroupBox3 As GroupBox
@@ -1111,7 +1003,6 @@ Partial Class Customers
     Friend WithEvents MangerNumberTB As TextBox
     Friend WithEvents ManagerIDTB As TextBox
     Friend WithEvents ManagerTB As TextBox
-    Friend WithEvents AddressTA As RichTextBox
     Friend WithEvents ReferralNumberTB As TextBox
     Friend WithEvents FaxNumberTB As TextBox
     Friend WithEvents telephoneNumberTB As TextBox
@@ -1138,7 +1029,8 @@ Partial Class Customers
     Friend WithEvents Label24 As Label
     Friend WithEvents NotifyIcon1 As NotifyIcon
     Friend WithEvents SaveInfo As PictureBox
-    Friend WithEvents upCustomerPB As PictureBox
-    Friend WithEvents downCustomerPB As PictureBox
-
+    Friend WithEvents downCustomersPB As PictureBox
+    Friend WithEvents UpCustomersPB As PictureBox
+    Friend WithEvents AddressTA As RichTextBox
 End Class
+

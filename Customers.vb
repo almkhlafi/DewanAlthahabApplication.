@@ -8,17 +8,36 @@ Public Class Customers
     Private currentSelectedCustomerId As Integer = 0
     Private currentSelectedCustomerName As String = ""
 
+    ' Helper method to find controls by name to avoid Designer variable shadowing issues
+    Private Function FindControlByName(Of T As Control)(controlName As String) As T
+        Try
+            Dim controls As Control() = Me.Controls.Find(controlName, True)
+            If controls.Length > 0 AndAlso TypeOf controls(0) Is T Then
+                Return CType(controls(0), T)
+            End If
+        Catch ex As Exception
+            ' Control not found or wrong type
+        End Try
+        Return Nothing
+    End Function
+
     ' Variables for customer navigation
     Private customerList As List(Of String) = New List(Of String)()
     Private currentCustomerIndex As Integer = -1
     Private isNavigating As Boolean = False
 
+    ' Control update flags to prevent recursive events
+    Private isLoadingAreas As Boolean = False
+    Private isUpdatingCountryData As Boolean = False
+    Private isUpdatingAreaData As Boolean = False
+    Private isUpdatingMarketData As Boolean = False
+    Private isUpdatingCategoryData As Boolean = False
+    Private isUpdatingGroupsData As Boolean = False
+    Private isUpdatingTypeData As Boolean = False
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ' Form initialization
         ' Setup NotifyIcon
-        NotifyIcon1.Icon = Me.Icon
-        NotifyIcon1.Visible = True
-        NotifyIcon1.Text = "العملاء"
 
 
         ' Setup and load branches DataGridView
@@ -29,24 +48,19 @@ Public Class Customers
         SetupCurrencyDataGridView()
         LoadCurrency()
 
-        ' Load additional ComboBoxes
-        LoadMarketData()
-        LoadCategoryData()
-        LoadGroupsData()
-        LoadTypeData()
-
-        ' Load countries into CountryCB
-        LoadCountries()
-        ' Set up AreaCB search functionality early
+        ' Set up ComboBox search functionality (but don't load data yet)
         SetupAreaSearch()
+        SetupCountrySearch()
+        SetupMarketSearch()
+        SetupCategorySearch()
+        SetupGroupsSearch()
+        SetupTypeSearch()
 
-        ' Initialize Customer/Supplier ComboBoxes
+        ' Initialize Customer/Supplier ComboBoxes with enhanced logic
         InitializeCustomerSupplierComboBoxes()
 
-        ' Load customer list for navigation
-        LoadCustomerListForNavigation()
-
-
+        ' Initialize customer list for navigation (but don't load first customer data)
+        InitializeNavigationOnly()
     End Sub
 
     Private Sub LoadCountries()
@@ -60,8 +74,9 @@ Public Class Customers
             ' Load countries from CMGADB2024 database
             Dim countriesTable As DataTable = dbConn.GetCountries()
 
-            ' Clear existing items
-            CountryCB.Items.Clear()
+            ' Clear existing DataSource first (not Items)
+            CountryCB.DataSource = Nothing
+            CountryCB.Tag = Nothing
 
             ' Set up CountryCB properties for enhanced search functionality
             CountryCB.DisplayMember = "DisplayText"
@@ -190,48 +205,87 @@ Public Class Customers
 
     Private Sub SetupCountrySearch()
         ' Enable advanced search functionality for CountryCB
-        AddHandler CountryCB.KeyUp, AddressOf CountryCB_KeyUp
-        AddHandler CountryCB.TextChanged, AddressOf CountryCB_TextChanged
+        If CountryCB IsNot Nothing Then
+            Try
+                AddHandler CountryCB.KeyUp, AddressOf CountryCB_KeyUp
+                AddHandler CountryCB.TextChanged, AddressOf CountryCB_TextChanged
+            Catch ex As Exception
+                MessageBox.Show("خطأ في إعداد البحث للبلدان: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        Else
+            MessageBox.Show("CountryCB control is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
     End Sub
 
-    Private areaSearchSetup As Boolean = False
+    Private areaSearchSetups As Boolean = False
 
     Private Sub SetupAreaSearch()
         ' Enable advanced search functionality for AreaCB only once
-        If Not areaSearchSetup Then
-            AddHandler AreaCB.KeyUp, AddressOf AreaCB_KeyUp
-            AddHandler AreaCB.TextChanged, AddressOf AreaCB_TextChanged
-            AddHandler AreaCB.DropDown, AddressOf AreaCB_DropDown
-            AddHandler AreaCB.SelectedIndexChanged, AddressOf AreaCB_SelectedIndexChanged
-            AddHandler AreaCB.Click, AddressOf AreaCB_Click
-            AddHandler AreaCB.Enter, AddressOf AreaCB_Enter
-            AddHandler AreaCB.GotFocus, AddressOf AreaCB_GotFocus
-            areaSearchSetup = True
+        If Not areaSearchSetups AndAlso AreaCB IsNot Nothing Then
+            Try
+                AddHandler AreaCB.KeyUp, AddressOf AreaCB_KeyUp
+                AddHandler AreaCB.TextChanged, AddressOf AreaCB_TextChanged
+                AddHandler AreaCB.DropDown, AddressOf AreaCB_DropDown
+                AddHandler AreaCB.SelectedIndexChanged, AddressOf AreaCB_SelectedIndexChanged
+                AddHandler AreaCB.Click, AddressOf AreaCB_Click
+                AddHandler AreaCB.Enter, AddressOf AreaCB_Enter
+                AddHandler AreaCB.GotFocus, AddressOf AreaCB_GotFocus
+                areaSearchSetups = True
+            Catch ex As Exception
+                ' Handle any errors during event handler setup
+                MessageBox.Show("خطأ في إعداد البحث للمناطق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        ElseIf AreaCB Is Nothing Then
+            MessageBox.Show("AreaCB control is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End If
     End Sub
 
     Private Sub SetupMarketSearch()
         ' Enable advanced search functionality for MarketCB
-        AddHandler MarketCB.KeyUp, AddressOf MarketCB_KeyUp
-        AddHandler MarketCB.TextChanged, AddressOf MarketCB_TextChanged
+        If MarketCB IsNot Nothing Then
+            Try
+                AddHandler MarketCB.KeyUp, AddressOf MarketCB_KeyUp
+                AddHandler MarketCB.TextChanged, AddressOf MarketCB_TextChanged
+            Catch ex As Exception
+                MessageBox.Show("خطأ في إعداد البحث للأسواق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        End If
     End Sub
 
     Private Sub SetupCategorySearch()
         ' Enable advanced search functionality for CategoryCB
-        AddHandler CatogeryCB.KeyUp, AddressOf CategoryCB_KeyUp
-        AddHandler CatogeryCB.TextChanged, AddressOf CategoryCB_TextChanged
+        If CatogeryCB IsNot Nothing Then
+            Try
+                AddHandler CatogeryCB.KeyUp, AddressOf CategoryCB_KeyUp
+                AddHandler CatogeryCB.TextChanged, AddressOf CategoryCB_TextChanged
+            Catch ex As Exception
+                MessageBox.Show("خطأ في إعداد البحث للفئات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        End If
     End Sub
 
     Private Sub SetupGroupsSearch()
         ' Enable advanced search functionality for GroupsCB
-        AddHandler GroupsCB.KeyUp, AddressOf GroupsCB_KeyUp
-        AddHandler GroupsCB.TextChanged, AddressOf GroupsCB_TextChanged
+        If GroupsCB IsNot Nothing Then
+            Try
+                AddHandler GroupsCB.KeyUp, AddressOf GroupsCB_KeyUp
+                AddHandler GroupsCB.TextChanged, AddressOf GroupsCB_TextChanged
+            Catch ex As Exception
+                MessageBox.Show("خطأ في إعداد البحث للمجموعات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        End If
     End Sub
 
     Private Sub SetupTypeSearch()
         ' Enable advanced search functionality for TypeCB
-        AddHandler TypeCB.KeyUp, AddressOf TypeCB_KeyUp
-        AddHandler TypeCB.TextChanged, AddressOf TypeCB_TextChanged
+        If TypeCB IsNot Nothing Then
+            Try
+                AddHandler TypeCB.KeyUp, AddressOf TypeCB_KeyUp
+                AddHandler TypeCB.TextChanged, AddressOf TypeCB_TextChanged
+            Catch ex As Exception
+                MessageBox.Show("خطأ في إعداد البحث للأنواع: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End Try
+        End If
     End Sub
 
     Private Sub CountryCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -246,7 +300,6 @@ Public Class Customers
         End If
     End Sub
 
-    Private isUpdatingCountryData As Boolean = False
 
     Private Sub CountryCB_TextChanged(sender As Object, e As EventArgs)
         ' Safety check - ensure CountryCB is initialized and form is loaded
@@ -342,7 +395,6 @@ Public Class Customers
         End If
     End Sub
 
-    Private isUpdatingAreaData As Boolean = False
 
     Private Sub AreaCB_TextChanged(sender As Object, e As EventArgs)
         ' Prevent recursive calls when updating data
@@ -469,7 +521,6 @@ Public Class Customers
     End Sub
 
     ' =====================MarketCB Search Event Handlers========================
-    Private isUpdatingMarketData As Boolean = False
 
     Private Sub MarketCB_KeyUp(sender As Object, e As KeyEventArgs)
         If e.KeyCode = Keys.Enter Then
@@ -533,7 +584,6 @@ Public Class Customers
     End Sub
 
     ' =====================CategoryCB Search Event Handlers========================
-    Private isUpdatingCategoryData As Boolean = False
 
     Private Sub CategoryCB_KeyUp(sender As Object, e As KeyEventArgs)
         If e.KeyCode = Keys.Enter Then
@@ -597,7 +647,6 @@ Public Class Customers
     End Sub
 
     ' =====================GroupsCB Search Event Handlers========================
-    Private isUpdatingGroupsData As Boolean = False
 
     Private Sub GroupsCB_KeyUp(sender As Object, e As KeyEventArgs)
         If e.KeyCode = Keys.Enter Then
@@ -661,7 +710,6 @@ Public Class Customers
     End Sub
 
     ' =====================TypeCB Search Event Handlers========================
-    Private isUpdatingTypeData As Boolean = False
 
     Private Sub TypeCB_KeyUp(sender As Object, e As KeyEventArgs)
         If e.KeyCode = Keys.Enter Then
@@ -724,11 +772,11 @@ Public Class Customers
         End Try
     End Sub
 
-    Private isLoadingAreas As Boolean = False
+    ' Additional form methods and navigation functionality
 
     Private Sub CountryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CountryCB.SelectedIndexChanged
         ' Prevent execution during area loading or country data updates
-        If isLoadingAreas OrElse isUpdatingCountryData Then Return
+        If isLoadingAreas OrElse isUpdatingCountryData OrElse isNavigating Then Return
 
         Try
             If CountryCB.SelectedItem IsNot Nothing Then
@@ -736,13 +784,21 @@ Public Class Customers
                 Dim countryCode = selectedCountry("countrycode").ToString
                 Dim displayText = selectedCountry("DisplayText").ToString
 
-
                 ' Auto-populate AreaCB with areas/cities for any selected country
                 isLoadingAreas = True
                 LoadAreas(countryCode)
                 isLoadingAreas = False
             Else
-                MessageBox.Show("CountryCB.SelectedItem is Nothing", "Debug", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                ' Country is empty - clear areas silently without showing error message
+                isLoadingAreas = True
+                isUpdatingAreaData = True
+                If AreaCB IsNot Nothing Then
+                    AreaCB.DataSource = Nothing
+                    AreaCB.Tag = Nothing
+                    AreaCB.Text = ""
+                End If
+                isUpdatingAreaData = False
+                isLoadingAreas = False
             End If
         Catch ex As Exception
             isLoadingAreas = False
@@ -751,7 +807,6 @@ Public Class Customers
     End Sub
 
     Private Sub SetupBranchesDataGridView()
-        Dim BranchesInfoDGV As DataGridView = Me.BranchesInfoDGV
         ' Safety check - ensure BranchesInfoDGV is initialized
         If BranchesInfoDGV Is Nothing Then
             MessageBox.Show("BranchesInfoDGV is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -955,23 +1010,24 @@ Public Class Customers
     End Sub
 
     Private Sub SetupCurrencyDataGridView()
-        ' Safety check - ensure CurrencyDGV is initialized
-        If CurrencyDGV Is Nothing Then
-            MessageBox.Show("CurrencyDGV is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        ' Find CurrencyDGV control by name to avoid Designer variable shadowing issues
+        Dim currencyDGV As DataGridView = FindControlByName(Of DataGridView)("CurrencyDGV")
+        If currencyDGV Is Nothing Then
+            MessageBox.Show("CurrencyDGV control not found!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return
         End If
 
         ' Clear existing columns
-        CurrencyDGV.Columns.Clear()
+        currencyDGV.Columns.Clear()
 
         ' Set basic properties
-        CurrencyDGV.AllowUserToAddRows = False
-        CurrencyDGV.AllowUserToDeleteRows = False
-        CurrencyDGV.SelectionMode = DataGridViewSelectionMode.FullRowSelect
-        CurrencyDGV.MultiSelect = True
-        CurrencyDGV.ReadOnly = False
-        CurrencyDGV.RowHeadersVisible = False
-        CurrencyDGV.RightToLeft = RightToLeft.Yes
+        currencyDGV.AllowUserToAddRows = False
+        currencyDGV.AllowUserToDeleteRows = False
+        currencyDGV.SelectionMode = DataGridViewSelectionMode.FullRowSelect
+        currencyDGV.MultiSelect = True
+        currencyDGV.ReadOnly = False
+        currencyDGV.RowHeadersVisible = False
+        currencyDGV.RightToLeft = RightToLeft.Yes
 
         ' Add checkbox column for selection
         Dim selectColumn As New DataGridViewCheckBoxColumn()
@@ -979,7 +1035,7 @@ Public Class Customers
         selectColumn.HeaderText = "الكل"
         selectColumn.Width = 50
         selectColumn.ReadOnly = False
-        CurrencyDGV.Columns.Add(selectColumn)
+        currencyDGV.Columns.Add(selectColumn)
 
         ' Add currency code column
         Dim currencyCodeColumn As New DataGridViewTextBoxColumn()
@@ -987,7 +1043,7 @@ Public Class Customers
         currencyCodeColumn.HeaderText = "الرمز"
         currencyCodeColumn.ReadOnly = True
         currencyCodeColumn.Width = 80
-        CurrencyDGV.Columns.Add(currencyCodeColumn)
+        currencyDGV.Columns.Add(currencyCodeColumn)
 
         ' Add currency name column
         Dim currencyNameColumn As New DataGridViewTextBoxColumn()
@@ -995,7 +1051,7 @@ Public Class Customers
         currencyNameColumn.HeaderText = "الاسم"
         currencyNameColumn.ReadOnly = True
         currencyNameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-        CurrencyDGV.Columns.Add(currencyNameColumn)
+        currencyDGV.Columns.Add(currencyNameColumn)
 
         ' Add currency decimal/price column
         Dim currencyDecimalColumn As New DataGridViewTextBoxColumn()
@@ -1003,21 +1059,27 @@ Public Class Customers
         currencyDecimalColumn.HeaderText = "السعر"
         currencyDecimalColumn.ReadOnly = True
         currencyDecimalColumn.Width = 100
-        CurrencyDGV.Columns.Add(currencyDecimalColumn)
+        currencyDGV.Columns.Add(currencyDecimalColumn)
 
         ' Add event handlers
-        AddHandler CurrencyDGV.CellContentClick, AddressOf DataGridView1_CellContentClick
-        AddHandler CurrencyDGV.ColumnHeaderMouseClick, AddressOf DataGridView1_ColumnHeaderMouseClick
+        AddHandler currencyDGV.CellContentClick, AddressOf DataGridView1_CellContentClick
+        AddHandler currencyDGV.ColumnHeaderMouseClick, AddressOf DataGridView1_ColumnHeaderMouseClick
     End Sub
 
     Private Sub LoadCurrency()
         Try
+            ' Find CurrencyDGV control by name to avoid Designer variable shadowing issues
+            Dim currencyDGV As DataGridView = FindControlByName(Of DataGridView)("CurrencyDGV")
+            If currencyDGV Is Nothing Then
+                MessageBox.Show("CurrencyDGV control not found in LoadCurrency!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
             ' Load currency from CMGADB2024 database
             Dim currencyTable As DataTable = dbConn.GetCurrency()
 
-            Dim CurrencyDGV As DataGridView = Me.CurrencyDGV
             ' Clear existing rows
-            CurrencyDGV.Rows.Clear()
+            currencyDGV.Rows.Clear()
 
             ' Add currency to DataGridView
             For Each row As DataRow In currencyTable.Rows
@@ -1027,7 +1089,7 @@ Public Class Customers
                     row("arabicname").ToString(), ' Arabic name
                     row("decimal").ToString() ' Decimal/Price value
                 }
-                CurrencyDGV.Rows.Add(newRow)
+                currencyDGV.Rows.Add(newRow)
             Next
 
         Catch ex As Exception
@@ -1049,6 +1111,7 @@ Public Class Customers
             ' Set up MarketCB properties for enhanced search functionality
             MarketCB.DisplayMember = "DisplayText"
             MarketCB.ValueMember = "code"
+
             MarketCB.AutoCompleteMode = AutoCompleteMode.Suggest
             MarketCB.AutoCompleteSource = AutoCompleteSource.ListItems
             MarketCB.DropDownStyle = ComboBoxStyle.DropDown
@@ -1234,17 +1297,23 @@ Public Class Customers
     Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs)
         ' Handle checkbox clicks in the Select column
         If e.RowIndex >= 0 AndAlso e.ColumnIndex = 0 Then
-            CurrencyDGV.EndEdit()
+            Dim currencyDGV As DataGridView = FindControlByName(Of DataGridView)("CurrencyDGV")
+            If currencyDGV IsNot Nothing Then
+                currencyDGV.EndEdit()
+            End If
         End If
     End Sub
 
     Private Sub DataGridView1_ColumnHeaderMouseClick(sender As Object, e As DataGridViewCellMouseEventArgs)
         ' Handle "select all" functionality when clicking on the header checkbox
         If e.ColumnIndex = 0 Then
+            Dim currencyDGV As DataGridView = FindControlByName(Of DataGridView)("CurrencyDGV")
+            If currencyDGV Is Nothing Then Return
+
             Dim selectAll As Boolean = True
 
             ' Check if any row is currently selected to determine toggle behavior
-            For Each row As DataGridViewRow In CurrencyDGV.Rows
+            For Each row As DataGridViewRow In currencyDGV.Rows
                 If CBool(row.Cells(0).Value) = True Then
                     selectAll = False
                     Exit For
@@ -1252,7 +1321,7 @@ Public Class Customers
             Next
 
             ' Set all checkboxes to the determined state
-            For Each row As DataGridViewRow In CurrencyDGV.Rows
+            For Each row As DataGridViewRow In currencyDGV.Rows
                 row.Cells(0).Value = selectAll
             Next
         End If
@@ -1261,8 +1330,10 @@ Public Class Customers
     ' Helper method to get selected currencies
     Public Function GetSelectedCurrencies() As List(Of String)
         Dim selectedCurrencies As New List(Of String)()
+        Dim currencyDGV As DataGridView = FindControlByName(Of DataGridView)("CurrencyDGV")
+        If currencyDGV Is Nothing Then Return selectedCurrencies
 
-        For Each row As DataGridViewRow In CurrencyDGV.Rows
+        For Each row As DataGridViewRow In currencyDGV.Rows
             If CBool(row.Cells("Select").Value) = True Then
                 selectedCurrencies.Add(row.Cells("CurrencyCode").Value.ToString())
             End If
@@ -1272,24 +1343,7 @@ Public Class Customers
     End Function
 
 
-    Private Sub AddAttachmentsBT_Click(sender As Object, e As EventArgs) Handles AddAttachmentsBT.Click
-        ' Check if a customer is selected - if not, show search dialog first
-        '  If currentSelectedCustomerId = 0 Then
-        ' No customer selected - show customer search dialog
-        '  Dim searchForm As New CustomerSearchForm
 
-        ' If searchForm.ShowDialog = DialogResult.OK Then
-        ' Customer was selected from search - store customer info
-        '     currentSelectedCustomerId = searchForm.SelectedCustomerId
-        '    currentSelectedCustomerName = searchForm.SelectedCustomerName
-        '  End If
-        '
-        ' searchForm.Dispose()
-        '  End If
-
-        ' Open attachments management (regardless of customer selection)
-        AttachmentsManagement.ShowDialog()
-    End Sub
 
     Private Sub DocumentsSettings_Click(sender As Object, e As EventArgs) Handles DocumentsSettings.Click
         Dim docMgmt As New DocumentsManagement
@@ -1386,9 +1440,7 @@ Public Class Customers
         End If
     End Sub
 
-    Private Sub MarketCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MarketCB.SelectedIndexChanged
 
-    End Sub
 
     Private Sub CatogeryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CatogeryCB.SelectedIndexChanged
 
@@ -1406,15 +1458,18 @@ Public Class Customers
 
     Private Sub InitializeCustomerSupplierComboBoxes()
         Try
-            ' Initialize CustomerSupplierCB
+            ' Initialize CustomerSupplierCB with enhanced logic
             If CustomerSupplierCB IsNot Nothing Then
                 CustomerSupplierCB.Items.Clear()
                 CustomerSupplierCB.Items.Add("Customer")
                 CustomerSupplierCB.Items.Add("Supplier")
                 CustomerSupplierCB.SelectedIndex = 0 ' Default to Customer
+
+                ' Generate and display next available code
+                GenerateAndDisplayNextCode()
             End If
 
-            ' Initialize IdentityCommercialNameOptionCB
+            ' Initialize IdentityCommercialNameOptionCB with enhanced logic
             If IdentityCommercialNameOptionCB IsNot Nothing Then
                 IdentityCommercialNameOptionCB.Items.Clear()
                 IdentityCommercialNameOptionCB.Items.Add("فردي") ' Individual
@@ -1425,17 +1480,194 @@ Public Class Customers
                 UpdateIdentityLabel("فردي")
             End If
 
+            ' Load lookup data from database for ComboBoxes
+            LoadLookupData()
+
         Catch ex As Exception
             MessageBox.Show("خطأ في تهيئة قوائم العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
-    Private Sub CustomerSupplierCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CustomerSupplierCB.SelectedIndexChanged
-        ' Handle customer/supplier type selection
+    ' Load lookup data from database for ComboBoxes
+    Private Sub LoadLookupData()
         Try
-            If CustomerSupplierCB.SelectedItem IsNot Nothing Then
-                ' Could add any specific logic here based on customer vs supplier selection
-                ' For now, the main difference is in the code generation (C vs S prefix)
+            ' Load MarketCB from CusTransactionMaster
+            If MarketCB IsNot Nothing Then
+                Try
+                    ' Reset ComboBox completely
+                    MarketCB.DataSource = Nothing
+                    MarketCB.Items.Clear()
+                    MarketCB.DisplayMember = Nothing
+                    MarketCB.ValueMember = Nothing
+                    
+                    Dim marketData As DataTable = dbConn.LoadCusTransactionMaster()
+                    If marketData IsNot Nothing AndAlso marketData.Rows.Count > 0 Then
+                        ' Verify required columns exist
+                        If marketData.Columns.Contains("fld_area_code") AndAlso marketData.Columns.Contains("DisplayText") Then
+                            MarketCB.DataSource = marketData
+                            MarketCB.DisplayMember = "DisplayText"
+                            MarketCB.ValueMember = "fld_area_code"
+                            MarketCB.SelectedIndex = -1
+                        Else
+                            System.Diagnostics.Debug.WriteLine("MarketCB: Required columns not found")
+                        End If
+                    Else
+                        System.Diagnostics.Debug.WriteLine("MarketCB: No data returned")
+                    End If
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine("Error loading MarketCB: " & ex.Message)
+                    ' Create fallback empty ComboBox
+                    MarketCB.DataSource = Nothing
+                    MarketCB.Items.Clear()
+                    MarketCB.Items.Add("لا توجد بيانات")
+                    MarketCB.SelectedIndex = -1
+                End Try
+            End If
+
+            ' Load GroupsCB from CusGradeMaster
+            If GroupsCB IsNot Nothing Then
+                Try
+                    ' Reset ComboBox completely
+                    GroupsCB.DataSource = Nothing
+                    GroupsCB.Items.Clear()
+                    GroupsCB.DisplayMember = Nothing
+                    GroupsCB.ValueMember = Nothing
+                    
+                    Dim groupsData As DataTable = dbConn.LoadCusGradeMaster()
+                    If groupsData IsNot Nothing AndAlso groupsData.Rows.Count > 0 Then
+                        If groupsData.Columns.Contains("code") AndAlso groupsData.Columns.Contains("DisplayText") Then
+                            GroupsCB.DataSource = groupsData
+                            GroupsCB.DisplayMember = "DisplayText"
+                            GroupsCB.ValueMember = "code"
+                            GroupsCB.SelectedIndex = -1
+                        End If
+                    End If
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine("Error loading GroupsCB: " & ex.Message)
+                    GroupsCB.DataSource = Nothing
+                    GroupsCB.Items.Clear()
+                    GroupsCB.Items.Add("لا توجد بيانات")
+                    GroupsCB.SelectedIndex = -1
+                End Try
+            End If
+
+            ' Load TypeCB from CustomerType
+            If TypeCB IsNot Nothing Then
+                Try
+                    ' Reset ComboBox completely
+                    TypeCB.DataSource = Nothing
+                    TypeCB.Items.Clear()
+                    TypeCB.DisplayMember = Nothing
+                    TypeCB.ValueMember = Nothing
+                    
+                    Dim typeData As DataTable = dbConn.LoadCustomerType()
+                    If typeData IsNot Nothing AndAlso typeData.Rows.Count > 0 Then
+                        If typeData.Columns.Contains("fld_code") AndAlso typeData.Columns.Contains("DisplayText") Then
+                            TypeCB.DataSource = typeData
+                            TypeCB.DisplayMember = "DisplayText"
+                            TypeCB.ValueMember = "fld_code"
+                            TypeCB.SelectedIndex = -1
+                        End If
+                    End If
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine("Error loading TypeCB: " & ex.Message)
+                    TypeCB.DataSource = Nothing
+                    TypeCB.Items.Clear()
+                    TypeCB.Items.Add("لا توجد بيانات")
+                    TypeCB.SelectedIndex = -1
+                End Try
+            End If
+
+            ' Load CatogeryCB from CustomerCategory
+            If CatogeryCB IsNot Nothing Then
+                Try
+                    ' Reset ComboBox completely
+                    CatogeryCB.DataSource = Nothing
+                    CatogeryCB.Items.Clear()
+                    CatogeryCB.DisplayMember = Nothing
+                    CatogeryCB.ValueMember = Nothing
+                    
+                    Dim categoryData As DataTable = dbConn.LoadCustomerCategory()
+                    If categoryData IsNot Nothing AndAlso categoryData.Rows.Count > 0 Then
+                        If categoryData.Columns.Contains("fld_code") AndAlso categoryData.Columns.Contains("DisplayText") Then
+                            CatogeryCB.DataSource = categoryData
+                            CatogeryCB.DisplayMember = "DisplayText"
+                            CatogeryCB.ValueMember = "fld_code"
+                            CatogeryCB.SelectedIndex = -1
+                        End If
+                    End If
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine("Error loading CatogeryCB: " & ex.Message)
+                    CatogeryCB.DataSource = Nothing
+                    CatogeryCB.Items.Clear()
+                    CatogeryCB.Items.Add("لا توجد بيانات")
+                    CatogeryCB.SelectedIndex = -1
+                End Try
+            End If
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("General error in LoadLookupData: " & ex.Message)
+        End Try
+    End Sub
+
+    ' Set lookup ComboBoxes from loaded customer data FK fields
+    Private Sub SetLookupComboBoxes(customerData As CustomerSupplierData)
+        Try
+            ' Set MarketCB from SalesMan FK
+            If MarketCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.SalesMan) AndAlso MarketCB.DataSource IsNot Nothing Then
+                Dim marketTable As DataTable = CType(MarketCB.DataSource, DataTable)
+                For i As Integer = 0 To marketTable.Rows.Count - 1
+                    If marketTable.Rows(i)("fld_area_code").ToString() = customerData.SalesMan Then
+                        MarketCB.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+            End If
+
+            ' Set GroupsCB from ScrapAdjCode FK
+            If GroupsCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.ScrapAdjCode) AndAlso GroupsCB.DataSource IsNot Nothing Then
+                Dim groupsTable As DataTable = CType(GroupsCB.DataSource, DataTable)
+                For i As Integer = 0 To groupsTable.Rows.Count - 1
+                    If groupsTable.Rows(i)("code").ToString() = customerData.ScrapAdjCode Then
+                        GroupsCB.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+            End If
+
+            ' Set TypeCB from TypeCode FK
+            If TypeCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.TypeCode) AndAlso TypeCB.DataSource IsNot Nothing Then
+                Dim typeTable As DataTable = CType(TypeCB.DataSource, DataTable)
+                For i As Integer = 0 To typeTable.Rows.Count - 1
+                    If typeTable.Rows(i)("fld_code").ToString() = customerData.TypeCode Then
+                        TypeCB.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+            End If
+
+            ' Set CatogeryCB from CategoryCode FK
+            If CatogeryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CategoryCode) AndAlso CatogeryCB.DataSource IsNot Nothing Then
+                Dim categoryTable As DataTable = CType(CatogeryCB.DataSource, DataTable)
+                For i As Integer = 0 To categoryTable.Rows.Count - 1
+                    If categoryTable.Rows(i)("fld_code").ToString() = customerData.CategoryCode Then
+                        CatogeryCB.SelectedIndex = i
+                        Exit For
+                    End If
+                Next
+            End If
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error setting lookup ComboBoxes: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub CustomerSupplierCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CustomerSupplierCB.SelectedIndexChanged
+        ' Handle customer/supplier type selection with code generation
+        Try
+            If CustomerSupplierCB.SelectedItem IsNot Nothing AndAlso Not isNavigating Then
+                ' Generate new code when customer/supplier type changes
+                GenerateAndDisplayNextCode()
             End If
         Catch ex As Exception
             MessageBox.Show("خطأ في تحديد نوع العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1465,6 +1697,60 @@ Public Class Customers
             End If
         Catch ex As Exception
             MessageBox.Show("خطأ في تحديث تسمية الهوية: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Handle ActiveNoActiveCKB checkbox state change
+    Private Sub ActiveNoActiveCKB_CheckedChanged(sender As Object, e As EventArgs) Handles ActiveNoActiveCKB.CheckedChanged
+        Try
+            If CustomerAccountNumberTB IsNot Nothing Then
+                ' Enable/disable CustomerAccountNumberTB based on ActiveNoActiveCKB state
+                CustomerAccountNumberTB.Enabled = ActiveNoActiveCKB.Checked
+
+                If Not ActiveNoActiveCKB.Checked Then
+                    ' Clear the text when disabled
+                    CustomerAccountNumberTB.Text = ""
+                End If
+
+                CustomerAccountNumberTB.Refresh()
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديث حالة رقم الحساب: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Handle VTRAppliedCKB checkbox state change
+    Private Sub VTRAppliedCKB_CheckedChanged(sender As Object, e As EventArgs) Handles VTRAppliedCKB.CheckedChanged
+        Try
+            If VTRnumberTB IsNot Nothing Then
+                ' Disable VTRnumberTB when VTRAppliedCKB is checked
+                VTRnumberTB.Enabled = Not VTRAppliedCKB.Checked
+
+                If VTRAppliedCKB.Checked Then
+                    ' Clear the text when disabled
+                    VTRnumberTB.Text = ""
+                End If
+
+                VTRnumberTB.Refresh()
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديث حالة رقم الضريبة: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Generate and display next available customer/supplier code
+    Private Sub GenerateAndDisplayNextCode()
+        Try
+            If CustomerSupplierCB IsNot Nothing AndAlso CustomerSupplierCB.SelectedItem IsNot Nothing Then
+                Dim isCustomer As Boolean = CustomerSupplierCB.SelectedItem.ToString() = "Customer"
+                Dim nextCode As String = dbConn.GenerateNextCode(isCustomer)
+
+                ' Display the generated code in a suitable control (assuming there's a code display textbox)
+                ' If there's no specific code display control, we could show it in the form title or a label
+                Me.Text = $"العملاء - الكود التالي: {nextCode}"
+            End If
+        Catch ex As Exception
+            MessageBox.Show("خطأ في توليد الكود: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -1556,19 +1842,13 @@ Public Class Customers
         ' Save current customer/supplier data
         SaveCustomerSupplierData()
 
-        ' Refresh customer list after save to include any new records
-        LoadCustomerListForNavigation()
+        ' Refresh customer list after save to include any new records (without loading ComboBox data)
+        RefreshCustomerListOnly()
     End Sub
 
-    Private Sub downCustomerPB_Click(sender As Object, e As EventArgs) Handles downCustomerPB.Click
-        ' Navigate to next customer
-        NavigateToNextCustomer()
-    End Sub
 
-    Private Sub upCustomerPB_Click(sender As Object, e As EventArgs) Handles upCustomerPB.Click
-        ' Navigate to previous customer
-        NavigateToPreviousCustomer()
-    End Sub
+
+
 
     Private Sub LoadCustomerListForNavigation()
         Try
@@ -1591,12 +1871,84 @@ Public Class Customers
         End Try
     End Sub
 
+    ' Refresh customer list without loading ComboBox data or changing current customer
+    Private Sub RefreshCustomerListOnly()
+        Try
+            ' Store current customer code
+            Dim currentCode As String = ""
+            If currentCustomerIndex >= 0 AndAlso currentCustomerIndex < customerList.Count Then
+                currentCode = customerList(currentCustomerIndex)
+            End If
+
+            ' Reload customer list from database
+            customerList = dbConn.GetAllCustomerSupplierCodes()
+
+            ' Try to find the current customer in the updated list
+            If Not String.IsNullOrEmpty(currentCode) Then
+                For i As Integer = 0 To customerList.Count - 1
+                    If customerList(i) = currentCode Then
+                        currentCustomerIndex = i
+                        Exit For
+                    End If
+                Next
+
+                ' Update form title
+                Me.Text = $"العملاء - {currentCustomerIndex + 1} من {customerList.Count} - {currentCode}"
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحديث قائمة العملاء: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Initialize navigation without loading first customer data or ComboBox data
+    Private Sub InitializeNavigationOnly()
+        Try
+            ' Load all customer/supplier codes from database
+            customerList = dbConn.GetAllCustomerSupplierCodes()
+
+            ' Set navigation index but don't load customer data yet
+            If customerList.Count > 0 Then
+                currentCustomerIndex = 0
+                ' Show navigation info without loading data
+                Me.Text = $"العملاء - {currentCustomerIndex + 1} من {customerList.Count} - (استخدم أزرار التنقل لتحميل البيانات)"
+            Else
+                currentCustomerIndex = -1
+                Me.Text = "العملاء - لا توجد بيانات"
+                MessageBox.Show("لا توجد عملاء/موردين في قاعدة البيانات", "لا توجد بيانات", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تهيئة قائمة العملاء: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' Load all ComboBox data (called only during navigation)
+    Private Sub LoadAllComboBoxData()
+        Try
+            ' Load countries into CountryCB
+            LoadCountries()
+
+            ' Load additional ComboBoxes
+            LoadMarketData()
+            LoadCategoryData()
+            LoadGroupsData()
+            LoadTypeData()
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في تحميل بيانات القوائم المنسدلة: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
     Private Sub NavigateToNextCustomer()
         Try
             If customerList.Count = 0 Then
                 MessageBox.Show("لا توجد سجلات عملاء/موردين.", "لا توجد سجلات", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
+
+            ' Load ComboBox data first (only when navigating)
+            LoadAllComboBoxData()
 
             ' Move to next customer (with wrapping)
             currentCustomerIndex += 1
@@ -1617,6 +1969,9 @@ Public Class Customers
                 MessageBox.Show("لا توجد سجلات عملاء/موردين.", "لا توجد سجلات", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
+
+            ' Load ComboBox data first (only when navigating)
+            LoadAllComboBoxData()
 
             ' Move to previous customer (with wrapping)
             currentCustomerIndex -= 1
@@ -1658,6 +2013,67 @@ Public Class Customers
                                 Exit For
                             End If
                         Next
+                    End If
+
+                    ' Analyze code prefix and set CustomerSupplierCB accordingly
+                    If Not String.IsNullOrEmpty(customerData.Code) Then
+                        If customerData.Code.ToUpper().StartsWith("C") Then
+                            ' Code starts with C - set to Customer (first item, index 0)
+                            If CustomerSupplierCB IsNot Nothing AndAlso CustomerSupplierCB.Items.Count > 0 Then
+                                CustomerSupplierCB.SelectedIndex = 0
+                            End If
+                        ElseIf customerData.Code.ToUpper().StartsWith("S") Then
+                            ' Code starts with S - set to Supplier (second item, index 1)
+                            If CustomerSupplierCB IsNot Nothing AndAlso CustomerSupplierCB.Items.Count > 1 Then
+                                CustomerSupplierCB.SelectedIndex = 1
+                            End If
+                        End If
+                    End If
+
+                    ' Handle ActiveNoActiveCKB checkbox and CustomerAccountNumberTB state
+                    If ActiveNoActiveCKB IsNot Nothing Then
+                        ' Set ActiveNoActiveCKB based on database active column
+                        ActiveNoActiveCKB.Checked = customerData.Active
+                        ActiveNoActiveCKB.Refresh()
+
+                        ' Enable/disable CustomerAccountNumberTB based on Active status
+                        If CustomerAccountNumberTB IsNot Nothing Then
+                            CustomerAccountNumberTB.Enabled = customerData.Active
+                            If customerData.Active Then
+                                ' Populate the CustomerAccountNumberTB if Active is true
+                                CustomerAccountNumberTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                            Else
+                                ' Clear the field if Active is false
+                                CustomerAccountNumberTB.Text = ""
+                            End If
+                            CustomerAccountNumberTB.Refresh()
+                        End If
+                    End If
+
+                    ' Handle VTRAppliedCKB checkbox enablement based on CustomerAccountNumberTB data
+                    If VTRAppliedCKB IsNot Nothing Then
+                        ' Check if CustomerAccountNumberTB contains data to determine if VTRAppliedCKB should be enabled
+                        Dim hasCustomerAccountData As Boolean = False
+                        If CustomerAccountNumberTB IsNot Nothing Then
+                            hasCustomerAccountData = Not String.IsNullOrEmpty(CustomerAccountNumberTB.Text.Trim())
+                        End If
+
+                        If hasCustomerAccountData Then
+                            ' Enable VTRAppliedCKB when CustomerAccountNumberTB has data
+                            VTRAppliedCKB.Enabled = True
+                        Else
+                            ' Disable VTRAppliedCKB if CustomerAccountNumberTB has no data
+                            VTRAppliedCKB.Enabled = False
+                            VTRAppliedCKB.Checked = False
+                        End If
+                        VTRAppliedCKB.Refresh()
+
+                        ' Handle VTRnumberTB state based on VTRAppliedCKB
+                        If VTRnumberTB IsNot Nothing Then
+                            ' Disable VTRnumberTB when VTRAppliedCKB is checked
+                            VTRnumberTB.Enabled = Not VTRAppliedCKB.Checked
+                            VTRnumberTB.Refresh()
+                        End If
                     End If
 
                     ' Populate all text fields with data
@@ -1731,11 +2147,22 @@ Public Class Customers
                     If ActiveNoActiveCKB IsNot Nothing Then
                         ActiveNoActiveCKB.Checked = False ' Default value, no field mapping specified
                         ActiveNoActiveCKB.Refresh()
+
+                        ' Ensure CustomerAccountNumberTB is disabled when ActiveNoActiveCKB is unchecked
+                        If CustomerAccountNumberTB IsNot Nothing Then
+                            CustomerAccountNumberTB.Enabled = False
+                        End If
                     End If
 
                     If VTRAppliedCKB IsNot Nothing Then
-                        VTRAppliedCKB.Checked = False ' Default value, no field mapping specified  
+                        VTRAppliedCKB.Checked = False ' Default value, no field mapping specified
+                        VTRAppliedCKB.Enabled = False ' Default disabled until CustomerAccountNumberTB has data
                         VTRAppliedCKB.Refresh()
+
+                        ' Ensure VTRnumberTB is enabled when VTRAppliedCKB is unchecked (default state)
+                        If VTRnumberTB IsNot Nothing Then
+                            VTRnumberTB.Enabled = Not VTRAppliedCKB.Checked ' True since VTRAppliedCKB is unchecked by default
+                        End If
                     End If
 
                     If phoneNumber1TB IsNot Nothing Then
@@ -1781,26 +2208,62 @@ Public Class Customers
                     ' Set country ComboBox
                     If Not String.IsNullOrEmpty(customerData.Country) AndAlso CountryCB IsNot Nothing AndAlso CountryCB.DataSource IsNot Nothing Then
                         Dim countryTable As DataTable = CType(CountryCB.DataSource, DataTable)
+                        Dim countryFound As Boolean = False
                         For i As Integer = 0 To countryTable.Rows.Count - 1
                             If countryTable.Rows(i)("countrycode").ToString() = customerData.Country Then
                                 CountryCB.SelectedIndex = i
                                 ' Load areas for this country
                                 LoadAreas(customerData.Country)
+                                countryFound = True
                                 Exit For
                             End If
                         Next
+
+                        ' If country not found in the list, clear the selection
+                        If Not countryFound Then
+                            CountryCB.SelectedIndex = -1
+                            CountryCB.Text = ""
+                        End If
+                    Else
+                        ' Country is empty or null - clear country and area selections
+                        If CountryCB IsNot Nothing Then
+                            CountryCB.SelectedIndex = -1
+                            CountryCB.Text = ""
+                        End If
+                        If AreaCB IsNot Nothing Then
+                            AreaCB.DataSource = Nothing
+                            AreaCB.Tag = Nothing
+                            AreaCB.Text = ""
+                        End If
                     End If
 
                     ' Set area ComboBox  
                     If Not String.IsNullOrEmpty(customerData.Area) AndAlso AreaCB IsNot Nothing AndAlso AreaCB.DataSource IsNot Nothing Then
                         Dim areaTable As DataTable = CType(AreaCB.DataSource, DataTable)
+                        Dim areaFound As Boolean = False
                         For i As Integer = 0 To areaTable.Rows.Count - 1
                             If areaTable.Rows(i)("description").ToString() = customerData.Area Then
                                 AreaCB.SelectedIndex = i
+                                areaFound = True
                                 Exit For
                             End If
                         Next
+
+                        ' If area not found in the list, clear the selection
+                        If Not areaFound Then
+                            AreaCB.SelectedIndex = -1
+                            AreaCB.Text = ""
+                        End If
+                    Else
+                        ' Area is empty - clear area selection if no country was set above
+                        If AreaCB IsNot Nothing AndAlso String.IsNullOrEmpty(customerData.Country) Then
+                            AreaCB.SelectedIndex = -1
+                            AreaCB.Text = ""
+                        End If
                     End If
+
+                    ' Set lookup ComboBoxes from FK fields
+                    SetLookupComboBoxes(customerData)
 
                     ' Force form refresh
                     Me.Refresh()
@@ -1840,9 +2303,9 @@ Public Class Customers
                 customerData.IsUpdate = True
                 customerData.Code = customerData.ExistingCode
             Else
-                ' We're creating a new customer
+                ' We're creating a new customer with C/S prefix auto-increment
                 Dim isCustomer As Boolean = CustomerSupplierCB.SelectedItem?.ToString() = "Customer"
-                customerData.Code = dbConn.GenerateNextCode(isCustomer)
+                customerData.Code = dbConn.GenerateNextCode(isCustomer) ' This will generate C0001, C0002... or S0001, S0002...
                 customerData.IsUpdate = False
             End If
 
@@ -1879,24 +2342,53 @@ Public Class Customers
                 customerData.IdentityType = IdentityCommercialNameOptionCB.SelectedItem.ToString()
 
                 If customerData.IdentityType = "فردي" Then
-                    ' Individual - save to fld_indvl_id_no
+                    ' Individual - save CommercialRecordAndIdentityTB value to fld_indvl_id_no field
                     customerData.IndividualID = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
-                    ' CustomerAccountNumberTB also maps to fld_cr_no per specification, but for Individual it should be empty
-                    customerData.CommercialRecord = If(CustomerAccountNumberTB IsNot Nothing, CustomerAccountNumberTB.Text.Trim(), "")
+                    ' Clear commercial record field for individual type
+                    customerData.CommercialRecord = ""
                 ElseIf customerData.IdentityType = "تجاري" Then
-                    ' Commercial - save to fld_cr_no (both CommercialRecordAndIdentityTB and CustomerAccountNumberTB map to this)
-                    Dim commercialRecordValue As String = ""
-                    If CommercialRecordAndIdentityTB IsNot Nothing AndAlso Not String.IsNullOrEmpty(CommercialRecordAndIdentityTB.Text.Trim()) Then
-                        commercialRecordValue = CommercialRecordAndIdentityTB.Text.Trim()
-                    ElseIf CustomerAccountNumberTB IsNot Nothing AndAlso Not String.IsNullOrEmpty(CustomerAccountNumberTB.Text.Trim()) Then
-                        commercialRecordValue = CustomerAccountNumberTB.Text.Trim()
-                    End If
-                    customerData.CommercialRecord = commercialRecordValue
+                    ' Commercial - save CommercialRecordAndIdentityTB value to fld_cr_no field
+                    customerData.CommercialRecord = If(CommercialRecordAndIdentityTB IsNot Nothing, CommercialRecordAndIdentityTB.Text.Trim(), "")
+                    ' Clear individual ID field for commercial type
                     customerData.IndividualID = ""
                 End If
+            End If
 
+            ' Handle Active status based on ActiveNoActiveCKB checkbox
+            customerData.Active = If(ActiveNoActiveCKB IsNot Nothing, ActiveNoActiveCKB.Checked, False)
 
+            ' Map ComboBox selections to FK fields for CustomerAccountsMaster
+            ' SalesMan from MarketCB (CusTransactionMaster.fld_area_code)
+            If MarketCB IsNot Nothing AndAlso MarketCB.SelectedValue IsNot Nothing Then
+                customerData.SalesMan = MarketCB.SelectedValue.ToString()
+            End If
 
+            ' ScrapAdjCode from GroupsCB (CusGradeMaster.code)
+            If GroupsCB IsNot Nothing AndAlso GroupsCB.SelectedValue IsNot Nothing Then
+                customerData.ScrapAdjCode = GroupsCB.SelectedValue.ToString()
+            End If
+
+            ' TypeCode from TypeCB (CustomerType.fld_code)
+            If TypeCB IsNot Nothing AndAlso TypeCB.SelectedValue IsNot Nothing Then
+                customerData.TypeCode = TypeCB.SelectedValue.ToString()
+            End If
+
+            ' CategoryCode from CatogeryCB (CustomerCategory.fld_code)
+            If CatogeryCB IsNot Nothing AndAlso CatogeryCB.SelectedValue IsNot Nothing Then
+                customerData.CategoryCode = CatogeryCB.SelectedValue.ToString()
+            End If
+
+            ' Handle VTRAppliedCKB enablement based on CustomerAccountNumberTB data when inserting
+            If VTRAppliedCKB IsNot Nothing And CustomerAccountNumberTB IsNot Nothing Then
+                Dim hasCustomerAccountData As Boolean = Not String.IsNullOrEmpty(CustomerAccountNumberTB.Text.Trim())
+                If Not hasCustomerAccountData Then
+                    ' If no customer account data, disable VTRAppliedCKB
+                    VTRAppliedCKB.Enabled = False
+                    VTRAppliedCKB.Checked = False
+                Else
+                    ' If customer account data exists, enable VTRAppliedCKB
+                    VTRAppliedCKB.Enabled = True
+                End If
             End If
 
             ' Save to database
@@ -1918,6 +2410,90 @@ Public Class Customers
         Catch ex As Exception
             MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
+    End Sub
+
+    Private Sub upCustomerPB_Click(sender As Object, e As EventArgs)
+        ' Navigate to previous customer
+        MessageBox.Show("HIIII")
+
+        NavigateToPreviousCustomer()
+    End Sub
+
+    Private Sub AddAttachmentsBT_Click(sender As Object, e As EventArgs) Handles AddAttachmentsBT.Click
+        AttachmentsManagement.Show()
+
+        ' Check if a customer is selected - if not, show search dialog first
+        '  If currentSelectedCustomerId = 0 Then
+        ' No customer selected - show customer search dialog
+        '  Dim searchForm As New CustomerSearchForm
+
+        ' If searchForm.ShowDialog = DialogResult.OK Then
+        ' Customer was selected from search - store customer info
+        '     currentSelectedCustomerId = searchForm.SelectedCustomerId
+        '    currentSelectedCustomerName = searchForm.SelectedCustomerName
+        '  End If
+        '
+        ' searchForm.Dispose()
+        '  End If
+
+        ' Open attachments management (regardless of customer selection)
+
+    End Sub
+
+
+
+    Private Sub UpCustomersPB_Click(sender As Object, e As EventArgs) Handles UpCustomersPB.Click
+        NavigateToNextCustomer()
+    End Sub
+
+    Private Sub downCustomersPB_Click(sender As Object, e As EventArgs) Handles downCustomersPB.Click
+        NavigateToPreviousCustomer()
+
+    End Sub
+
+    Private Sub refreshPB_Click(sender As Object, e As EventArgs) Handles refreshPB.Click
+
+        IdentityCommercialNameOptionCB.Text = ""
+        CustomerAccountNumberTB.Text = ""
+        NameInEnglishTB.Text = ""
+        AddressTA.Text = ""
+        ManagerTB.Text = ""
+        ManagerIDTB.Text = ""
+        FormalNameTB.Text = ""
+        CommercialNameTB.Text = ""
+        VTRnumberTB.Text = ""
+        emailTB.Text = ""
+        phoneNumber1TB.Text = ""
+        phoneNumber1ZipCodeTB.Text = ""
+        phoneNumber2TB.Text = ""
+        telephoneNumberTB.Text = ""
+        telephoneNumberZipcodeTB.Text = ""
+        FaxNumberTB.Text = ""
+        ReferralNumberTB.Text = ""
+
+        ' CheckBoxes
+        ActiveNoActiveCKB.Checked = False
+        VTRAppliedCKB.Checked = False
+        VTRAppliedCKB.Enabled = False ' Disable until CustomerAccountNumberTB has data
+
+        ' Ensure CustomerAccountNumberTB is disabled when form is cleared
+        If CustomerAccountNumberTB IsNot Nothing Then
+            CustomerAccountNumberTB.Enabled = False
+        End If
+
+        ' Ensure VTRnumberTB is enabled when form is cleared (since VTRAppliedCKB is unchecked)
+        If VTRnumberTB IsNot Nothing Then
+            VTRnumberTB.Enabled = True
+        End If
+
+        ' ComboBoxes - reset to defaults
+        If CustomerSupplierCB IsNot Nothing Then CustomerSupplierCB.SelectedIndex = 0 ' Default to Customer
+        If IdentityCommercialNameOptionCB IsNot Nothing Then
+            IdentityCommercialNameOptionCB.SelectedIndex = 0 ' Default to فردي
+            UpdateIdentityLabel("فردي")
+        End If
+        CountryCB.SelectedIndex = -1
+        AreaCB.SelectedIndex = -1
     End Sub
 
 

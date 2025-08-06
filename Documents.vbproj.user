@@ -7,6 +7,9 @@
     <Compile Update="AutoCloseMessageForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Customers.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="CustomerSearchForm.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -17,9 +20,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="DocumentUpdateForm.vb">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Customers.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Login.vb">

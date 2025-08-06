@@ -21,6 +21,13 @@ Public Class CustomerSupplierData
     Public Property IndividualID As String = ""
     Public Property CommercialRecord As String = ""
     Public Property IdentityType As String = "" ' "فردي" or "تجاري"
+    Public Property Active As Boolean = False ' Active status for VTRAppliedCKB
+    
+    ' Foreign Key fields for CustomerAccountsMaster
+    Public Property SalesMan As String = "" ' FK from CusTransactionMaster.fld_area_code
+    Public Property ScrapAdjCode As String = "" ' FK from CusGradeMaster.code
+    Public Property TypeCode As String = "" ' FK from CustomerType.fld_code
+    Public Property CategoryCode As String = "" ' FK from CustomerCategory.fld_code
     
     ' Control properties
     Public Property IsUpdate As Boolean = False

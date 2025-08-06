@@ -18,7 +18,7 @@ Public Class AutoCloseMessageForm
         messageLabel.BackColor = Color.Transparent
         messageLabel.Font = New Font("Segoe UI", 12.0F, FontStyle.Bold)
         messageLabel.ForeColor = Color.DarkGreen
-        messageLabel.Location = New Point(15, 20)
+        messageLabel.Location = New Point(7, 9)
         messageLabel.Name = "messageLabel"
         messageLabel.Size = New Size(320, 60)
         messageLabel.TabIndex = 0

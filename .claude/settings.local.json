@@ -9,7 +9,8 @@
       "Bash(timeout 5 dotnet run --project Documents.vbproj)",
       "Bash(dotnet clean:*)",
       "Bash(timeout 3 dotnet run --project Documents.vbproj)",
-      "Bash(timeout 10 dotnet run --project Documents.vbproj)"
+      "Bash(timeout 10 dotnet run --project Documents.vbproj)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

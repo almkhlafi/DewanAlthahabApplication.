@@ -6,6 +6,21 @@ Public Class DBconnections
     Dim connpath As String = "Data Source=ABDULRAHMAN;Initial Catalog=EmployeesDB;Integrated Security=True;TrustServerCertificate=True"
     Dim connpath2 As String = "Data Source=192.168.15.56;Initial Catalog=CMGADB2024;Persist Security Info=True;User ID=AR;Pooling=False;Multiple Active Result Sets=False;Encrypt=True;Trust Server Certificate=True;Application Name=""SQL Server Management Studio"";Command Timeout=30;Password=123456"
 
+    ' Helper method to truncate strings to prevent database field length errors
+    Private Function TruncateString(value As String, maxLength As Integer) As Object
+        If String.IsNullOrEmpty(value) Then
+            Return DBNull.Value
+        End If
+
+        If value.Length <= maxLength Then
+            Return value
+        Else
+            ' Log which field is being truncated for debugging
+            System.Diagnostics.Debug.WriteLine($"Truncating field from {value.Length} to {maxLength} characters: {value.Substring(0, Math.Min(50, value.Length))}...")
+            Return value.Substring(0, maxLength)
+        End If
+    End Function
+
     '===============Reuse the connection=============
     ' Reusable method to get a new connection (default - first connection)
     Public Function GetConnection() As SqlConnection
@@ -2175,31 +2190,42 @@ ORDER BY p.Name"
             cmd = New SqlCommand(query, conn)
 
             ' Add parameters
-            cmd.Parameters.AddWithValue("@code", customerData.Code)
-            cmd.Parameters.AddWithValue("@c_type", customerData.CustomerType)
-            cmd.Parameters.AddWithValue("@name", If(String.IsNullOrEmpty(customerData.EnglishName), DBNull.Value, customerData.EnglishName))
-            cmd.Parameters.AddWithValue("@fld_arabic_name", If(String.IsNullOrEmpty(customerData.ArabicName), DBNull.Value, customerData.ArabicName))
-            cmd.Parameters.AddWithValue("@shortname", If(String.IsNullOrEmpty(customerData.CommercialName), DBNull.Value, customerData.CommercialName))
-            cmd.Parameters.AddWithValue("@bussiness_address", If(String.IsNullOrEmpty(customerData.Address), DBNull.Value, customerData.Address))
-            cmd.Parameters.AddWithValue("@acc_manager", If(String.IsNullOrEmpty(customerData.Manager), DBNull.Value, customerData.Manager))
-            cmd.Parameters.AddWithValue("@bank_acc_name", If(String.IsNullOrEmpty(customerData.ManagerID), DBNull.Value, customerData.ManagerID))
-            cmd.Parameters.AddWithValue("@bank_acc_no", If(String.IsNullOrEmpty(customerData.ManagerNumber), DBNull.Value, customerData.ManagerNumber))
-            cmd.Parameters.AddWithValue("@fld_state", If(String.IsNullOrEmpty(customerData.Country), DBNull.Value, customerData.Country))
-            cmd.Parameters.AddWithValue("@fld_dist", If(String.IsNullOrEmpty(customerData.Area), DBNull.Value, customerData.Area))
-            cmd.Parameters.AddWithValue("@vat_tin_no", If(String.IsNullOrEmpty(customerData.VATNumber), DBNull.Value, customerData.VATNumber))
-            cmd.Parameters.AddWithValue("@email", If(String.IsNullOrEmpty(customerData.Email), DBNull.Value, customerData.Email))
-            cmd.Parameters.AddWithValue("@fld_contry_code_mobile", If(String.IsNullOrEmpty(customerData.MobileCountryCode), DBNull.Value, customerData.MobileCountryCode))
-            cmd.Parameters.AddWithValue("@country", If(String.IsNullOrEmpty(customerData.CountryName), DBNull.Value, customerData.CountryName))
-            cmd.Parameters.AddWithValue("@fld_fax_no", If(String.IsNullOrEmpty(customerData.FaxNumber), DBNull.Value, customerData.FaxNumber))
-            cmd.Parameters.AddWithValue("@fld_ref_no", If(String.IsNullOrEmpty(customerData.ReferralNumber), DBNull.Value, customerData.ReferralNumber))
-            cmd.Parameters.AddWithValue("@fld_indvl_id_no", If(String.IsNullOrEmpty(customerData.IndividualID), DBNull.Value, customerData.IndividualID))
-            cmd.Parameters.AddWithValue("@fld_cr_no", If(String.IsNullOrEmpty(customerData.CommercialRecord), DBNull.Value, customerData.CommercialRecord))
+            cmd.Parameters.AddWithValue("@code", TruncateString(customerData.Code, 10))
+            cmd.Parameters.AddWithValue("@c_type", TruncateString(customerData.CustomerType, 10))
+            cmd.Parameters.AddWithValue("@name", TruncateString(customerData.EnglishName, 50))
+            cmd.Parameters.AddWithValue("@fld_arabic_name", TruncateString(customerData.ArabicName, 50))
+            cmd.Parameters.AddWithValue("@shortname", TruncateString(customerData.CommercialName, 30))
+            cmd.Parameters.AddWithValue("@bussiness_address", TruncateString(customerData.Address, 200))
+            cmd.Parameters.AddWithValue("@acc_manager", TruncateString(customerData.Manager, 50))
+            cmd.Parameters.AddWithValue("@bank_acc_name", TruncateString(customerData.ManagerID, 30))
+            cmd.Parameters.AddWithValue("@bank_acc_no", TruncateString(customerData.ManagerNumber, 30))
+            cmd.Parameters.AddWithValue("@fld_state", TruncateString(customerData.Country, 5))
+            cmd.Parameters.AddWithValue("@fld_dist", TruncateString(customerData.Area, 50))
+            cmd.Parameters.AddWithValue("@vat_tin_no", TruncateString(customerData.VATNumber, 15))
+            cmd.Parameters.AddWithValue("@email", TruncateString(customerData.Email, 50))
+            cmd.Parameters.AddWithValue("@fld_contry_code_mobile", TruncateString(customerData.MobileCountryCode, 5))
+            cmd.Parameters.AddWithValue("@country", TruncateString(customerData.CountryName, 500))
+            cmd.Parameters.AddWithValue("@fld_fax_no", TruncateString(customerData.FaxNumber, 15))
+            cmd.Parameters.AddWithValue("@fld_ref_no", TruncateString(customerData.ReferralNumber, 15))
+            cmd.Parameters.AddWithValue("@fld_indvl_id_no", TruncateString(customerData.IndividualID, 15))
+            cmd.Parameters.AddWithValue("@fld_cr_no", TruncateString(customerData.CommercialRecord, 15))
 
             Dim result As Integer = cmd.ExecuteNonQuery()
             Return result > 0
 
         Catch ex As Exception
-            MessageBox.Show("خطأ في حفظ بيانات العميل/المورد: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            ' Log detailed error information for debugging
+            System.Diagnostics.Debug.WriteLine($"Database error: {ex.Message}")
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}")
+
+            Dim errorMsg As String = "خطأ في حفظ بيانات العميل/المورد: " & ex.Message
+
+            ' Check if it's a truncation error and provide helpful message
+            If ex.Message.Contains("truncated") OrElse ex.Message.Contains("String or binary data would be truncated") Then
+                errorMsg = "خطأ في حفظ البيانات: أحد الحقول يحتوي على نص طويل جداً. تم تقليل طول النص إلى الحد المسموح. يرجى المحاولة مرة أخرى." & vbCrLf & vbCrLf & "التفاصيل التقنية: " & ex.Message
+            End If
+
+            MessageBox.Show(errorMsg, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         Finally
             If cmd IsNot Nothing Then cmd.Dispose()
@@ -2210,73 +2236,6 @@ ORDER BY p.Name"
         End Try
     End Function
 
-    ' Load Customer/Supplier by code
-    Public Function GetCustomerSupplierByCode(code As String) As CustomerSupplierData
-        Dim conn As SqlConnection = Nothing
-        Dim cmd As SqlCommand = Nothing
-        Dim reader As SqlDataReader = Nothing
-        Dim customerData As New CustomerSupplierData()
-
-        Try
-            conn = GetConnection2() ' Use CMGADB2024 database
-            conn.Open()
-
-            Dim query As String = "SELECT * FROM [CustomerAccountsMaster] WHERE code = @code"
-            cmd = New SqlCommand(query, conn)
-            cmd.Parameters.AddWithValue("@code", code)
-
-            reader = cmd.ExecuteReader()
-
-            If reader.Read() Then
-                Try
-                    customerData.Code = If(reader("code") IsNot DBNull.Value, reader("code").ToString(), "")
-                    customerData.CustomerType = If(reader("c_type") IsNot DBNull.Value, reader("c_type").ToString(), "")
-                    customerData.EnglishName = If(reader("name") IsNot DBNull.Value, reader("name").ToString(), "")
-                    customerData.ArabicName = If(reader("fld_arabic_name") IsNot DBNull.Value, reader("fld_arabic_name").ToString(), "")
-                    customerData.CommercialName = If(reader("shortname") IsNot DBNull.Value, reader("shortname").ToString(), "")
-                    customerData.Address = If(reader("bussiness_address") IsNot DBNull.Value, reader("bussiness_address").ToString(), "")
-                    customerData.Manager = If(reader("acc_manager") IsNot DBNull.Value, reader("acc_manager").ToString(), "")
-                    customerData.ManagerID = If(reader("bank_acc_name") IsNot DBNull.Value, reader("bank_acc_name").ToString(), "")
-                    customerData.ManagerNumber = If(reader("bank_acc_no") IsNot DBNull.Value, reader("bank_acc_no").ToString(), "")
-                    customerData.Country = If(reader("fld_state") IsNot DBNull.Value, reader("fld_state").ToString(), "")
-                    customerData.Area = If(reader("fld_dist") IsNot DBNull.Value, reader("fld_dist").ToString(), "")
-                    customerData.VATNumber = If(reader("vat_tin_no") IsNot DBNull.Value, reader("vat_tin_no").ToString(), "")
-                    customerData.Email = If(reader("email") IsNot DBNull.Value, reader("email").ToString(), "")
-                    customerData.MobileCountryCode = If(reader("fld_contry_code_mobile") IsNot DBNull.Value, reader("fld_contry_code_mobile").ToString(), "")
-                    customerData.CountryName = If(reader("country") IsNot DBNull.Value, reader("country").ToString(), "")
-                    customerData.FaxNumber = If(reader("fld_fax_no") IsNot DBNull.Value, reader("fld_fax_no").ToString(), "")
-                    customerData.ReferralNumber = If(reader("fld_ref_no") IsNot DBNull.Value, reader("fld_ref_no").ToString(), "")
-                    customerData.IndividualID = If(reader("fld_indvl_id_no") IsNot DBNull.Value, reader("fld_indvl_id_no").ToString(), "")
-                    customerData.CommercialRecord = If(reader("fld_cr_no") IsNot DBNull.Value, reader("fld_cr_no").ToString(), "")
-
-                    ' Try to read identity_type field with error handling
-                    Try
-                        customerData.IdentityType = If(reader("identity_type") IsNot DBNull.Value, reader("identity_type").ToString(), "فردي")
-                    Catch ex As Exception
-                        ' Field might not exist or have different name, set default value
-                        customerData.IdentityType = "فردي"
-                    End Try
-
-                    customerData.IsUpdate = True
-                    customerData.ExistingCode = code
-                Catch fieldEx As Exception
-                    Throw New Exception($"خطأ في قراءة الحقل: {fieldEx.Message}")
-                End Try
-            End If
-
-        Catch ex As Exception
-            MessageBox.Show("خطأ في تحميل بيانات العميل/المورد: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        Finally
-            If reader IsNot Nothing Then reader.Close()
-            If cmd IsNot Nothing Then cmd.Dispose()
-            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
-                conn.Close()
-                conn.Dispose()
-            End If
-        End Try
-
-        Return customerData
-    End Function
 
     ' Get all customer/supplier codes for navigation
     Public Function GetAllCustomerSupplierCodes() As List(Of String)
@@ -2311,6 +2270,354 @@ ORDER BY p.Name"
         End Try
 
         Return codes
+    End Function
+
+    ' =====================Lookup Methods for ComboBoxes========================
+    
+    ' Load data from CusTransactionMaster table
+    Public Function LoadCusTransactionMaster() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            ' Create the basic structure
+            dt.Columns.Add("fld_area_code", GetType(String))
+            dt.Columns.Add("DisplayText", GetType(String))
+            dt.Columns.Add("Description", GetType(String))
+            
+            conn.Open()
+            
+            ' Try to get data with description if available
+            Dim query As String = "SELECT DISTINCT fld_area_code, 
+                CASE 
+                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CusTransactionMaster' AND COLUMN_NAME = 'description')
+                    THEN COALESCE(description, fld_area_code)
+                    ELSE fld_area_code
+                END as description
+                FROM CusTransactionMaster 
+                WHERE fld_area_code IS NOT NULL 
+                ORDER BY fld_area_code"
+            
+            cmd = New SqlCommand(query, conn)
+            Dim reader As SqlDataReader = cmd.ExecuteReader()
+            
+            While reader.Read()
+                Dim row As DataRow = dt.NewRow()
+                Dim areaCode As String = If(reader("fld_area_code") Is DBNull.Value, "", reader("fld_area_code").ToString().Trim())
+                Dim description As String = If(reader("description") Is DBNull.Value, areaCode, reader("description").ToString().Trim())
+                
+                row("fld_area_code") = areaCode
+                row("Description") = description
+                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = areaCode, areaCode, $"{areaCode} - {description}")
+                dt.Rows.Add(row)
+            End While
+            
+            reader.Close()
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading CusTransactionMaster: " & ex.Message)
+            ' Add a default empty row to prevent binding errors
+            If dt.Rows.Count = 0 Then
+                Dim emptyRow As DataRow = dt.NewRow()
+                emptyRow("fld_area_code") = ""
+                emptyRow("Description") = ""
+                emptyRow("DisplayText") = "لا توجد بيانات"
+                dt.Rows.Add(emptyRow)
+            End If
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing Then
+                If conn.State = ConnectionState.Open Then conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+        
+        Return dt
+    End Function
+
+    ' Load data from CusGradeMaster table
+    Public Function LoadCusGradeMaster() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            ' Create the basic structure
+            dt.Columns.Add("code", GetType(String))
+            dt.Columns.Add("DisplayText", GetType(String))
+            dt.Columns.Add("Description", GetType(String))
+            
+            conn.Open()
+            
+            ' Try to get data with description if available
+            Dim query As String = "SELECT DISTINCT code, 
+                CASE 
+                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CusGradeMaster' AND COLUMN_NAME = 'description')
+                    THEN COALESCE(description, code)
+                    ELSE code
+                END as description
+                FROM CusGradeMaster 
+                WHERE code IS NOT NULL 
+                ORDER BY code"
+            
+            cmd = New SqlCommand(query, conn)
+            Dim reader As SqlDataReader = cmd.ExecuteReader()
+            
+            While reader.Read()
+                Dim row As DataRow = dt.NewRow()
+                Dim code As String = If(reader("code") Is DBNull.Value, "", reader("code").ToString().Trim())
+                Dim description As String = If(reader("description") Is DBNull.Value, code, reader("description").ToString().Trim())
+                
+                row("code") = code
+                row("Description") = description
+                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = code, code, $"{code} - {description}")
+                dt.Rows.Add(row)
+            End While
+            
+            reader.Close()
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading CusGradeMaster: " & ex.Message)
+            ' Add a default empty row to prevent binding errors
+            If dt.Rows.Count = 0 Then
+                Dim emptyRow As DataRow = dt.NewRow()
+                emptyRow("code") = ""
+                emptyRow("Description") = ""
+                emptyRow("DisplayText") = "لا توجد بيانات"
+                dt.Rows.Add(emptyRow)
+            End If
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing Then
+                If conn.State = ConnectionState.Open Then conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+        
+        Return dt
+    End Function
+
+    ' Load data from CustomerType table
+    Public Function LoadCustomerType() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            ' Create the basic structure
+            dt.Columns.Add("fld_code", GetType(String))
+            dt.Columns.Add("DisplayText", GetType(String))
+            dt.Columns.Add("Description", GetType(String))
+            
+            conn.Open()
+            
+            ' Try to get data with description if available
+            Dim query As String = "SELECT DISTINCT fld_code, 
+                CASE 
+                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CustomerType' AND COLUMN_NAME = 'description')
+                    THEN COALESCE(description, fld_code)
+                    ELSE fld_code
+                END as description
+                FROM CustomerType 
+                WHERE fld_code IS NOT NULL 
+                ORDER BY fld_code"
+            
+            cmd = New SqlCommand(query, conn)
+            Dim reader As SqlDataReader = cmd.ExecuteReader()
+            
+            While reader.Read()
+                Dim row As DataRow = dt.NewRow()
+                Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
+                Dim description As String = If(reader("description") Is DBNull.Value, fldCode, reader("description").ToString().Trim())
+                
+                row("fld_code") = fldCode
+                row("Description") = description
+                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = fldCode, fldCode, $"{fldCode} - {description}")
+                dt.Rows.Add(row)
+            End While
+            
+            reader.Close()
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading CustomerType: " & ex.Message)
+            ' Add a default empty row to prevent binding errors
+            If dt.Rows.Count = 0 Then
+                Dim emptyRow As DataRow = dt.NewRow()
+                emptyRow("fld_code") = ""
+                emptyRow("Description") = ""
+                emptyRow("DisplayText") = "لا توجد بيانات"
+                dt.Rows.Add(emptyRow)
+            End If
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing Then
+                If conn.State = ConnectionState.Open Then conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+        
+        Return dt
+    End Function
+
+    ' Load data from CustomerCategory table
+    Public Function LoadCustomerCategory() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            ' Create the basic structure
+            dt.Columns.Add("fld_code", GetType(String))
+            dt.Columns.Add("DisplayText", GetType(String))
+            dt.Columns.Add("Description", GetType(String))
+            
+            conn.Open()
+            
+            ' Try to get data with description if available
+            Dim query As String = "SELECT DISTINCT fld_code, 
+                CASE 
+                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CustomerCategory' AND COLUMN_NAME = 'description')
+                    THEN COALESCE(description, fld_code)
+                    ELSE fld_code
+                END as description
+                FROM CustomerCategory 
+                WHERE fld_code IS NOT NULL 
+                ORDER BY fld_code"
+            
+            cmd = New SqlCommand(query, conn)
+            Dim reader As SqlDataReader = cmd.ExecuteReader()
+            
+            While reader.Read()
+                Dim row As DataRow = dt.NewRow()
+                Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
+                Dim description As String = If(reader("description") Is DBNull.Value, fldCode, reader("description").ToString().Trim())
+                
+                row("fld_code") = fldCode
+                row("Description") = description
+                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = fldCode, fldCode, $"{fldCode} - {description}")
+                dt.Rows.Add(row)
+            End While
+            
+            reader.Close()
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading CustomerCategory: " & ex.Message)
+            ' Add a default empty row to prevent binding errors
+            If dt.Rows.Count = 0 Then
+                Dim emptyRow As DataRow = dt.NewRow()
+                emptyRow("fld_code") = ""
+                emptyRow("Description") = ""
+                emptyRow("DisplayText") = "لا توجد بيانات"
+                dt.Rows.Add(emptyRow)
+            End If
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing Then
+                If conn.State = ConnectionState.Open Then conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+        
+        Return dt
+    End Function
+
+    ' Load data from AreaMaster table (if different from existing Area logic)
+    Public Function LoadAreaMaster() As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            cmd = New SqlCommand("SELECT contryCode, contryCode AS DisplayText FROM AreaMaster ORDER BY contryCode", conn)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading AreaMaster: " & ex.Message)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+        
+        Return dt
+    End Function
+
+    ' Load customer/supplier data by code including FK values from CustomerAccountsMaster
+    Public Function GetCustomerSupplierByCode(customerCode As String) As CustomerSupplierData
+        Dim customerData As New CustomerSupplierData()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+            
+            ' Query to get customer data with FK values from CustomerAccountsMaster
+            Dim query As String = "
+                SELECT 
+                    cam.Code, cam.CustomerType, cam.EnglishName, cam.ArabicName, 
+                    cam.CommercialName, cam.Address, cam.Manager, cam.ManagerID, 
+                    cam.ManagerNumber, cam.Country, cam.Area, cam.VATNumber, 
+                    cam.Email, cam.MobileCountryCode, cam.FaxNumber, cam.ReferralNumber,
+                    cam.IndividualID, cam.CommercialRecord, cam.IdentityType, cam.Active,
+                    cam.sales_man, cam.scrap_adj_code, cam.type, cam.categoty
+                FROM CustomerAccountsMaster cam
+                WHERE cam.Code = @CustomerCode"
+            
+            cmd = New SqlCommand(query, conn)
+            cmd.Parameters.AddWithValue("@CustomerCode", customerCode)
+            
+            Dim reader As SqlDataReader = cmd.ExecuteReader()
+            
+            If reader.Read() Then
+                ' Map basic customer data
+                customerData.Code = If(reader("Code") Is DBNull.Value, "", reader("Code").ToString())
+                customerData.CustomerType = If(reader("CustomerType") Is DBNull.Value, "", reader("CustomerType").ToString())
+                customerData.EnglishName = If(reader("EnglishName") Is DBNull.Value, "", reader("EnglishName").ToString())
+                customerData.ArabicName = If(reader("ArabicName") Is DBNull.Value, "", reader("ArabicName").ToString())
+                customerData.CommercialName = If(reader("CommercialName") Is DBNull.Value, "", reader("CommercialName").ToString())
+                customerData.Address = If(reader("Address") Is DBNull.Value, "", reader("Address").ToString())
+                customerData.Manager = If(reader("Manager") Is DBNull.Value, "", reader("Manager").ToString())
+                customerData.ManagerID = If(reader("ManagerID") Is DBNull.Value, "", reader("ManagerID").ToString())
+                customerData.ManagerNumber = If(reader("ManagerNumber") Is DBNull.Value, "", reader("ManagerNumber").ToString())
+                customerData.Country = If(reader("Country") Is DBNull.Value, "", reader("Country").ToString())
+                customerData.Area = If(reader("Area") Is DBNull.Value, "", reader("Area").ToString())
+                customerData.VATNumber = If(reader("VATNumber") Is DBNull.Value, "", reader("VATNumber").ToString())
+                customerData.Email = If(reader("Email") Is DBNull.Value, "", reader("Email").ToString())
+                customerData.MobileCountryCode = If(reader("MobileCountryCode") Is DBNull.Value, "", reader("MobileCountryCode").ToString())
+                customerData.FaxNumber = If(reader("FaxNumber") Is DBNull.Value, "", reader("FaxNumber").ToString())
+                customerData.ReferralNumber = If(reader("ReferralNumber") Is DBNull.Value, "", reader("ReferralNumber").ToString())
+                customerData.IndividualID = If(reader("IndividualID") Is DBNull.Value, "", reader("IndividualID").ToString())
+                customerData.CommercialRecord = If(reader("CommercialRecord") Is DBNull.Value, "", reader("CommercialRecord").ToString())
+                customerData.IdentityType = If(reader("IdentityType") Is DBNull.Value, "", reader("IdentityType").ToString())
+                customerData.Active = If(reader("Active") Is DBNull.Value, False, CBool(reader("Active")))
+                
+                ' Map FK fields from CustomerAccountsMaster
+                customerData.SalesMan = If(reader("sales_man") Is DBNull.Value, "", reader("sales_man").ToString())
+                customerData.ScrapAdjCode = If(reader("scrap_adj_code") Is DBNull.Value, "", reader("scrap_adj_code").ToString())
+                customerData.TypeCode = If(reader("type") Is DBNull.Value, "", reader("type").ToString())
+                customerData.CategoryCode = If(reader("categoty") Is DBNull.Value, "", reader("categoty").ToString())
+            End If
+            
+            reader.Close()
+            
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine("Error loading customer by code: " & ex.Message)
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing Then
+                If conn.State = ConnectionState.Open Then conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+        
+        Return customerData
     End Function
 
 
