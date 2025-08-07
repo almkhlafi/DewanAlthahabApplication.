@@ -2254,9 +2254,13 @@ ORDER BY p.Name"
 
             While reader.Read()
                 If reader("code") IsNot DBNull.Value Then
-                    codes.Add(reader("code").ToString())
+                    Dim code As String = reader("code").ToString()
+                    codes.Add(code)
+                    System.Diagnostics.Debug.WriteLine($"Found customer code: '{code}' (Length: {code.Length})")
                 End If
             End While
+            
+            System.Diagnostics.Debug.WriteLine($"Total customer codes loaded: {codes.Count}")
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل قائمة العملاء/الموردين: " & ex.Message, "خطأ في قاعدة البيانات", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -2558,6 +2562,9 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
             
+            System.Diagnostics.Debug.WriteLine($"GetCustomerSupplierByCode called with code: '{customerCode}' (Length: {customerCode?.Length})")
+            System.Diagnostics.Debug.WriteLine($"Connection string: {connpath2}")
+            
             ' Query to get customer data with FK values from CustomerAccountsMaster
             Dim query As String = "
                 SELECT 
@@ -2573,9 +2580,14 @@ ORDER BY p.Name"
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerCode", customerCode)
             
+            System.Diagnostics.Debug.WriteLine($"Executing query: {query}")
+            System.Diagnostics.Debug.WriteLine($"Parameter @CustomerCode: '{customerCode}'")
+            
             Dim reader As SqlDataReader = cmd.ExecuteReader()
+            System.Diagnostics.Debug.WriteLine("Query executed successfully")
             
             If reader.Read() Then
+                System.Diagnostics.Debug.WriteLine($"Customer record found in database for code: {customerCode}")
                 ' Map basic customer data
                 customerData.Code = If(reader("Code") Is DBNull.Value, "", reader("Code").ToString())
                 customerData.CustomerType = If(reader("CustomerType") Is DBNull.Value, "", reader("CustomerType").ToString())
@@ -2603,12 +2615,14 @@ ORDER BY p.Name"
                 customerData.ScrapAdjCode = If(reader("scrap_adj_code") Is DBNull.Value, "", reader("scrap_adj_code").ToString())
                 customerData.TypeCode = If(reader("type") Is DBNull.Value, "", reader("type").ToString())
                 customerData.CategoryCode = If(reader("categoty") Is DBNull.Value, "", reader("categoty").ToString())
+            Else
+                System.Diagnostics.Debug.WriteLine($"No customer record found in database for code: {customerCode}")
             End If
             
             reader.Close()
             
         Catch ex As Exception
-            System.Diagnostics.Debug.WriteLine("Error loading customer by code: " & ex.Message)
+            System.Diagnostics.Debug.WriteLine($"Error loading customer/supplier '{customerCode}': {ex.Message}")
         Finally
             If cmd IsNot Nothing Then cmd.Dispose()
             If conn IsNot Nothing Then
@@ -2618,6 +2632,48 @@ ORDER BY p.Name"
         End Try
         
         Return customerData
+    End Function
+
+    ' Test method to verify database connectivity and customer data
+    Public Function TestCustomerDataAccess() As String
+        Dim result As New System.Text.StringBuilder()
+        Dim conn As SqlConnection = Nothing
+        
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+            result.AppendLine($"✓ Database connection successful")
+            result.AppendLine($"Connection string: {connpath2}")
+            
+            ' Test 1: Count all records
+            Dim countCmd As New SqlCommand("SELECT COUNT(*) FROM CustomerAccountsMaster", conn)
+            Dim totalCount As Integer = CInt(countCmd.ExecuteScalar())
+            result.AppendLine($"✓ Total records in CustomerAccountsMaster: {totalCount}")
+            
+            ' Test 2: Get first 5 codes
+            Dim codesCmd As New SqlCommand("SELECT TOP 5 Code FROM CustomerAccountsMaster ORDER BY Code", conn)
+            Dim reader As SqlDataReader = codesCmd.ExecuteReader()
+            result.AppendLine("✓ First 5 customer codes:")
+            While reader.Read()
+                Dim code As String = If(reader("Code").ToString(), "[NULL]")
+                result.AppendLine($"  - '{code}' (Length: {code.Length})")
+            End While
+            reader.Close()
+            
+            ' Test 3: Check for empty/null codes
+            Dim nullCountCmd As New SqlCommand("SELECT COUNT(*) FROM CustomerAccountsMaster WHERE Code IS NULL OR Code = ''", conn)
+            Dim nullCount As Integer = CInt(nullCountCmd.ExecuteScalar())
+            result.AppendLine($"✓ Empty/NULL codes: {nullCount}")
+            
+        Catch ex As Exception
+            result.AppendLine($"✗ Error: {ex.Message}")
+        Finally
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+            End If
+        End Try
+        
+        Return result.ToString()
     End Function
 
 

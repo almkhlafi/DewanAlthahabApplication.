@@ -22,13 +22,13 @@ Partial Class Customers
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle1 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim DataGridViewCellStyle2 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
 
+        Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
+        TypeCB = New ComboBox()
         MarketCB = New ComboBox()
         BranchesInfoDGV = New DataGridView()
-        TypeCB = New ComboBox()
         CatogeryCB = New ComboBox()
         GroupsCB = New ComboBox()
         AddressTA = New RichTextBox()
@@ -144,23 +144,23 @@ Partial Class Customers
         CurrencyDGV.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         CurrencyDGV.BackgroundColor = SystemColors.ButtonHighlight
         CurrencyDGV.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None
-        DataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle1.BackColor = SystemColors.Control
-        DataGridViewCellStyle1.Font = New Font("Segoe UI", 9.0F)
-        DataGridViewCellStyle1.ForeColor = SystemColors.WindowText
-        DataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle1.WrapMode = DataGridViewTriState.True
-        CurrencyDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle3.BackColor = SystemColors.Control
+        DataGridViewCellStyle3.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle3.ForeColor = SystemColors.WindowText
+        DataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle3.WrapMode = DataGridViewTriState.True
+        CurrencyDGV.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle3
         CurrencyDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        DataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle2.BackColor = SystemColors.Window
-        DataGridViewCellStyle2.Font = New Font("Segoe UI", 9.0F)
-        DataGridViewCellStyle2.ForeColor = SystemColors.Highlight
-        DataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight
-        DataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText
-        DataGridViewCellStyle2.WrapMode = DataGridViewTriState.False
-        CurrencyDGV.DefaultCellStyle = DataGridViewCellStyle2
+        DataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle4.BackColor = SystemColors.Window
+        DataGridViewCellStyle4.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle4.ForeColor = SystemColors.Highlight
+        DataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight
+        DataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText
+        DataGridViewCellStyle4.WrapMode = DataGridViewTriState.False
+        CurrencyDGV.DefaultCellStyle = DataGridViewCellStyle4
         CurrencyDGV.Location = New Point(7, 26)
         CurrencyDGV.Name = "CurrencyDGV"
         CurrencyDGV.ReadOnly = True
@@ -171,13 +171,13 @@ Partial Class Customers
         ' GroupBox4
         ' 
         GroupBox4.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left
+        GroupBox4.Controls.Add(TypeCB)
         GroupBox4.Controls.Add(MarketCB)
         GroupBox4.Controls.Add(BranchesInfoDGV)
         GroupBox4.Controls.Add(Label23)
         GroupBox4.Controls.Add(Label22)
         GroupBox4.Controls.Add(Label21)
         GroupBox4.Controls.Add(Label12)
-        GroupBox4.Controls.Add(TypeCB)
         GroupBox4.Controls.Add(CatogeryCB)
         GroupBox4.Controls.Add(GroupsCB)
         GroupBox4.ForeColor = SystemColors.Highlight
@@ -187,6 +187,14 @@ Partial Class Customers
         GroupBox4.TabIndex = 4
         GroupBox4.TabStop = False
         GroupBox4.Text = "معلومات الفرع"
+        ' 
+        ' TypeCB
+        ' 
+        TypeCB.FormattingEnabled = True
+        TypeCB.Location = New Point(27, 544)
+        TypeCB.Name = "TypeCB"
+        TypeCB.Size = New Size(362, 28)
+        TypeCB.TabIndex = 47
         ' 
         ' MarketCB
         ' 
@@ -257,15 +265,6 @@ Partial Class Customers
         Label12.Size = New Size(58, 20)
         Label12.TabIndex = 40
         Label12.Text = "الاسواق"
-        ' 
-        ' TypeCB
-        ' 
-        TypeCB.FormattingEnabled = True
-        TypeCB.Location = New Point(27, 544)
-        TypeCB.Margin = New Padding(2, 3, 2, 3)
-        TypeCB.Name = "TypeCB"
-        TypeCB.Size = New Size(362, 28)
-        TypeCB.TabIndex = 39
         ' 
         ' CatogeryCB
         ' 
@@ -373,8 +372,6 @@ Partial Class Customers
         ' 
         ' CountryCB
         ' 
-        CountryCB.AutoCompleteMode = AutoCompleteMode.SuggestAppend
-        CountryCB.AutoCompleteSource = AutoCompleteSource.ListItems
         CountryCB.FormattingEnabled = True
         CountryCB.Location = New Point(12, 309)
         CountryCB.Name = "CountryCB"
@@ -967,7 +964,6 @@ Partial Class Customers
     Friend WithEvents GroupBox2 As GroupBox
     Friend WithEvents Delegations As PictureBox
     Friend WithEvents DocumentsSettings As PictureBox
-    Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents AddAttachmentsBT As PictureBox
     Friend WithEvents refreshPB As PictureBox
     Friend WithEvents PictureBox5 As PictureBox
@@ -1020,17 +1016,17 @@ Partial Class Customers
     Friend WithEvents Label22 As Label
     Friend WithEvents Label21 As Label
     Friend WithEvents Label12 As Label
-    Friend WithEvents TypeCB As ComboBox
+
     Friend WithEvents CatogeryCB As ComboBox
     Friend WithEvents GroupsCB As ComboBox
     Friend WithEvents MarketCB As ComboBox
     Friend WithEvents phoneNumber1ZipCodeTB As TextBox
     Friend WithEvents telephoneNumberZipcodeTB As TextBox
     Friend WithEvents Label24 As Label
-    Friend WithEvents NotifyIcon1 As NotifyIcon
     Friend WithEvents SaveInfo As PictureBox
     Friend WithEvents downCustomersPB As PictureBox
     Friend WithEvents UpCustomersPB As PictureBox
     Friend WithEvents AddressTA As RichTextBox
+    Friend WithEvents TypeCB As ComboBox
 End Class
 
