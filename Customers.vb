@@ -872,7 +872,7 @@ Public Class Customers
                 Dim newRow As DataRow = displayTable.NewRow()
                 newRow("fld_area_code") = row("fld_area_code").ToString()
 
-                Dim displayText As String = $"{row("fld_area_code")} - {row("description")} - {row("shortname")} - {row("arabic_desc")}"
+                Dim displayText As String = $"{row("description")} - {row("shortname")} - {row("arabic_desc")} - {row("fld_area_code")} - {row("code")}"
 
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)
@@ -918,10 +918,7 @@ Public Class Customers
                 Dim newRow As DataRow = displayTable.NewRow()
                 newRow("fld_code") = row("fld_code").ToString()
 
-                Dim displayText As String = $"{row("fld_code")} - {row("fld_name")}"
-                If Not String.IsNullOrEmpty(row("fld_arabic_name").ToString()) Then
-                    displayText += $" - {row("fld_arabic_name")}"
-                End If
+                Dim displayText As String = $"{row("fld_code")} - {row("fld_name")} - {row("fld_arabic_name")}"
 
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)
@@ -1013,10 +1010,7 @@ Public Class Customers
                 Dim newRow As DataRow = displayTable.NewRow()
                 newRow("fld_code") = row("fld_code").ToString()
 
-                Dim displayText As String = $"{row("fld_code")} - {row("fld_name")}"
-                If Not String.IsNullOrEmpty(row("fld_arabic_name").ToString()) Then
-                    displayText += $" - {row("fld_arabic_name")}"
-                End If
+                Dim displayText As String = $"{row("fld_code")} - {row("fld_name")} - {row("fld_arabic_name")}"
 
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)

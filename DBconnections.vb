@@ -1965,7 +1965,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT code, description, shortname, contryCode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode AND active = 'True' ORDER BY description"
+            Dim query As String = "SELECT code, description, shortname, contryCode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CountryCode", countryCode)
             da = New SqlDataAdapter(cmd)
@@ -1996,7 +1996,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT code, description, shortname, active, arabic_desc, fld_area_code FROM [CMGADB2024].[dbo].[CusTransactionMaster] WHERE active = 'True' ORDER BY description"
+            Dim query As String = "SELECT description, shortname, arabic_desc, fld_area_code, code FROM [CMGADB2024].[dbo].[CusTransactionMaster] ORDER BY description"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2026,7 +2026,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name, fld_active FROM [CMGADB2024].[dbo].[CustomerCategory] WHERE fld_active = 'True' ORDER BY fld_arabic_name"
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM [CMGADB2024].[dbo].[CustomerCategory] ORDER BY fld_arabic_name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2056,7 +2056,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT code, description, shortname, active, arabic_desc FROM [CMGADB2024].[dbo].[CusGradeMaster] WHERE active = 'True' ORDER BY description"
+            Dim query As String = "SELECT code, description, shortname, arabic_desc FROM [CMGADB2024].[dbo].[CusGradeMaster] ORDER BY description"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2086,7 +2086,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name, fld_active FROM [CMGADB2024].[dbo].[CustomerType] WHERE fld_active = 'True' ORDER BY fld_arabic_name"
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM [CMGADB2024].[dbo].[CustomerType] ORDER BY fld_arabic_name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2327,16 +2327,11 @@ ORDER BY p.Name"
             
             conn.Open()
             
-            ' Try to get data with description if available
-            Dim query As String = "SELECT DISTINCT fld_area_code, 
-                CASE 
-                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CusTransactionMaster' AND COLUMN_NAME = 'description')
-                    THEN COALESCE(description, fld_area_code)
-                    ELSE fld_area_code
-                END as description
+            ' Get all columns for proper display format
+            Dim query As String = "SELECT DISTINCT fld_area_code, description, shortname, arabic_desc, code
                 FROM CusTransactionMaster 
                 WHERE fld_area_code IS NOT NULL 
-                ORDER BY fld_area_code"
+                ORDER BY description"
             
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
@@ -2344,11 +2339,15 @@ ORDER BY p.Name"
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim areaCode As String = If(reader("fld_area_code") Is DBNull.Value, "", reader("fld_area_code").ToString().Trim())
-                Dim description As String = If(reader("description") Is DBNull.Value, areaCode, reader("description").ToString().Trim())
+                Dim description As String = If(reader("description") Is DBNull.Value, "", reader("description").ToString().Trim())
+                Dim shortname As String = If(reader("shortname") Is DBNull.Value, "", reader("shortname").ToString().Trim())
+                Dim arabicDesc As String = If(reader("arabic_desc") Is DBNull.Value, "", reader("arabic_desc").ToString().Trim())
+                Dim code As String = If(reader("code") Is DBNull.Value, "", reader("code").ToString().Trim())
                 
                 row("fld_area_code") = areaCode
                 row("Description") = description
-                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = areaCode, areaCode, $"{areaCode} - {description}")
+                ' Use the correct display format: description - shortname - arabic_desc - fld_area_code - code
+                row("DisplayText") = $"{description} - {shortname} - {arabicDesc} - {areaCode} - {code}"
                 dt.Rows.Add(row)
             End While
             
@@ -2389,16 +2388,11 @@ ORDER BY p.Name"
             
             conn.Open()
             
-            ' Try to get data with description if available
-            Dim query As String = "SELECT DISTINCT code, 
-                CASE 
-                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'CusGradeMaster' AND COLUMN_NAME = 'description')
-                    THEN COALESCE(description, code)
-                    ELSE code
-                END as description
+            ' Get all columns for proper display format
+            Dim query As String = "SELECT code, description, shortname, arabic_desc
                 FROM CusGradeMaster 
                 WHERE code IS NOT NULL 
-                ORDER BY code"
+                ORDER BY description"
             
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
@@ -2406,11 +2400,14 @@ ORDER BY p.Name"
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim code As String = If(reader("code") Is DBNull.Value, "", reader("code").ToString().Trim())
-                Dim description As String = If(reader("description") Is DBNull.Value, code, reader("description").ToString().Trim())
+                Dim description As String = If(reader("description") Is DBNull.Value, "", reader("description").ToString().Trim())
+                Dim shortname As String = If(reader("shortname") Is DBNull.Value, "", reader("shortname").ToString().Trim())
+                Dim arabicDesc As String = If(reader("arabic_desc") Is DBNull.Value, "", reader("arabic_desc").ToString().Trim())
                 
                 row("code") = code
                 row("Description") = description
-                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = code, code, $"{code} - {description}")
+                ' Use the correct display format: code - description - shortname - arabic_desc
+                row("DisplayText") = $"{code} - {description} - {shortname} - {arabicDesc}"
                 dt.Rows.Add(row)
             End While
             
@@ -2505,7 +2502,7 @@ ORDER BY p.Name"
             conn.Open()
             
             ' Load from CustomerCategory table - PK: fld_code -> FK: categoty
-            Dim query As String = "SELECT DISTINCT fld_code FROM CustomerCategory WHERE fld_code IS NOT NULL ORDER BY fld_code"
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM CustomerCategory WHERE fld_code IS NOT NULL ORDER BY fld_arabic_name"
             
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
@@ -2513,10 +2510,13 @@ ORDER BY p.Name"
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
+                Dim fldName As String = If(reader("fld_name") Is DBNull.Value, "", reader("fld_name").ToString().Trim())
+                Dim fldArabicName As String = If(reader("fld_arabic_name") Is DBNull.Value, "", reader("fld_arabic_name").ToString().Trim())
                 
                 row("fld_code") = fldCode
-                row("Description") = fldCode
-                row("DisplayText") = fldCode
+                row("Description") = fldName
+                ' Use the correct display format: fld_code - fld_name - fld_arabic_name
+                row("DisplayText") = $"{fldCode} - {fldName} - {fldArabicName}"
                 dt.Rows.Add(row)
             End While
             
