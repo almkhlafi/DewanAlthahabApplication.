@@ -34,6 +34,7 @@ Public Class Customers
     Private isUpdatingCategoryData As Boolean = False
     Private isUpdatingGroupsData As Boolean = False
     Private isUpdatingTypeData As Boolean = False
+    Private isPerformingSearch As Boolean = False
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ' Form initialization
@@ -163,19 +164,21 @@ Public Class Customers
 
             ' Set up AreaCB properties for enhanced search functionality
             AreaCB.DisplayMember = "DisplayText"
-            AreaCB.ValueMember = "description"
+            AreaCB.ValueMember = "code"
             AreaCB.AutoCompleteMode = AutoCompleteMode.Suggest
             AreaCB.AutoCompleteSource = AutoCompleteSource.ListItems
             AreaCB.DropDownStyle = ComboBoxStyle.DropDown
 
             ' Create a new DataTable with combined display text
             Dim displayTable As New DataTable()
+            displayTable.Columns.Add("code", GetType(String))
             displayTable.Columns.Add("description", GetType(String))
             displayTable.Columns.Add("DisplayText", GetType(String))
 
             ' Add areas to ComboBox with combined display format: description - shortname
             For Each row As DataRow In areasTable.Rows
                 Dim newRow As DataRow = displayTable.NewRow()
+                newRow("code") = row("code").ToString()
                 newRow("description") = row("description").ToString()
 
                 ' Create display text with description and short name
@@ -883,9 +886,9 @@ Public Class Customers
 
     Private Sub LoadCategoryData()
         Try
-            ' Safety check - ensure CatogeryCB is initialized
+            ' Safety check - ensure CategoryCB is initialized
             If CategoryCB Is Nothing Then
-                MessageBox.Show("CatogeryCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("CategoryCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return
             End If
 
@@ -1164,7 +1167,7 @@ Public Class Customers
 
 
 
-    Private Sub CatogeryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CategoryCB.SelectedIndexChanged
+    Private Sub CategoryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CategoryCB.SelectedIndexChanged
 
     End Sub
 
@@ -1330,7 +1333,7 @@ Public Class Customers
                 End Try
             End If
 
-            ' Load CatogeryCB from CustomerCategory
+            ' Load CategoryCB from CustomerCategory
             If CategoryCB IsNot Nothing Then
                 Try
                     ' Reset ComboBox completely
@@ -1354,12 +1357,12 @@ Public Class Customers
                             CategoryCB.DropDownStyle = ComboBoxStyle.DropDown
 
                             ' Setup enhanced search events
-                            AddHandler CategoryCB.TextChanged, AddressOf CatogeryCB_TextChanged
-                            AddHandler CategoryCB.KeyUp, AddressOf CatogeryCB_KeyUp
+                            AddHandler CategoryCB.TextChanged, AddressOf CategoryCB_TextChanged
+                            AddHandler CategoryCB.KeyUp, AddressOf CategoryCB_KeyUp
                         End If
                     End If
                 Catch ex As Exception
-                    System.Diagnostics.Debug.WriteLine("Error loading CatogeryCB: " & ex.Message)
+                    System.Diagnostics.Debug.WriteLine("Error loading CategoryCB: " & ex.Message)
                     CategoryCB.DataSource = Nothing
                     CategoryCB.Items.Clear()
                     CategoryCB.Items.Add("لا توجد بيانات")
@@ -1477,7 +1480,7 @@ Public Class Customers
                 Next
             End If
 
-            ' Set CatogeryCB from CategoryCode FK
+            ' Set CategoryCB from CategoryCode FK
             If CategoryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CategoryCode) AndAlso CategoryCB.DataSource IsNot Nothing Then
                 Dim categoryTable As DataTable = CType(CategoryCB.DataSource, DataTable)
                 For i As Integer = 0 To categoryTable.Rows.Count - 1
@@ -2115,7 +2118,7 @@ Public Class Customers
                         Dim areaTable As DataTable = CType(AreaCB.DataSource, DataTable)
                         Dim areaFound As Boolean = False
                         For i As Integer = 0 To areaTable.Rows.Count - 1
-                            If areaTable.Rows(i)("description").ToString() = customerData.Area Then
+                            If areaTable.Rows(i)("code").ToString() = customerData.Area Then
                                 AreaCB.SelectedIndex = i
                                 areaFound = True
                                 Exit For
@@ -2197,19 +2200,20 @@ Public Class Customers
             customerData.ManagerID = If(ManagerIDTB IsNot Nothing, ManagerIDTB.Text.Trim(), "")
             customerData.ManagerNumber = If(MangerNumberTB IsNot Nothing, MangerNumberTB.Text.Trim(), "")
 
-            ' Get selected country and area - save Arabic names
+            ' Get selected country and area - save FK values
             If CountryCB.SelectedItem IsNot Nothing Then
                 Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
-                ' Save the Arabic name (DisplayText) instead of the code
-                customerData.Country = selectedCountry("DisplayText").ToString()
-                customerData.CountryName = selectedCountry("DisplayText").ToString()
-                System.Diagnostics.Debug.WriteLine($"Selected country: {customerData.Country}")
+                ' Save only the countrycode (FK) in country column
+                customerData.Country = selectedCountry("countrycode").ToString()
+                customerData.CountryName = selectedCountry("countrycode").ToString()
+                System.Diagnostics.Debug.WriteLine($"Selected country code: {customerData.Country}")
             End If
 
             If AreaCB.SelectedItem IsNot Nothing Then
                 Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
-                customerData.Area = selectedArea("description").ToString()
-                System.Diagnostics.Debug.WriteLine($"Selected area: {customerData.Area}")
+                ' Save only the code (PK) in area column
+                customerData.Area = selectedArea("code").ToString()
+                System.Diagnostics.Debug.WriteLine($"Selected area code: {customerData.Area}")
             End If
 
             customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
@@ -2254,7 +2258,7 @@ Public Class Customers
                 customerData.TypeCode = TypeCB.SelectedValue.ToString()
             End If
 
-            ' CategoryCode from CatogeryCB (CustomerCategory.fld_code)
+            ' CategoryCode from CategoryCB (CustomerCategory.fld_code)
             If CategoryCB IsNot Nothing AndAlso CategoryCB.SelectedValue IsNot Nothing Then
                 customerData.CategoryCode = CategoryCB.SelectedValue.ToString()
             End If
@@ -2327,53 +2331,112 @@ Public Class Customers
     End Sub
 
     Private Sub refreshPB_Click(sender As Object, e As EventArgs) Handles refreshPB.Click
+        Try
+            System.Diagnostics.Debug.WriteLine("RefreshPB clicked - Resetting all components")
 
-        IdentityCommercialNameOptionCB.Text = ""
-        CustomerAccountNumberTB.Text = ""
-        NameInEnglishTB.Text = ""
-        AddressTA.Text = ""
-        ManagerTB.Text = ""
-        ManagerIDTB.Text = ""
-        FormalNameTB.Text = ""
-        CommercialNameTB.Text = ""
-        VTRnumberTB.Text = ""
-        emailTB.Text = ""
-        phoneNumber1TB.Text = ""
-        phoneNumber1ZipCodeTB.Text = ""
-        phoneNumber2TB.Text = ""
-        telephoneNumberTB.Text = ""
-        telephoneNumberZipcodeTB.Text = ""
-        FaxNumberTB.Text = ""
-        ReferralNumberTB.Text = ""
+            ' Reset all TextBoxes to empty
+            ResetAllTextBoxes()
 
-        ' CheckBoxes
-        ActiveNoActiveCKB.Checked = False
-        VTRAppliedCKB.Checked = False
-        VTRAppliedCKB.Enabled = False ' Disable until CustomerAccountNumberTB has data
+            ' Reset all ComboBoxes
+            ResetAllComboBoxes()
 
-        ' Ensure CustomerAccountNumberTB is disabled when form is cleared
-        If CustomerAccountNumberTB IsNot Nothing Then
-            CustomerAccountNumberTB.Enabled = False
+            ' Reset all CheckBoxes
+            ResetAllCheckBoxes()
+
+            ' Reset form state for new customer/supplier entry
+            ResetFormState()
+
+            ' Reset navigation state
+            currentCustomerIndex = -1
+            currentSelectedCustomerName = ""
+
+            ' Update form title
+            Me.Text = "العملاء - إدخال جديد"
+
+            ' Set focus to first field
+            If CustomerSupplierCB IsNot Nothing Then
+                CustomerSupplierCB.Focus()
+            End If
+
+            System.Diagnostics.Debug.WriteLine("All components reset successfully")
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في إعادة تعيين المكونات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub ResetAllTextBoxes()
+        ' Reset all TextBox controls to empty
+        If CustomerAccountNumberTB IsNot Nothing Then CustomerAccountNumberTB.Text = ""
+        If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = ""
+        If AddressTA IsNot Nothing Then AddressTA.Text = ""
+        If ManagerTB IsNot Nothing Then ManagerTB.Text = ""
+        If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = ""
+        If FormalNameTB IsNot Nothing Then FormalNameTB.Text = ""
+        If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = ""
+        If VTRnumberTB IsNot Nothing Then VTRnumberTB.Text = ""
+        If emailTB IsNot Nothing Then emailTB.Text = ""
+        If phoneNumber1TB IsNot Nothing Then phoneNumber1TB.Text = ""
+        If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = ""
+        If phoneNumber2TB IsNot Nothing Then phoneNumber2TB.Text = ""
+        If telephoneNumberTB IsNot Nothing Then telephoneNumberTB.Text = ""
+        If telephoneNumberZipcodeTB IsNot Nothing Then telephoneNumberZipcodeTB.Text = ""
+        If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = ""
+        If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = ""
+        If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = ""
+        If CommercialRecordAndIdentityTB IsNot Nothing Then CommercialRecordAndIdentityTB.Text = ""
+    End Sub
+
+    Private Sub ResetAllComboBoxes()
+        ' Reset all ComboBox controls
+        If CustomerSupplierCB IsNot Nothing Then
+            CustomerSupplierCB.SelectedIndex = 0 ' Default to Customer
         End If
 
-        ' Ensure VTRnumberTB is enabled when form is cleared (since VTRAppliedCKB is unchecked)
-        If VTRnumberTB IsNot Nothing Then
-            VTRnumberTB.Enabled = True
-        End If
-
-        ' ComboBoxes - reset to defaults
-        If CustomerSupplierCB IsNot Nothing Then CustomerSupplierCB.SelectedIndex = 0 ' Default to Customer
         If IdentityCommercialNameOptionCB IsNot Nothing Then
             IdentityCommercialNameOptionCB.SelectedIndex = 0 ' Default to فردي
             UpdateIdentityLabel("فردي")
         End If
-        CountryCB.SelectedIndex = -1
-        AreaCB.SelectedIndex = -1
+
+        If CountryCB IsNot Nothing Then CountryCB.SelectedIndex = -1
+        If AreaCB IsNot Nothing Then AreaCB.SelectedIndex = -1
+        If MarketCB IsNot Nothing Then MarketCB.SelectedIndex = -1
+        If GroupsCB IsNot Nothing Then GroupsCB.SelectedIndex = -1
+        If CategoryCB IsNot Nothing Then CategoryCB.SelectedIndex = -1
+        If TypeCB IsNot Nothing Then TypeCB.SelectedIndex = -1
+    End Sub
+
+    Private Sub ResetAllCheckBoxes()
+        ' Reset all CheckBox controls
+        If ActiveNoActiveCKB IsNot Nothing Then ActiveNoActiveCKB.Checked = True ' Default to Active
+        If VTRAppliedCKB IsNot Nothing Then
+            VTRAppliedCKB.Checked = False
+            VTRAppliedCKB.Enabled = False ' Disable until CustomerAccountNumberTB has data
+        End If
+    End Sub
+
+    Private Sub ResetFormState()
+        ' Reset form state and control enablement
+        If CustomerAccountNumberTB IsNot Nothing Then
+            CustomerAccountNumberTB.Enabled = False ' Disabled until Active is checked
+        End If
+
+        If VTRnumberTB IsNot Nothing Then
+            VTRnumberTB.Enabled = True ' Enabled when VTRAppliedCKB is unchecked
+        End If
+
+        ' Reset navigation flags
+        isNavigating = False
+        isLoadingAreas = False
+        isUpdatingCountryData = False
+        isPerformingSearch = False
     End Sub
 
     ' Enhanced search event handlers for ComboBoxes
     Private Sub MarketCB_TextChanged(sender As Object, e As EventArgs)
-        PerformEnhancedSearch(MarketCB, "MarketCB")
+        If Not isPerformingSearch Then
+            PerformEnhancedSearch(MarketCB, "MarketCB")
+        End If
     End Sub
 
     Private Sub MarketCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -2385,7 +2448,9 @@ Public Class Customers
     End Sub
 
     Private Sub GroupsCB_TextChanged(sender As Object, e As EventArgs)
-        PerformEnhancedSearch(GroupsCB, "GroupsCB")
+        If Not isPerformingSearch Then
+            PerformEnhancedSearch(GroupsCB, "GroupsCB")
+        End If
     End Sub
 
     Private Sub GroupsCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -2397,7 +2462,9 @@ Public Class Customers
     End Sub
 
     Private Sub TypeCB_TextChanged(sender As Object, e As EventArgs)
-        PerformEnhancedSearch(TypeCB, "TypeCB")
+        If Not isPerformingSearch Then
+            PerformEnhancedSearch(TypeCB, "TypeCB")
+        End If
     End Sub
 
     Private Sub TypeCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -2408,11 +2475,13 @@ Public Class Customers
         End If
     End Sub
 
-    Private Sub CatogeryCB_TextChanged(sender As Object, e As EventArgs)
-        PerformEnhancedSearch(CategoryCB, "CatogeryCB")
+    Private Sub CategoryCB_TextChanged(sender As Object, e As EventArgs)
+        If Not isPerformingSearch Then
+            PerformEnhancedSearch(CategoryCB, "CategoryCB")
+        End If
     End Sub
 
-    Private Sub CatogeryCB_KeyUp(sender As Object, e As KeyEventArgs)
+    Private Sub CategoryCB_KeyUp(sender As Object, e As KeyEventArgs)
         If e.KeyCode = Keys.Escape Then
             CategoryCB.DroppedDown = False
         ElseIf e.KeyCode <> Keys.Up AndAlso e.KeyCode <> Keys.Down Then
@@ -2423,7 +2492,10 @@ Public Class Customers
     ' Enhanced search function that searches any letter, not just the first
     Private Sub PerformEnhancedSearch(comboBox As ComboBox, comboName As String)
         Try
-            If comboBox Is Nothing OrElse Not Me.IsHandleCreated Then Return
+            ' Prevent recursive calls
+            If isPerformingSearch OrElse comboBox Is Nothing OrElse Not Me.IsHandleCreated Then Return
+
+            isPerformingSearch = True
 
             Dim searchText As String = comboBox.Text.ToLower().Trim()
             Dim currentCursorPosition As Integer = comboBox.SelectionStart
@@ -2437,6 +2509,7 @@ Public Class Customers
                     comboBox.Tag = originalData.Copy()
                     originalData = CType(comboBox.Tag, DataTable)
                 Else
+                    isPerformingSearch = False
                     Return
                 End If
             End If
@@ -2445,6 +2518,7 @@ Public Class Customers
                 ' Restore original data if search is empty
                 comboBox.DataSource = originalData
                 comboBox.Text = ""
+                isPerformingSearch = False
                 Return
             End If
 
@@ -2487,7 +2561,7 @@ Public Class Customers
                 comboBox.Text = userText
                 comboBox.SelectionStart = currentCursorPosition
                 comboBox.SelectionLength = 0
-                
+
                 ' Only open dropdown if ComboBox has focus and user is actively typing
                 If comboBox.Focused AndAlso Not String.IsNullOrEmpty(searchText) AndAlso reorderedTable.Rows.Count > 0 Then
                     comboBox.DroppedDown = True
@@ -2496,6 +2570,9 @@ Public Class Customers
 
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine($"Error in enhanced search for {comboName}: {ex.Message}")
+        Finally
+            ' Always reset the flag to prevent getting stuck
+            isPerformingSearch = False
         End Try
     End Sub
 

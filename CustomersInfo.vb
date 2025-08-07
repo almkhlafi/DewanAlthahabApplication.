@@ -162,19 +162,21 @@
 
                 ' Set up AreaCB properties for enhanced search functionality
                 AreaCB.DisplayMember = "DisplayText"
-                AreaCB.ValueMember = "description"
+                AreaCB.ValueMember = "code"
                 AreaCB.AutoCompleteMode = AutoCompleteMode.Suggest
                 AreaCB.AutoCompleteSource = AutoCompleteSource.ListItems
                 AreaCB.DropDownStyle = ComboBoxStyle.DropDown
 
                 ' Create a new DataTable with combined display text
                 Dim displayTable As New DataTable()
+                displayTable.Columns.Add("code", GetType(String))
                 displayTable.Columns.Add("description", GetType(String))
                 displayTable.Columns.Add("DisplayText", GetType(String))
 
                 ' Add areas to ComboBox with combined display format: description - shortname
                 For Each row As DataRow In areasTable.Rows
                     Dim newRow As DataRow = displayTable.NewRow()
+                    newRow("code") = row("code").ToString()
                     newRow("description") = row("description").ToString()
 
                     ' Create display text with description and short name
@@ -2094,7 +2096,7 @@
                             Dim areaTable As DataTable = CType(AreaCB.DataSource, DataTable)
                             Dim areaFound As Boolean = False
                             For i As Integer = 0 To areaTable.Rows.Count - 1
-                                If areaTable.Rows(i)("description").ToString() = customerData.Area Then
+                                If areaTable.Rows(i)("code").ToString() = customerData.Area Then
                                     AreaCB.SelectedIndex = i
                                     areaFound = True
                                     Exit For
@@ -2185,7 +2187,7 @@
 
                 If AreaCB.SelectedItem IsNot Nothing Then
                     Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
-                    customerData.Area = selectedArea("description").ToString()
+                    customerData.Area = selectedArea("code").ToString()
                 End If
 
                 customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")

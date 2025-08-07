@@ -1965,7 +1965,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT contryCode, description, shortname FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
+            Dim query As String = "SELECT code, description, shortname, contryCode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CountryCode", countryCode)
             da = New SqlDataAdapter(cmd)
@@ -2149,11 +2149,10 @@ ORDER BY p.Name"
             conn = GetConnection2() ' Use CMGADB2024 database
             conn.Open()
 
-
             Dim query As String = ""
 
             If customerData.IsUpdate AndAlso Not String.IsNullOrEmpty(customerData.ExistingCode) Then
-                ' Update existing record - removed identity_type field temporarily
+                ' Update existing record - include FK fields
                 query = "UPDATE [CustomerAccountsMaster] SET " &
                        "c_type = @c_type, " &
                        "name = @name, " &
@@ -2172,19 +2171,25 @@ ORDER BY p.Name"
                        "fld_fax_no = @fld_fax_no, " &
                        "fld_ref_no = @fld_ref_no, " &
                        "fld_indvl_id_no = @fld_indvl_id_no, " &
-                       "fld_cr_no = @fld_cr_no " &
+                       "fld_cr_no = @fld_cr_no, " &
+                       "sales_man = @sales_man, " &
+                       "scrap_adj_code = @scrap_adj_code, " &
+                       "type = @type, " &
+                       "categoty = @categoty " &
                        "WHERE code = @code"
             Else
-                ' Insert new record - add commonly required fields with safe defaults
+                ' Insert new record - include FK fields
                 query = "INSERT INTO [CustomerAccountsMaster] " &
                        "(code, c_type, name, fld_arabic_name, shortname, bussiness_address, " &
                        "acc_manager, bank_acc_name, bank_acc_no, fld_state, fld_dist, " &
                        "vat_tin_no, email, fld_contry_code_mobile, country, fld_fax_no, " &
-                       "fld_ref_no, fld_indvl_id_no, fld_cr_no, currency, active, introduced_date) " &
+                       "fld_ref_no, fld_indvl_id_no, fld_cr_no, currency, active, introduced_date, " &
+                       "sales_man, scrap_adj_code, type, categoty) " &
                        "VALUES (@code, @c_type, @name, @fld_arabic_name, @shortname, @bussiness_address, " &
                        "@acc_manager, @bank_acc_name, @bank_acc_no, @fld_state, @fld_dist, " &
                        "@vat_tin_no, @email, @fld_contry_code_mobile, @country, @fld_fax_no, " &
-                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @currency, @active, @introduced_date)"
+                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @currency, @active, @introduced_date, " &
+                       "@sales_man, @scrap_adj_code, @type, @categoty)"
             End If
 
             cmd = New SqlCommand(query, conn)
@@ -2212,8 +2217,8 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@acc_manager", TruncateString(customerData.Manager, 50))
             cmd.Parameters.AddWithValue("@bank_acc_name", TruncateString(customerData.ManagerID, 30))
             cmd.Parameters.AddWithValue("@bank_acc_no", TruncateString(customerData.ManagerNumber, 30))
-            cmd.Parameters.AddWithValue("@fld_state", TruncateString(customerData.Country, 50))
-            cmd.Parameters.AddWithValue("@fld_dist", TruncateString(customerData.Area, 50))
+            cmd.Parameters.AddWithValue("@fld_state", TruncateString(customerData.Country, 100))
+            cmd.Parameters.AddWithValue("@fld_dist", TruncateString(customerData.Area, 100))
             cmd.Parameters.AddWithValue("@vat_tin_no", TruncateString(customerData.VATNumber, 15))
             cmd.Parameters.AddWithValue("@email", TruncateString(customerData.Email, 50))
             cmd.Parameters.AddWithValue("@fld_contry_code_mobile", TruncateString(customerData.MobileCountryCode, 5))
@@ -2223,7 +2228,13 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@fld_indvl_id_no", TruncateString(customerData.IndividualID, 15))
             cmd.Parameters.AddWithValue("@fld_cr_no", TruncateString(customerData.CommercialRecord, 15))
             
-            ' Add additional parameters for INSERT operations
+            ' Add FK parameters - apply to both INSERT and UPDATE
+            cmd.Parameters.AddWithValue("@sales_man", TruncateString(customerData.SalesMan, 50))
+            cmd.Parameters.AddWithValue("@scrap_adj_code", TruncateString(customerData.ScrapAdjCode, 50))
+            cmd.Parameters.AddWithValue("@type", TruncateString(customerData.TypeCode, 50))
+            cmd.Parameters.AddWithValue("@categoty", TruncateString(customerData.CategoryCode, 50))
+            
+            ' Add additional parameters for INSERT operations only
             If Not customerData.IsUpdate Then
                 cmd.Parameters.AddWithValue("@currency", TruncateString("SAR", 10))  ' Default currency
                 cmd.Parameters.AddWithValue("@active", True)  ' Default to active
@@ -2425,7 +2436,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' Load data from CustomerType table
+    ' Load data from CustomerType table (FK: type)
     Public Function LoadCustomerType() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -2440,14 +2451,8 @@ ORDER BY p.Name"
             
             conn.Open()
             
-            ' Try to get descriptions from CusTransactionMaster or use codes as fallback
-            Dim query As String = "
-                SELECT DISTINCT ct.fld_code,
-                COALESCE(ctm.description, ctm.shortname, ct.fld_code) as description
-                FROM CustomerType ct
-                LEFT JOIN CusTransactionMaster ctm ON ct.fld_code = ctm.code
-                WHERE ct.fld_code IS NOT NULL 
-                ORDER BY ct.fld_code"
+            ' Load from CustomerType table - PK: fld_code -> FK: type
+            Dim query As String = "SELECT DISTINCT fld_code FROM CustomerType WHERE fld_code IS NOT NULL ORDER BY fld_code"
             
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
@@ -2455,11 +2460,10 @@ ORDER BY p.Name"
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
-                Dim description As String = If(reader("description") Is DBNull.Value, fldCode, reader("description").ToString().Trim())
                 
                 row("fld_code") = fldCode
-                row("Description") = description
-                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = fldCode, fldCode, description)
+                row("Description") = fldCode
+                row("DisplayText") = fldCode
                 dt.Rows.Add(row)
             End While
             
@@ -2485,7 +2489,7 @@ ORDER BY p.Name"
         Return dt
     End Function
 
-    ' Load data from CustomerCategory table
+    ' Load data from CustomerCategory table (FK: categoty)
     Public Function LoadCustomerCategory() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
@@ -2500,14 +2504,8 @@ ORDER BY p.Name"
             
             conn.Open()
             
-            ' Try to get descriptions from CusTransactionMaster or use codes as fallback
-            Dim query As String = "
-                SELECT DISTINCT cc.fld_code,
-                COALESCE(ctm.description, ctm.shortname, cc.fld_code) as description
-                FROM CustomerCategory cc
-                LEFT JOIN CusTransactionMaster ctm ON cc.fld_code = ctm.code
-                WHERE cc.fld_code IS NOT NULL 
-                ORDER BY cc.fld_code"
+            ' Load from CustomerCategory table - PK: fld_code -> FK: categoty
+            Dim query As String = "SELECT DISTINCT fld_code FROM CustomerCategory WHERE fld_code IS NOT NULL ORDER BY fld_code"
             
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
@@ -2515,11 +2513,10 @@ ORDER BY p.Name"
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
-                Dim description As String = If(reader("description") Is DBNull.Value, fldCode, reader("description").ToString().Trim())
                 
                 row("fld_code") = fldCode
-                row("Description") = description
-                row("DisplayText") = If(String.IsNullOrEmpty(description) OrElse description = fldCode, fldCode, description)
+                row("Description") = fldCode
+                row("DisplayText") = fldCode
                 dt.Rows.Add(row)
             End While
             
@@ -2544,6 +2541,7 @@ ORDER BY p.Name"
         
         Return dt
     End Function
+
 
     ' Load data from AreaMaster table (if different from existing Area logic)
     Public Function LoadAreaMaster() As DataTable
