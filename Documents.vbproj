@@ -11,10 +11,13 @@
   <ItemGroup>
     <Compile Remove="ِ.Designer.vb" />
     <Compile Remove="ِ.vb" />
+    <Compile Remove="CustomersInfo.vb" />
+    <Compile Remove="CustomersInfo.Designer.vb" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="ِ.resx" />
+    <EmbeddedResource Remove="CustomersInfo.resx" />
   </ItemGroup>
 
   <ItemGroup>

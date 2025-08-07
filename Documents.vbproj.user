@@ -13,6 +13,9 @@
     <Compile Update="CustomerSearchForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="CustomersInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="DelegationsManagement.vb">
       <SubType>Form</SubType>
     </Compile>

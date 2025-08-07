@@ -223,4 +223,75 @@ Partial Class CustomerSearchForm
     Friend WithEvents RemoveCustomerBT As Button
     Friend WithEvents AddCustomerBT As Button
     Friend WithEvents addUserTB As RichTextBox
+
+
+    Friend WithEvents GroupBox1 As GroupBox
+    Friend WithEvents GroupBox5 As GroupBox
+    Friend WithEvents GroupBox2 As GroupBox
+    Friend WithEvents Delegations As PictureBox
+    Friend WithEvents DocumentsSettings As PictureBox
+    Friend WithEvents AddAttachmentsBT As PictureBox
+    Friend WithEvents refreshPB As PictureBox
+    Friend WithEvents PictureBox5 As PictureBox
+    Friend WithEvents PictureBox1 As PictureBox
+    Friend WithEvents GroupBox3 As GroupBox
+    Friend WithEvents Label14 As Label
+    Friend WithEvents Label13 As Label
+    Friend WithEvents Label11 As Label
+    Friend WithEvents Label10 As Label
+    Friend WithEvents Label9 As Label
+    Friend WithEvents Label8 As Label
+    Friend WithEvents Label7 As Label
+    Friend WithEvents Label6 As Label
+    Friend WithEvents Label5 As Label
+    Friend WithEvents Label4 As Label
+    Friend WithEvents Label3 As Label
+    Friend WithEvents CommercialRecordAndIdentityLB As Label
+    Friend WithEvents CustomerAccountNumberTB As TextBox
+    Friend WithEvents CommercialRecordAndIdentityTB As TextBox
+    Friend WithEvents Label19 As Label
+    Friend WithEvents Label18 As Label
+    Friend WithEvents Label17 As Label
+    Friend WithEvents Label16 As Label
+    Friend WithEvents Label15 As Label
+    Friend WithEvents ActiveNoActiveCKB As CheckBox
+    Friend WithEvents NameInEnglishTB As TextBox
+    Friend WithEvents VTRAppliedCKB As CheckBox
+    Friend WithEvents CommercialNameTB As TextBox
+    Friend WithEvents Label20 As Label
+    Friend WithEvents FormalNameTB As TextBox
+    Friend WithEvents AreaCB As ComboBox
+    Friend WithEvents CountryCB As ComboBox
+    Friend WithEvents MangerNumberTB As TextBox
+    Friend WithEvents ManagerIDTB As TextBox
+    Friend WithEvents ManagerTB As TextBox
+    Friend WithEvents ReferralNumberTB As TextBox
+    Friend WithEvents FaxNumberTB As TextBox
+    Friend WithEvents telephoneNumberTB As TextBox
+    Friend WithEvents phoneNumber2TB As TextBox
+    Friend WithEvents phoneNumber1TB As TextBox
+    Friend WithEvents emailTB As TextBox
+    Friend WithEvents VTRnumberTB As TextBox
+    Friend WithEvents IdentityCommercialNameOptionCB As ComboBox
+    Friend WithEvents CustomerSupplierCB As ComboBox
+    Friend WithEvents GroupBox6 As GroupBox
+    Friend WithEvents CurrencyDGV As DataGridView
+    Friend WithEvents GroupBox4 As GroupBox
+    Friend WithEvents BranchesInfoDGV As DataGridView
+    Friend WithEvents Label23 As Label
+    Friend WithEvents Label22 As Label
+    Friend WithEvents Label21 As Label
+    Friend WithEvents Label12 As Label
+
+    Friend WithEvents CatogeryCB As ComboBox
+    Friend WithEvents GroupsCB As ComboBox
+    Friend WithEvents MarketCB As ComboBox
+    Friend WithEvents phoneNumber1ZipCodeTB As TextBox
+    Friend WithEvents telephoneNumberZipcodeTB As TextBox
+    Friend WithEvents Label24 As Label
+    Friend WithEvents SaveInfo As PictureBox
+    Friend WithEvents downCustomersPB As PictureBox
+    Friend WithEvents UpCustomersPB As PictureBox
+    Friend WithEvents AddressTA As RichTextBox
+    Friend WithEvents TypeCB As ComboBox
 End Class

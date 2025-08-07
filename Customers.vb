@@ -61,7 +61,7 @@ Public Class Customers
 
         ' Initialize customer list for navigation (but don't load first customer data)
         InitializeNavigationOnly()
-        
+
         ' Debug: Test database access
         Try
             Dim testResult As String = dbConn.TestCustomerDataAccess()
@@ -520,7 +520,7 @@ Public Class Customers
                 isLoadingAreas = True
                 LoadAreas(countryCode)
                 isLoadingAreas = False
-                
+
                 System.Diagnostics.Debug.WriteLine($"Selected country: {displayText} with code: {countryCode}")
             Else
                 ' Country is empty - clear areas silently without showing error message
@@ -884,7 +884,7 @@ Public Class Customers
     Private Sub LoadCategoryData()
         Try
             ' Safety check - ensure CatogeryCB is initialized
-            If CatogeryCB Is Nothing Then
+            If CategoryCB Is Nothing Then
                 MessageBox.Show("CatogeryCB is not initialized!", "Control Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return
             End If
@@ -893,11 +893,11 @@ Public Class Customers
             Dim categoryTable As DataTable = dbConn.GetCategoryData()
 
             ' Set up CategoryCB properties for enhanced search functionality
-            CatogeryCB.DisplayMember = "DisplayText"
-            CatogeryCB.ValueMember = "fld_code"
-            CatogeryCB.AutoCompleteMode = AutoCompleteMode.Suggest
-            CatogeryCB.AutoCompleteSource = AutoCompleteSource.ListItems
-            CatogeryCB.DropDownStyle = ComboBoxStyle.DropDown
+            CategoryCB.DisplayMember = "DisplayText"
+            CategoryCB.ValueMember = "fld_code"
+            CategoryCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            CategoryCB.AutoCompleteSource = AutoCompleteSource.ListItems
+            CategoryCB.DropDownStyle = ComboBoxStyle.DropDown
 
             ' Create a new DataTable with combined display text
             Dim displayTable As New DataTable()
@@ -919,8 +919,8 @@ Public Class Customers
             Next
 
             ' Bind to ComboBox and store original data for search
-            CatogeryCB.DataSource = displayTable
-            CatogeryCB.Tag = displayTable
+            CategoryCB.DataSource = displayTable
+            CategoryCB.Tag = displayTable
 
             ' Set up search functionality
             SetupCategorySearch()
@@ -1164,7 +1164,7 @@ Public Class Customers
 
 
 
-    Private Sub CatogeryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CatogeryCB.SelectedIndexChanged
+    Private Sub CatogeryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CategoryCB.SelectedIndexChanged
 
     End Sub
 
@@ -1236,7 +1236,7 @@ Public Class Customers
                             MarketCB.AutoCompleteMode = AutoCompleteMode.None
                             MarketCB.AutoCompleteSource = AutoCompleteSource.None
                             MarketCB.DropDownStyle = ComboBoxStyle.DropDown
-                            
+
                             ' Setup enhanced search events
                             AddHandler MarketCB.TextChanged, AddressOf MarketCB_TextChanged
                             AddHandler MarketCB.KeyUp, AddressOf MarketCB_KeyUp
@@ -1278,7 +1278,7 @@ Public Class Customers
                             GroupsCB.AutoCompleteMode = AutoCompleteMode.None
                             GroupsCB.AutoCompleteSource = AutoCompleteSource.None
                             GroupsCB.DropDownStyle = ComboBoxStyle.DropDown
-                            
+
                             ' Setup enhanced search events
                             AddHandler GroupsCB.TextChanged, AddressOf GroupsCB_TextChanged
                             AddHandler GroupsCB.KeyUp, AddressOf GroupsCB_KeyUp
@@ -1315,7 +1315,7 @@ Public Class Customers
                             TypeCB.AutoCompleteMode = AutoCompleteMode.None
                             TypeCB.AutoCompleteSource = AutoCompleteSource.None
                             TypeCB.DropDownStyle = ComboBoxStyle.DropDown
-                            
+
                             ' Setup enhanced search events
                             AddHandler TypeCB.TextChanged, AddressOf TypeCB_TextChanged
                             AddHandler TypeCB.KeyUp, AddressOf TypeCB_KeyUp
@@ -1331,39 +1331,39 @@ Public Class Customers
             End If
 
             ' Load CatogeryCB from CustomerCategory
-            If CatogeryCB IsNot Nothing Then
+            If CategoryCB IsNot Nothing Then
                 Try
                     ' Reset ComboBox completely
-                    CatogeryCB.DataSource = Nothing
-                    CatogeryCB.Items.Clear()
-                    CatogeryCB.DisplayMember = Nothing
-                    CatogeryCB.ValueMember = Nothing
+                    CategoryCB.DataSource = Nothing
+                    CategoryCB.Items.Clear()
+                    CategoryCB.DisplayMember = Nothing
+                    CategoryCB.ValueMember = Nothing
 
                     Dim categoryData As DataTable = dbConn.LoadCustomerCategory()
                     If categoryData IsNot Nothing AndAlso categoryData.Rows.Count > 0 Then
                         If categoryData.Columns.Contains("fld_code") AndAlso categoryData.Columns.Contains("DisplayText") Then
-                            CatogeryCB.DataSource = categoryData
-                            CatogeryCB.DisplayMember = "DisplayText"
-                            CatogeryCB.ValueMember = "fld_code"
-                            CatogeryCB.SelectedIndex = -1
-                            CatogeryCB.Tag = categoryData.Copy() ' Store original data for search
+                            CategoryCB.DataSource = categoryData
+                            CategoryCB.DisplayMember = "DisplayText"
+                            CategoryCB.ValueMember = "fld_code"
+                            CategoryCB.SelectedIndex = -1
+                            CategoryCB.Tag = categoryData.Copy() ' Store original data for search
 
                             ' Enable enhanced search functionality
-                            CatogeryCB.AutoCompleteMode = AutoCompleteMode.None
-                            CatogeryCB.AutoCompleteSource = AutoCompleteSource.None
-                            CatogeryCB.DropDownStyle = ComboBoxStyle.DropDown
-                            
+                            CategoryCB.AutoCompleteMode = AutoCompleteMode.None
+                            CategoryCB.AutoCompleteSource = AutoCompleteSource.None
+                            CategoryCB.DropDownStyle = ComboBoxStyle.DropDown
+
                             ' Setup enhanced search events
-                            AddHandler CatogeryCB.TextChanged, AddressOf CatogeryCB_TextChanged
-                            AddHandler CatogeryCB.KeyUp, AddressOf CatogeryCB_KeyUp
+                            AddHandler CategoryCB.TextChanged, AddressOf CatogeryCB_TextChanged
+                            AddHandler CategoryCB.KeyUp, AddressOf CatogeryCB_KeyUp
                         End If
                     End If
                 Catch ex As Exception
                     System.Diagnostics.Debug.WriteLine("Error loading CatogeryCB: " & ex.Message)
-                    CatogeryCB.DataSource = Nothing
-                    CatogeryCB.Items.Clear()
-                    CatogeryCB.Items.Add("لا توجد بيانات")
-                    CatogeryCB.SelectedIndex = -1
+                    CategoryCB.DataSource = Nothing
+                    CategoryCB.Items.Clear()
+                    CategoryCB.Items.Add("لا توجد بيانات")
+                    CategoryCB.SelectedIndex = -1
                 End Try
             End If
 
@@ -1478,11 +1478,11 @@ Public Class Customers
             End If
 
             ' Set CatogeryCB from CategoryCode FK
-            If CatogeryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CategoryCode) AndAlso CatogeryCB.DataSource IsNot Nothing Then
-                Dim categoryTable As DataTable = CType(CatogeryCB.DataSource, DataTable)
+            If CategoryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CategoryCode) AndAlso CategoryCB.DataSource IsNot Nothing Then
+                Dim categoryTable As DataTable = CType(CategoryCB.DataSource, DataTable)
                 For i As Integer = 0 To categoryTable.Rows.Count - 1
                     If categoryTable.Rows(i)("fld_code").ToString() = customerData.CategoryCode Then
-                        CatogeryCB.SelectedIndex = i
+                        CategoryCB.SelectedIndex = i
                         Exit For
                     End If
                 Next
@@ -1828,7 +1828,27 @@ Public Class Customers
 
             isNavigating = True
             Dim customerCode As String = customerList(index)
-            
+
+            ' Debug: Check if customer exists in database
+            System.Diagnostics.Debug.WriteLine($"=== DEBUG: Checking customer {customerCode} ===")
+            Dim customerExists As Boolean = dbConn.DoesCustomerExist(customerCode)
+            System.Diagnostics.Debug.WriteLine($"Customer {customerCode} exists in database: {customerExists}")
+
+            ' Special debug for C0002
+            If customerCode = "C0002" Then
+                System.Diagnostics.Debug.WriteLine("=== SPECIAL DEBUG FOR C0002 ===")
+                Dim rawData As String = dbConn.GetRawCustomerData("C0002")
+                System.Diagnostics.Debug.WriteLine(rawData)
+                System.Diagnostics.Debug.WriteLine("=== END SPECIAL DEBUG ===")
+            End If
+
+            ' Temporarily disable existence check to debug data loading
+            'If Not customerExists Then
+            '    MessageBox.Show($"العميل {customerCode} غير موجود في قاعدة البيانات!" & Environment.NewLine &
+            '                   "سيتم إزالته من قائمة العملاء.", "عميل غير موجود", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            '    Return
+            'End If
+
             ' Ensure ComboBoxes are loaded before populating customer data
             System.Diagnostics.Debug.WriteLine("Loading ComboBox data for navigation...")
             Try
@@ -1843,6 +1863,7 @@ Public Class Customers
             System.Diagnostics.Debug.WriteLine($"Customer data loaded - Code: {customerData?.Code}, IsNull: {customerData Is Nothing}")
 
             If customerData IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.Code) Then
+                System.Diagnostics.Debug.WriteLine($"Customer data found! Starting form population for: {customerData.Code}")
                 ' Populate form with loaded data - force UI update
                 Try
                     ' Clear all fields first
@@ -1920,9 +1941,18 @@ Public Class Customers
                     End If
 
                     ' Populate all text fields with data
+                    ' Debug: Show customer data details
+                    System.Diagnostics.Debug.WriteLine($"Customer Data Details:")
+                    System.Diagnostics.Debug.WriteLine($"  Code: '{customerData.Code}'")
+                    System.Diagnostics.Debug.WriteLine($"  English Name: '{customerData.EnglishName}'")
+                    System.Diagnostics.Debug.WriteLine($"  Arabic Name: '{customerData.ArabicName}'")
+                    System.Diagnostics.Debug.WriteLine($"  Active: {customerData.Active}")
+
+                    System.Diagnostics.Debug.WriteLine("Starting to populate text fields...")
                     If NameInEnglishTB IsNot Nothing Then
                         NameInEnglishTB.Text = If(String.IsNullOrEmpty(customerData.EnglishName), "", customerData.EnglishName)
                         NameInEnglishTB.Refresh()
+                        System.Diagnostics.Debug.WriteLine($"English Name set to: '{NameInEnglishTB.Text}'")
                     End If
 
                     If FormalNameTB IsNot Nothing Then
@@ -2112,12 +2142,15 @@ Public Class Customers
                     Me.Refresh()
                     Application.DoEvents()
 
+                    System.Diagnostics.Debug.WriteLine($"Form population completed successfully for customer: {customerData.Code}")
+
                 Catch fieldEx As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error populating form fields: {fieldEx.Message}")
                     MessageBox.Show("خطأ في تعبئة الحقول: " & fieldEx.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 End Try
             Else
                 System.Diagnostics.Debug.WriteLine($"Customer not found or empty data for code: {customerCode}")
-                MessageBox.Show($"لم يتم العثور على بيانات العميل: {customerCode}" & Environment.NewLine & 
+                MessageBox.Show($"لم يتم العثور على بيانات العميل: {customerCode}" & Environment.NewLine &
                                $"تأكد من وجود العميل في قاعدة البيانات", "خطأ - C0004", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
 
@@ -2164,16 +2197,19 @@ Public Class Customers
             customerData.ManagerID = If(ManagerIDTB IsNot Nothing, ManagerIDTB.Text.Trim(), "")
             customerData.ManagerNumber = If(MangerNumberTB IsNot Nothing, MangerNumberTB.Text.Trim(), "")
 
-            ' Get selected country and area
+            ' Get selected country and area - save Arabic names
             If CountryCB.SelectedItem IsNot Nothing Then
                 Dim selectedCountry = CType(CountryCB.SelectedItem, DataRowView)
-                customerData.Country = selectedCountry("countrycode").ToString()
+                ' Save the Arabic name (DisplayText) instead of the code
+                customerData.Country = selectedCountry("DisplayText").ToString()
                 customerData.CountryName = selectedCountry("DisplayText").ToString()
+                System.Diagnostics.Debug.WriteLine($"Selected country: {customerData.Country}")
             End If
 
             If AreaCB.SelectedItem IsNot Nothing Then
                 Dim selectedArea = CType(AreaCB.SelectedItem, DataRowView)
                 customerData.Area = selectedArea("description").ToString()
+                System.Diagnostics.Debug.WriteLine($"Selected area: {customerData.Area}")
             End If
 
             customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
@@ -2219,8 +2255,8 @@ Public Class Customers
             End If
 
             ' CategoryCode from CatogeryCB (CustomerCategory.fld_code)
-            If CatogeryCB IsNot Nothing AndAlso CatogeryCB.SelectedValue IsNot Nothing Then
-                customerData.CategoryCode = CatogeryCB.SelectedValue.ToString()
+            If CategoryCB IsNot Nothing AndAlso CategoryCB.SelectedValue IsNot Nothing Then
+                customerData.CategoryCode = CategoryCB.SelectedValue.ToString()
             End If
 
             ' Handle VTRAppliedCKB enablement based on CustomerAccountNumberTB data when inserting
@@ -2373,14 +2409,14 @@ Public Class Customers
     End Sub
 
     Private Sub CatogeryCB_TextChanged(sender As Object, e As EventArgs)
-        PerformEnhancedSearch(CatogeryCB, "CatogeryCB")
+        PerformEnhancedSearch(CategoryCB, "CatogeryCB")
     End Sub
 
     Private Sub CatogeryCB_KeyUp(sender As Object, e As KeyEventArgs)
         If e.KeyCode = Keys.Escape Then
-            CatogeryCB.DroppedDown = False
+            CategoryCB.DroppedDown = False
         ElseIf e.KeyCode <> Keys.Up AndAlso e.KeyCode <> Keys.Down Then
-            CatogeryCB.DroppedDown = True
+            CategoryCB.DroppedDown = True
         End If
     End Sub
 

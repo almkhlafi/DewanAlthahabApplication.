@@ -22,14 +22,13 @@ Partial Class Customers
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
         Dim DataGridViewCellStyle3 As DataGridViewCellStyle = New DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As DataGridViewCellStyle = New DataGridViewCellStyle()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Customers))
         TypeCB = New ComboBox()
         MarketCB = New ComboBox()
         BranchesInfoDGV = New DataGridView()
-        CatogeryCB = New ComboBox()
+        CategoryCB = New ComboBox()
         GroupsCB = New ComboBox()
         AddressTA = New RichTextBox()
         downCustomersPB = New PictureBox()
@@ -94,14 +93,14 @@ Partial Class Customers
         refreshPB = New PictureBox()
         AddAttachmentsBT = New PictureBox()
         PictureBox5 = New PictureBox()
+        CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).BeginInit()
+        CType(downCustomersPB, ComponentModel.ISupportInitialize).BeginInit()
+        CType(UpCustomersPB, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox1.SuspendLayout()
         GroupBox6.SuspendLayout()
         CType(CurrencyDGV, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox4.SuspendLayout()
-        CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox3.SuspendLayout()
-        CType(downCustomersPB, ComponentModel.ISupportInitialize).BeginInit()
-        CType(UpCustomersPB, ComponentModel.ISupportInitialize).BeginInit()
         CType(SaveInfo, ComponentModel.ISupportInitialize).BeginInit()
         GroupBox5.SuspendLayout()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
@@ -112,6 +111,95 @@ Partial Class Customers
         CType(AddAttachmentsBT, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox5, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
+        ' 
+        ' TypeCB
+        ' 
+        TypeCB.FormattingEnabled = True
+        TypeCB.Location = New Point(27, 544)
+        TypeCB.Name = "TypeCB"
+        TypeCB.Size = New Size(362, 28)
+        TypeCB.TabIndex = 47
+        ' 
+        ' MarketCB
+        ' 
+        MarketCB.FormattingEnabled = True
+        MarketCB.Location = New Point(435, 486)
+        MarketCB.Name = "MarketCB"
+        MarketCB.Size = New Size(393, 28)
+        MarketCB.TabIndex = 46
+        ' 
+        ' BranchesInfoDGV
+        ' 
+        BranchesInfoDGV.BackgroundColor = SystemColors.ButtonHighlight
+        BranchesInfoDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        BranchesInfoDGV.Location = New Point(6, 26)
+        BranchesInfoDGV.Name = "BranchesInfoDGV"
+        BranchesInfoDGV.RowHeadersWidth = 51
+        BranchesInfoDGV.Size = New Size(861, 415)
+        BranchesInfoDGV.TabIndex = 44
+        ' 
+        ' CategoryCB
+        ' 
+        CategoryCB.FormattingEnabled = True
+        CategoryCB.Location = New Point(27, 472)
+        CategoryCB.Margin = New Padding(2, 3, 2, 3)
+        CategoryCB.Name = "CategoryCB"
+        CategoryCB.Size = New Size(362, 28)
+        CategoryCB.TabIndex = 38
+        ' 
+        ' GroupsCB
+        ' 
+        GroupsCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        GroupsCB.FormattingEnabled = True
+        GroupsCB.Location = New Point(435, 543)
+        GroupsCB.Margin = New Padding(2, 3, 2, 3)
+        GroupsCB.Name = "GroupsCB"
+        GroupsCB.Size = New Size(393, 28)
+        GroupsCB.TabIndex = 37
+        ' 
+        ' AddressTA
+        ' 
+        AddressTA.Location = New Point(14, 77)
+        AddressTA.Name = "AddressTA"
+        AddressTA.Size = New Size(339, 64)
+        AddressTA.TabIndex = 57
+        AddressTA.Text = ""
+        ' 
+        ' downCustomersPB
+        ' 
+        downCustomersPB.Image = CType(resources.GetObject("downCustomersPB.Image"), Image)
+        downCustomersPB.Location = New Point(46, 16)
+        downCustomersPB.Name = "downCustomersPB"
+        downCustomersPB.Size = New Size(23, 22)
+        downCustomersPB.SizeMode = PictureBoxSizeMode.StretchImage
+        downCustomersPB.TabIndex = 56
+        downCustomersPB.TabStop = False
+        ' 
+        ' UpCustomersPB
+        ' 
+        UpCustomersPB.Image = CType(resources.GetObject("UpCustomersPB.Image"), Image)
+        UpCustomersPB.Location = New Point(12, 16)
+        UpCustomersPB.Name = "UpCustomersPB"
+        UpCustomersPB.Size = New Size(24, 22)
+        UpCustomersPB.SizeMode = PictureBoxSizeMode.StretchImage
+        UpCustomersPB.TabIndex = 55
+        UpCustomersPB.TabStop = False
+        ' 
+        ' CountryCB
+        ' 
+        CountryCB.FormattingEnabled = True
+        CountryCB.Location = New Point(12, 309)
+        CountryCB.Name = "CountryCB"
+        CountryCB.Size = New Size(397, 28)
+        CountryCB.TabIndex = 52
+        ' 
+        ' AreaCB
+        ' 
+        AreaCB.FormattingEnabled = True
+        AreaCB.Location = New Point(12, 363)
+        AreaCB.Name = "AreaCB"
+        AreaCB.Size = New Size(397, 28)
+        AreaCB.TabIndex = 51
         ' 
         ' GroupBox1
         ' 
@@ -178,7 +266,7 @@ Partial Class Customers
         GroupBox4.Controls.Add(Label22)
         GroupBox4.Controls.Add(Label21)
         GroupBox4.Controls.Add(Label12)
-        GroupBox4.Controls.Add(CatogeryCB)
+        GroupBox4.Controls.Add(CategoryCB)
         GroupBox4.Controls.Add(GroupsCB)
         GroupBox4.ForeColor = SystemColors.Highlight
         GroupBox4.Location = New Point(6, 197)
@@ -187,32 +275,6 @@ Partial Class Customers
         GroupBox4.TabIndex = 4
         GroupBox4.TabStop = False
         GroupBox4.Text = "معلومات الفرع"
-        ' 
-        ' TypeCB
-        ' 
-        TypeCB.FormattingEnabled = True
-        TypeCB.Location = New Point(27, 544)
-        TypeCB.Name = "TypeCB"
-        TypeCB.Size = New Size(362, 28)
-        TypeCB.TabIndex = 47
-        ' 
-        ' MarketCB
-        ' 
-        MarketCB.FormattingEnabled = True
-        MarketCB.Location = New Point(435, 486)
-        MarketCB.Name = "MarketCB"
-        MarketCB.Size = New Size(393, 28)
-        MarketCB.TabIndex = 46
-        ' 
-        ' BranchesInfoDGV
-        ' 
-        BranchesInfoDGV.BackgroundColor = SystemColors.ButtonHighlight
-        BranchesInfoDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        BranchesInfoDGV.Location = New Point(6, 26)
-        BranchesInfoDGV.Name = "BranchesInfoDGV"
-        BranchesInfoDGV.RowHeadersWidth = 51
-        BranchesInfoDGV.Size = New Size(861, 415)
-        BranchesInfoDGV.TabIndex = 44
         ' 
         ' Label23
         ' 
@@ -265,25 +327,6 @@ Partial Class Customers
         Label12.Size = New Size(58, 20)
         Label12.TabIndex = 40
         Label12.Text = "الاسواق"
-        ' 
-        ' CatogeryCB
-        ' 
-        CatogeryCB.FormattingEnabled = True
-        CatogeryCB.Location = New Point(27, 472)
-        CatogeryCB.Margin = New Padding(2, 3, 2, 3)
-        CatogeryCB.Name = "CatogeryCB"
-        CatogeryCB.Size = New Size(362, 28)
-        CatogeryCB.TabIndex = 38
-        ' 
-        ' GroupsCB
-        ' 
-        GroupsCB.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        GroupsCB.FormattingEnabled = True
-        GroupsCB.Location = New Point(435, 543)
-        GroupsCB.Margin = New Padding(2, 3, 2, 3)
-        GroupsCB.Name = "GroupsCB"
-        GroupsCB.Size = New Size(393, 28)
-        GroupsCB.TabIndex = 37
         ' 
         ' GroupBox3
         ' 
@@ -341,50 +384,6 @@ Partial Class Customers
         GroupBox3.Size = New Size(658, 863)
         GroupBox3.TabIndex = 2
         GroupBox3.TabStop = False
-        ' 
-        ' AddressTA
-        ' 
-        AddressTA.Location = New Point(14, 77)
-        AddressTA.Name = "AddressTA"
-        AddressTA.Size = New Size(339, 64)
-        AddressTA.TabIndex = 57
-        AddressTA.Text = ""
-        ' 
-        ' downCustomersPB
-        ' 
-        downCustomersPB.Image = CType(resources.GetObject("downCustomersPB.Image"), Image)
-        downCustomersPB.Location = New Point(46, 16)
-        downCustomersPB.Name = "downCustomersPB"
-        downCustomersPB.Size = New Size(23, 22)
-        downCustomersPB.SizeMode = PictureBoxSizeMode.StretchImage
-        downCustomersPB.TabIndex = 56
-        downCustomersPB.TabStop = False
-        ' 
-        ' UpCustomersPB
-        ' 
-        UpCustomersPB.Image = CType(resources.GetObject("UpCustomersPB.Image"), Image)
-        UpCustomersPB.Location = New Point(12, 16)
-        UpCustomersPB.Name = "UpCustomersPB"
-        UpCustomersPB.Size = New Size(24, 22)
-        UpCustomersPB.SizeMode = PictureBoxSizeMode.StretchImage
-        UpCustomersPB.TabIndex = 55
-        UpCustomersPB.TabStop = False
-        ' 
-        ' CountryCB
-        ' 
-        CountryCB.FormattingEnabled = True
-        CountryCB.Location = New Point(12, 309)
-        CountryCB.Name = "CountryCB"
-        CountryCB.Size = New Size(397, 28)
-        CountryCB.TabIndex = 52
-        ' 
-        ' AreaCB
-        ' 
-        AreaCB.FormattingEnabled = True
-        AreaCB.Location = New Point(12, 363)
-        AreaCB.Name = "AreaCB"
-        AreaCB.Size = New Size(397, 28)
-        AreaCB.TabIndex = 51
         ' 
         ' SaveInfo
         ' 
@@ -938,16 +937,16 @@ Partial Class Customers
         Name = "Customers"
         StartPosition = FormStartPosition.CenterScreen
         Text = "الـعــمــــــــلاء"
+        CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).EndInit()
+        CType(downCustomersPB, ComponentModel.ISupportInitialize).EndInit()
+        CType(UpCustomersPB, ComponentModel.ISupportInitialize).EndInit()
         GroupBox1.ResumeLayout(False)
         GroupBox6.ResumeLayout(False)
         CType(CurrencyDGV, ComponentModel.ISupportInitialize).EndInit()
         GroupBox4.ResumeLayout(False)
         GroupBox4.PerformLayout()
-        CType(BranchesInfoDGV, ComponentModel.ISupportInitialize).EndInit()
         GroupBox3.ResumeLayout(False)
         GroupBox3.PerformLayout()
-        CType(downCustomersPB, ComponentModel.ISupportInitialize).EndInit()
-        CType(UpCustomersPB, ComponentModel.ISupportInitialize).EndInit()
         CType(SaveInfo, ComponentModel.ISupportInitialize).EndInit()
         GroupBox5.ResumeLayout(False)
         CType(PictureBox1, ComponentModel.ISupportInitialize).EndInit()
@@ -1017,7 +1016,7 @@ Partial Class Customers
     Friend WithEvents Label21 As Label
     Friend WithEvents Label12 As Label
 
-    Friend WithEvents CatogeryCB As ComboBox
+    Friend WithEvents CategoryCB As ComboBox
     Friend WithEvents GroupsCB As ComboBox
     Friend WithEvents MarketCB As ComboBox
     Friend WithEvents phoneNumber1ZipCodeTB As TextBox

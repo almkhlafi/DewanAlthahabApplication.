@@ -2,7 +2,7 @@ Public Class CustomerSearchForm
     Private dbConn As New DBconnections()
     Public Property SelectedCustomerId As Integer = 0
     Public Property SelectedCustomerName As String = ""
-    
+
     ' Variables for customer management
     Private isUpdatingCustomer As Boolean = False
     Private selectedCustomerIdForUpdate As Integer = 0
