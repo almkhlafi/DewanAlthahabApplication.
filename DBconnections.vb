@@ -1965,7 +1965,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT code, description, shortname, contryCode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode ORDER BY description"
+            Dim query As String = "SELECT code, description, shortname, contryCode FROM [CMGADB2024].[dbo].[AreaMaster] WHERE contryCode = @CountryCode AND active = 'True' ORDER BY description"
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CountryCode", countryCode)
             da = New SqlDataAdapter(cmd)
@@ -1996,7 +1996,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT code, description, shortname FROM [CMGADB2024].[dbo].[CusTransactionMaster] ORDER BY description"
+            Dim query As String = "SELECT code, description, shortname, active, arabic_desc, fld_area_code FROM [CMGADB2024].[dbo].[CusTransactionMaster] WHERE active = 'True' ORDER BY description"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2026,7 +2026,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM [CMGADB2024].[dbo].[CustomerCategory] ORDER BY fld_arabic_name"
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name, fld_active FROM [CMGADB2024].[dbo].[CustomerCategory] WHERE fld_active = 'True' ORDER BY fld_arabic_name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2056,7 +2056,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT code, description, shortname FROM [CMGADB2024].[dbo].[CusGradeMaster] ORDER BY description"
+            Dim query As String = "SELECT code, description, shortname, active, arabic_desc FROM [CMGADB2024].[dbo].[CusGradeMaster] WHERE active = 'True' ORDER BY description"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -2086,7 +2086,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM [CMGADB2024].[dbo].[CustomerType] ORDER BY fld_arabic_name"
+            Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name, fld_active FROM [CMGADB2024].[dbo].[CustomerType] WHERE fld_active = 'True' ORDER BY fld_arabic_name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)

@@ -61,7 +61,11 @@ Public Class Customers
         InitializeCustomerSupplierComboBoxes()
 
         ' Initialize customer list for navigation (but don't load first customer data)
-        InitializeNavigationOnly()
+        ' Set up timer for delayed navigation initialization
+        navigationInitTimer = New Timer()
+        navigationInitTimer.Interval = 1000 ' 3 seconds in milliseconds
+        AddHandler navigationInitTimer.Tick, AddressOf DelayedInitializeNavigation
+        navigationInitTimer.Start()
 
         ' Debug: Test database access
         Try
@@ -72,6 +76,14 @@ Public Class Customers
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine($"Database test failed: {ex.Message}")
         End Try
+    End Sub
+    ' Timer for delayed navigation initialization
+    Private navigationInitTimer As Timer
+
+    Private Sub DelayedInitializeNavigation(sender As Object, e As EventArgs)
+        navigationInitTimer.Stop() ' Stop the timer so it doesn't repeat
+        navigationInitTimer.Dispose()
+        InitializeNavigationOnly() ' Call your method
     End Sub
 
     Private Sub LoadCountries()
@@ -181,11 +193,8 @@ Public Class Customers
                 newRow("code") = row("code").ToString()
                 newRow("description") = row("description").ToString()
 
-                ' Create display text with description and short name
-                Dim displayText As String = row("description").ToString()
-                If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
-                    displayText += $" - {row("shortname")}"
-                End If
+                ' Create display text with code, description and short name
+                Dim displayText As String = $"{row("code")} - {row("description")} - {row("shortname")}"
 
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)
@@ -847,7 +856,7 @@ Public Class Customers
 
             ' Set up MarketCB properties for enhanced search functionality
             MarketCB.DisplayMember = "DisplayText"
-            MarketCB.ValueMember = "code"
+            MarketCB.ValueMember = "fld_area_code"
 
             MarketCB.AutoCompleteMode = AutoCompleteMode.Suggest
             MarketCB.AutoCompleteSource = AutoCompleteSource.ListItems
@@ -855,18 +864,15 @@ Public Class Customers
 
             ' Create a new DataTable with combined display text
             Dim displayTable As New DataTable()
-            displayTable.Columns.Add("code", GetType(String))
+            displayTable.Columns.Add("fld_area_code", GetType(String))
             displayTable.Columns.Add("DisplayText", GetType(String))
 
-            ' Add market data with combined display format: code - description - shortname
+            ' Add market data with combined display format: fld_area_code - description - shortname
             For Each row As DataRow In marketTable.Rows
                 Dim newRow As DataRow = displayTable.NewRow()
-                newRow("code") = row("code").ToString()
+                newRow("fld_area_code") = row("fld_area_code").ToString()
 
-                Dim displayText As String = $"{row("code")} - {row("description")}"
-                If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
-                    displayText += $" - {row("shortname")}"
-                End If
+                Dim displayText As String = $"{row("fld_area_code")} - {row("description")} - {row("shortname")} - {row("arabic_desc")}"
 
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)
@@ -961,10 +967,7 @@ Public Class Customers
                 Dim newRow As DataRow = displayTable.NewRow()
                 newRow("code") = row("code").ToString()
 
-                Dim displayText As String = $"{row("code")} - {row("description")}"
-                If Not String.IsNullOrEmpty(row("shortname").ToString()) Then
-                    displayText += $" - {row("shortname")}"
-                End If
+                Dim displayText As String = $"{row("code")} - {row("description")} - {row("shortname")} - {row("arabic_desc")}"
 
                 newRow("DisplayText") = displayText
                 displayTable.Rows.Add(newRow)
