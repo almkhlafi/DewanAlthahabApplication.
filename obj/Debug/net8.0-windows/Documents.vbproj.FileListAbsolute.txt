@@ -1,13 +1,16 @@
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Documents.exe
+C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Documents.dll
+C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.Identity.Client.dll
+C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.SqlServer.Server.dll
+C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\Microsoft.Data.SqlClient.dll
+C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Documents.deps.json
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Documents.runtimeconfig.json
-C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Documents.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Documents.pdb
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Azure.Core.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Azure.Identity.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.Data.SqlClient.dll
-C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.Identity.Client.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.Identity.Client.Extensions.Msal.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.IdentityModel.Abstractions.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.IdentityModel.JsonWebTokens.dll
@@ -15,7 +18,6 @@ C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microso
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.IdentityModel.Protocols.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.IdentityModel.Tokens.dll
-C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\Microsoft.SqlServer.Server.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\System.ClientModel.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\System.Memory.Data.dll
@@ -31,10 +33,8 @@ C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\ru\Micr
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\zh-Hans\Microsoft.Data.SqlClient.resources.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\zh-Hant\Microsoft.Data.SqlClient.resources.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\unix\lib\net8.0\Microsoft.Data.SqlClient.dll
-C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\Microsoft.Data.SqlClient.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
-C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\azaym\source\repos\Documents\Documents\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Runtime.Caching.dll
 C:\Users\azaym\source\repos\Documents\Documents\obj\Debug\net8.0-windows\Documents.vbproj.AssemblyReference.cache

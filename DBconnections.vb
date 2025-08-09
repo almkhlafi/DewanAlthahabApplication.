@@ -2164,6 +2164,7 @@ ORDER BY p.Name"
                        "bank_acc_no = @bank_acc_no, " &
                        "fld_state = @fld_state, " &
                        "fld_dist = @fld_dist, " &
+                       "area = @area, " &
                        "vat_tin_no = @vat_tin_no, " &
                        "email = @email, " &
                        "fld_contry_code_mobile = @fld_contry_code_mobile, " &
@@ -2181,14 +2182,14 @@ ORDER BY p.Name"
                 ' Insert new record - include FK fields
                 query = "INSERT INTO [CustomerAccountsMaster] " &
                        "(code, c_type, name, fld_arabic_name, shortname, bussiness_address, " &
-                       "acc_manager, bank_acc_name, bank_acc_no, fld_state, fld_dist, " &
+                       "acc_manager, bank_acc_name, bank_acc_no, fld_state, fld_dist, area, " &
                        "vat_tin_no, email, fld_contry_code_mobile, country, fld_fax_no, " &
-                       "fld_ref_no, fld_indvl_id_no, fld_cr_no, currency, active, introduced_date, " &
+                       "fld_ref_no, fld_indvl_id_no, fld_cr_no, currency, active, " &
                        "sales_man, scrap_adj_code, type, categoty) " &
                        "VALUES (@code, @c_type, @name, @fld_arabic_name, @shortname, @bussiness_address, " &
-                       "@acc_manager, @bank_acc_name, @bank_acc_no, @fld_state, @fld_dist, " &
+                       "@acc_manager, @bank_acc_name, @bank_acc_no, @fld_state, @fld_dist, @area, " &
                        "@vat_tin_no, @email, @fld_contry_code_mobile, @country, @fld_fax_no, " &
-                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @currency, @active, @introduced_date, " &
+                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @currency, @active, " &
                        "@sales_man, @scrap_adj_code, @type, @categoty)"
             End If
 
@@ -2219,6 +2220,7 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@bank_acc_no", TruncateString(customerData.ManagerNumber, 30))
             cmd.Parameters.AddWithValue("@fld_state", TruncateString(customerData.Country, 100))
             cmd.Parameters.AddWithValue("@fld_dist", TruncateString(customerData.Area, 100))
+            cmd.Parameters.AddWithValue("@area", TruncateString(customerData.Area, 100))
             cmd.Parameters.AddWithValue("@vat_tin_no", TruncateString(customerData.VATNumber, 15))
             cmd.Parameters.AddWithValue("@email", TruncateString(customerData.Email, 50))
             cmd.Parameters.AddWithValue("@fld_contry_code_mobile", TruncateString(customerData.MobileCountryCode, 5))
@@ -2238,7 +2240,6 @@ ORDER BY p.Name"
             If Not customerData.IsUpdate Then
                 cmd.Parameters.AddWithValue("@currency", TruncateString("SAR", 10))  ' Default currency
                 cmd.Parameters.AddWithValue("@active", True)  ' Default to active
-                cmd.Parameters.AddWithValue("@introduced_date", DateTime.Now)  ' Current date
                 System.Diagnostics.Debug.WriteLine("Added default values for new customer")
             End If
             

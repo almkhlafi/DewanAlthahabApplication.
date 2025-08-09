@@ -63,7 +63,7 @@ Public Class Customers
         ' Initialize customer list for navigation (but don't load first customer data)
         ' Set up timer for delayed navigation initialization
         navigationInitTimer = New Timer()
-        navigationInitTimer.Interval = 1000 ' 3 seconds in milliseconds
+        navigationInitTimer.Interval = 800 ' 3 seconds in milliseconds
         AddHandler navigationInitTimer.Tick, AddressOf DelayedInitializeNavigation
         navigationInitTimer.Start()
 
@@ -1534,16 +1534,16 @@ Public Class Customers
     ' Handle ActiveNoActiveCKB checkbox state change
     Private Sub ActiveNoActiveCKB_CheckedChanged(sender As Object, e As EventArgs) Handles ActiveNoActiveCKB.CheckedChanged
         Try
-            If CustomerAccountNumberTB IsNot Nothing Then
-                ' Enable/disable CustomerAccountNumberTB based on ActiveNoActiveCKB state
-                CustomerAccountNumberTB.Enabled = ActiveNoActiveCKB.Checked
+            If CommercialRecordAndIdentityTB IsNot Nothing Then
+                ' Enable/disable CommercialRecordAndIdentityTB based on ActiveNoActiveCKB state
+                CommercialRecordAndIdentityTB.Enabled = ActiveNoActiveCKB.Checked
 
                 If Not ActiveNoActiveCKB.Checked Then
                     ' Clear the text when disabled
-                    CustomerAccountNumberTB.Text = ""
+                    CommercialRecordAndIdentityTB.Text = ""
                 End If
 
-                CustomerAccountNumberTB.Refresh()
+                CommercialRecordAndIdentityTB.Refresh()
             End If
         Catch ex As Exception
             MessageBox.Show("خطأ في تحديث حالة رقم الحساب: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1617,8 +1617,10 @@ Public Class Customers
 
                     If CommercialRecordAndIdentityTB IsNot Nothing Then
                         If customerData.IsIndividual Then
+                            ' For فردي (Individual), load fld_indvl_id_no to CommercialRecordAndIdentityTB
                             CommercialRecordAndIdentityTB.Text = customerData.IndividualID
                         ElseIf customerData.IsCommercial Then
+                            ' For تجاري (Commercial), load fld_cr_no to CommercialRecordAndIdentityTB
                             CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
                         End If
                     End If
@@ -1894,39 +1896,39 @@ Public Class Customers
                         End If
                     End If
 
-                    ' Handle ActiveNoActiveCKB checkbox and CustomerAccountNumberTB state
+                    ' Handle ActiveNoActiveCKB checkbox and CommercialRecordAndIdentityTB state
                     If ActiveNoActiveCKB IsNot Nothing Then
                         ' Set ActiveNoActiveCKB based on database active column
                         ActiveNoActiveCKB.Checked = customerData.Active
                         ActiveNoActiveCKB.Refresh()
 
-                        ' Enable/disable CustomerAccountNumberTB based on Active status
-                        If CustomerAccountNumberTB IsNot Nothing Then
-                            CustomerAccountNumberTB.Enabled = customerData.Active
+                        ' Enable/disable CommercialRecordAndIdentityTB based on Active status
+                        If CommercialRecordAndIdentityTB IsNot Nothing Then
+                            CommercialRecordAndIdentityTB.Enabled = customerData.Active
                             If customerData.Active Then
-                                ' Populate the CustomerAccountNumberTB if Active is true
-                                CustomerAccountNumberTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                                ' Populate the CommercialRecordAndIdentityTB if Active is true
+                                CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
                             Else
                                 ' Clear the field if Active is false
-                                CustomerAccountNumberTB.Text = ""
+                                CommercialRecordAndIdentityTB.Text = ""
                             End If
-                            CustomerAccountNumberTB.Refresh()
+                            CommercialRecordAndIdentityTB.Refresh()
                         End If
                     End If
 
-                    ' Handle VTRAppliedCKB checkbox enablement based on CustomerAccountNumberTB data
+                    ' Handle VTRAppliedCKB checkbox enablement based on CommercialRecordAndIdentityTB data
                     If VTRAppliedCKB IsNot Nothing Then
-                        ' Check if CustomerAccountNumberTB contains data to determine if VTRAppliedCKB should be enabled
+                        ' Check if CommercialRecordAndIdentityTB contains data to determine if VTRAppliedCKB should be enabled
                         Dim hasCustomerAccountData As Boolean = False
-                        If CustomerAccountNumberTB IsNot Nothing Then
-                            hasCustomerAccountData = Not String.IsNullOrEmpty(CustomerAccountNumberTB.Text.Trim())
+                        If CommercialRecordAndIdentityTB IsNot Nothing Then
+                            hasCustomerAccountData = Not String.IsNullOrEmpty(CommercialRecordAndIdentityTB.Text.Trim())
                         End If
 
                         If hasCustomerAccountData Then
-                            ' Enable VTRAppliedCKB when CustomerAccountNumberTB has data
+                            ' Enable VTRAppliedCKB when CommercialRecordAndIdentityTB has data
                             VTRAppliedCKB.Enabled = True
                         Else
-                            ' Disable VTRAppliedCKB if CustomerAccountNumberTB has no data
+                            ' Disable VTRAppliedCKB if CommercialRecordAndIdentityTB has no data
                             VTRAppliedCKB.Enabled = False
                             VTRAppliedCKB.Checked = False
                         End If
@@ -2011,9 +2013,9 @@ Public Class Customers
                     End If
 
                     ' Add missing fields from the field mapping specification
-                    If CustomerAccountNumberTB IsNot Nothing Then
-                        CustomerAccountNumberTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
-                        CustomerAccountNumberTB.Refresh()
+                    If CommercialRecordAndIdentityTB IsNot Nothing Then
+                        CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                        CommercialRecordAndIdentityTB.Refresh()
                     End If
 
                     ' Add all the missing controls you mentioned
@@ -2021,15 +2023,15 @@ Public Class Customers
                         ActiveNoActiveCKB.Checked = False ' Default value, no field mapping specified
                         ActiveNoActiveCKB.Refresh()
 
-                        ' Ensure CustomerAccountNumberTB is disabled when ActiveNoActiveCKB is unchecked
-                        If CustomerAccountNumberTB IsNot Nothing Then
-                            CustomerAccountNumberTB.Enabled = False
+                        ' Ensure CommercialRecordAndIdentityTB is disabled when ActiveNoActiveCKB is unchecked
+                        If CommercialRecordAndIdentityTB IsNot Nothing Then
+                            CommercialRecordAndIdentityTB.Enabled = False
                         End If
                     End If
 
                     If VTRAppliedCKB IsNot Nothing Then
                         VTRAppliedCKB.Checked = False ' Default value, no field mapping specified
-                        VTRAppliedCKB.Enabled = False ' Default disabled until CustomerAccountNumberTB has data
+                        VTRAppliedCKB.Enabled = False ' Default disabled until CommercialRecordAndIdentityTB has data
                         VTRAppliedCKB.Refresh()
 
                         ' Ensure VTRnumberTB is enabled when VTRAppliedCKB is unchecked (default state)
@@ -2260,9 +2262,9 @@ Public Class Customers
                 customerData.CategoryCode = CategoryCB.SelectedValue.ToString()
             End If
 
-            ' Handle VTRAppliedCKB enablement based on CustomerAccountNumberTB data when inserting
-            If VTRAppliedCKB IsNot Nothing And CustomerAccountNumberTB IsNot Nothing Then
-                Dim hasCustomerAccountData As Boolean = Not String.IsNullOrEmpty(CustomerAccountNumberTB.Text.Trim())
+            ' Handle VTRAppliedCKB enablement based on CommercialRecordAndIdentityTB data when inserting
+            If VTRAppliedCKB IsNot Nothing And CommercialRecordAndIdentityTB IsNot Nothing Then
+                Dim hasCustomerAccountData As Boolean = Not String.IsNullOrEmpty(CommercialRecordAndIdentityTB.Text.Trim())
                 If Not hasCustomerAccountData Then
                     ' If no customer account data, disable VTRAppliedCKB
                     VTRAppliedCKB.Enabled = False
@@ -2364,7 +2366,7 @@ Public Class Customers
 
     Private Sub ResetAllTextBoxes()
         ' Reset all TextBox controls to empty
-        If CustomerAccountNumberTB IsNot Nothing Then CustomerAccountNumberTB.Text = ""
+        If CommercialRecordAndIdentityTB IsNot Nothing Then CommercialRecordAndIdentityTB.Text = ""
         If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = ""
         If AddressTA IsNot Nothing Then AddressTA.Text = ""
         If ManagerTB IsNot Nothing Then ManagerTB.Text = ""
@@ -2408,14 +2410,14 @@ Public Class Customers
         If ActiveNoActiveCKB IsNot Nothing Then ActiveNoActiveCKB.Checked = True ' Default to Active
         If VTRAppliedCKB IsNot Nothing Then
             VTRAppliedCKB.Checked = False
-            VTRAppliedCKB.Enabled = False ' Disable until CustomerAccountNumberTB has data
+            VTRAppliedCKB.Enabled = False ' Disable until CommercialRecordAndIdentityTB has data
         End If
     End Sub
 
     Private Sub ResetFormState()
         ' Reset form state and control enablement
-        If CustomerAccountNumberTB IsNot Nothing Then
-            CustomerAccountNumberTB.Enabled = False ' Disabled until Active is checked
+        If CommercialRecordAndIdentityTB IsNot Nothing Then
+            CommercialRecordAndIdentityTB.Enabled = False ' Disabled until Active is checked
         End If
 
         If VTRnumberTB IsNot Nothing Then
