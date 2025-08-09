@@ -1,6 +1,17 @@
-﻿Public Class Customers
+﻿Imports System.Threading
+Imports System.Threading.Tasks
+Imports System.Collections.Concurrent
+Imports System.Windows.Forms
+
+Public Class Customers
 
     Private dbConn As New DBconnections()
+
+    ' Threading and caching for performance
+    Private customerDataCache As New ConcurrentDictionary(Of String, CustomerSupplierData)
+    Private loadingTasks As New ConcurrentDictionary(Of String, Task)
+    Private isLoadingData As Boolean = False
+    Private loadingCancellationTokenSource As CancellationTokenSource
 
     ' Variables to track selected customer from search dialog
     Private currentSelectedCustomerId As Integer = 0
@@ -58,6 +69,10 @@
         ' Initialize Customer/Supplier ComboBoxes with enhanced logic
         InitializeCustomerSupplierComboBoxes()
 
+        ' Load all ComboBox data
+        LoadAllComboBoxData()
+        LoadCountries() ' Load countries ComboBox
+
         ' Initialize CustomerAccountNumberTB as read-only
         If CustomerAccountNumberTB IsNot Nothing Then
             CustomerAccountNumberTB.ReadOnly = True
@@ -67,10 +82,13 @@
 
         ' Initialize customer list for navigation (but don't load first customer data)
         ' Set up timer for delayed navigation initialization
-        navigationInitTimer = New Timer()
-        navigationInitTimer.Interval = 800 ' 3 seconds in milliseconds
+        navigationInitTimer = New System.Windows.Forms.Timer()
+        navigationInitTimer.Interval = 800 ' 800ms delay
         AddHandler navigationInitTimer.Tick, AddressOf DelayedInitializeNavigation
         navigationInitTimer.Start()
+
+        ' Start cache warming in background for better performance
+        Task.Run(Sub() WarmUpCustomerCache())
 
         ' Debug: Test database access
         Try
@@ -82,8 +100,40 @@
             System.Diagnostics.Debug.WriteLine($"Database test failed: {ex.Message}")
         End Try
     End Sub
+
+    Private Sub Customers_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        ''' <summary>
+        ''' Cleanup threading resources when form is closing
+        ''' </summary>
+        Try
+            System.Diagnostics.Debug.WriteLine("Form closing - cleaning up threading resources...")
+
+            ' Cancel any ongoing loading operations
+            If loadingCancellationTokenSource IsNot Nothing Then
+                loadingCancellationTokenSource.Cancel()
+                loadingCancellationTokenSource.Dispose()
+                loadingCancellationTokenSource = Nothing
+            End If
+
+            ' Clear caches to free memory
+            ClearCustomerCache()
+            loadingTasks.Clear()
+
+            ' Stop and dispose timer if exists
+            If navigationInitTimer IsNot Nothing Then
+                navigationInitTimer.Stop()
+                navigationInitTimer.Dispose()
+                navigationInitTimer = Nothing
+            End If
+
+            System.Diagnostics.Debug.WriteLine("Threading resources cleaned up successfully")
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error during form cleanup: {ex.Message}")
+        End Try
+    End Sub
     ' Timer for delayed navigation initialization
-    Private navigationInitTimer As Timer
+    Private navigationInitTimer As System.Windows.Forms.Timer
 
     Private Sub DelayedInitializeNavigation(sender As Object, e As EventArgs)
         navigationInitTimer.Stop() ' Stop the timer so it doesn't repeat
@@ -234,7 +284,7 @@
         ' Enable advanced search functionality for CountryCB
         If CountryCB IsNot Nothing Then
             Try
-                AddHandler CountryCB.KeyUp, AddressOf CountryCB_KeyUp
+                AddHandler CountryCB.KeyUp, AddressOf CountryCB_KeyUp_1_1
                 AddHandler CountryCB.TextChanged, AddressOf CountryCB_TextChanged
             Catch ex As Exception
                 MessageBox.Show("خطأ في إعداد البحث للبلدان: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Warning)
@@ -287,7 +337,7 @@
         ' No additional setup needed
     End Sub
 
-    Private Sub CountryCB_KeyUp(sender As Object, e As KeyEventArgs)
+    Private Sub CountryCB_KeyUp_1_1(sender As Object, e As KeyEventArgs)
         ' Safety check - ensure CountryCB is initialized and form is loaded
         If CountryCB Is Nothing OrElse Not Me.IsHandleCreated Then Return
 
@@ -301,6 +351,14 @@
 
 
     Private Sub CountryCB_TextChanged(sender As Object, e As EventArgs)
+        ' Use enhanced search functionality for partial/random matching
+        If Not isPerformingSearch AndAlso Not isUpdatingCountryData Then
+            PerformEnhancedSearch(CountryCB, "CountryCB")
+        End If
+    End Sub
+
+    ' Legacy CountryCB search implementation (keeping as backup)
+    Private Sub CountryCB_TextChanged_Legacy(sender As Object, e As EventArgs)
         ' Safety check - ensure CountryCB is initialized and form is loaded
         If CountryCB Is Nothing OrElse Not Me.IsHandleCreated Then Return
 
@@ -383,6 +441,20 @@
             isUpdatingCountryData = False
             ' Ignore any errors during text change
         End Try
+    End Sub
+
+    Private Sub CountryCB_KeyUp_1(sender As Object, e As KeyEventArgs)
+        If e.KeyCode = Keys.Escape Then
+            ' Clear search on Escape
+            CountryCB.Text = ""
+            CountryCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Enter Then
+            CountryCB.DroppedDown = False
+        ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+            If Not CountryCB.DroppedDown Then
+                CountryCB.DroppedDown = True
+            End If
+        End If
     End Sub
 
     Private Sub AreaCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -1343,6 +1415,8 @@
                             CountryCB.DisplayMember = "DisplayText"
                             CountryCB.ValueMember = "countrycode"
                             CountryCB.SelectedIndex = -1
+                            ' Store original data for enhanced search functionality
+                            CountryCB.Tag = countryData.Copy()
                         End If
                     End If
                 Catch ex As Exception
@@ -1667,7 +1741,7 @@
 
     ' =====================Navigation and Save Methods========================
 
-    Private Sub SaveInfo_Click(sender As Object, e As EventArgs)
+    Private Sub SaveInfo_Click_1(sender As Object, e As EventArgs)
         ' Save current customer/supplier data
         SaveCustomerSupplierData()
 
@@ -1784,7 +1858,10 @@
             End If
 
             System.Diagnostics.Debug.WriteLine($"Navigating to next customer: {currentCustomerIndex + 1} of {customerList.Count}")
-            LoadCustomerByIndex(currentCustomerIndex)
+            ' Use async loading for better performance
+            Task.Run(Async Function()
+                         Await LoadCustomerByIndexAsync(currentCustomerIndex)
+                     End Function)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في الانتقال للعميل التالي: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1810,7 +1887,10 @@
             End If
 
             System.Diagnostics.Debug.WriteLine($"Navigating to previous customer: {currentCustomerIndex + 1} of {customerList.Count}")
-            LoadCustomerByIndex(currentCustomerIndex)
+            ' Use async loading for better performance
+            Task.Run(Async Function()
+                         Await LoadCustomerByIndexAsync(currentCustomerIndex)
+                     End Function)
 
         Catch ex As Exception
             MessageBox.Show("خطأ في الانتقال للعميل السابق: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -2218,6 +2298,551 @@
         Catch ex As Exception
             isNavigating = False
             MessageBox.Show("خطأ في تحميل بيانات العميل: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    ' =====================Threading Methods for Fast Navigation========================
+
+    Private Async Function LoadCustomerByIndexAsync(index As Integer) As Task
+        ''' <summary>
+        ''' Loads customer data asynchronously for faster navigation
+        ''' </summary>
+        Try
+            If index < 0 OrElse index >= customerList.Count Then
+                System.Diagnostics.Debug.WriteLine($"Invalid index: {index}, customer list count: {customerList?.Count}")
+                Return
+            End If
+
+            Dim customerCode As String = customerList(index)
+            System.Diagnostics.Debug.WriteLine($"Loading customer {customerCode} asynchronously...")
+
+            ' Show loading indicator on UI thread
+            ShowLoadingIndicator()
+
+            ' Check cache first
+            If customerDataCache.ContainsKey(customerCode) Then
+                System.Diagnostics.Debug.WriteLine($"Loading {customerCode} from cache")
+                Dim cachedData As CustomerSupplierData = customerDataCache(customerCode)
+                ' Populate form on UI thread
+                Me.Invoke(Sub()
+                              PopulateFormWithCustomerData(cachedData)
+                              ' Start preloading adjacent customers for faster navigation
+                              PreloadAdjacentCustomers(index)
+                          End Sub)
+                HideLoadingIndicator()
+                Return
+            End If
+
+            ' Cancel any existing loading operation for this customer
+            If loadingTasks.ContainsKey(customerCode) Then
+                System.Diagnostics.Debug.WriteLine($"Cancelling existing loading task for {customerCode}")
+                loadingTasks.TryRemove(customerCode, Nothing)
+            End If
+
+            ' Create cancellation token
+            If loadingCancellationTokenSource IsNot Nothing Then
+                loadingCancellationTokenSource.Cancel()
+            End If
+            loadingCancellationTokenSource = New CancellationTokenSource()
+            Dim cancellationToken As CancellationToken = loadingCancellationTokenSource.Token
+
+            ' Load data in background thread
+            Dim loadingTask As Task = Task.Run(Sub()
+                                                   Try
+                                                       System.Diagnostics.Debug.WriteLine($"Background: Loading {customerCode} from database")
+
+                                                       ' Load customer data from database
+                                                       Dim customerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(customerCode)
+
+                                                       ' Check if operation was cancelled
+                                                       If cancellationToken.IsCancellationRequested Then
+                                                           System.Diagnostics.Debug.WriteLine($"Background: Loading {customerCode} was cancelled")
+                                                           Return
+                                                       End If
+
+                                                       If customerData IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.Code) Then
+                                                           ' Cache the data for future use
+                                                           customerDataCache.TryAdd(customerCode, customerData)
+                                                           System.Diagnostics.Debug.WriteLine($"Background: {customerCode} loaded and cached")
+
+                                                           ' Update UI on main thread
+                                                           Me.Invoke(Sub()
+                                                                         Try
+                                                                             PopulateFormWithCustomerData(customerData)
+                                                                             System.Diagnostics.Debug.WriteLine($"UI: {customerCode} form populated")
+                                                                             ' Start preloading adjacent customers for faster navigation
+                                                                             PreloadAdjacentCustomers(index)
+                                                                         Catch uiEx As Exception
+                                                                             System.Diagnostics.Debug.WriteLine($"UI Error populating {customerCode}: {uiEx.Message}")
+                                                                         End Try
+                                                                     End Sub)
+                                                       Else
+                                                           System.Diagnostics.Debug.WriteLine($"Background: No data found for {customerCode}")
+                                                           Me.Invoke(Sub()
+                                                                         MessageBox.Show($"لم يتم العثور على بيانات العميل {customerCode}", "لا توجد بيانات", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                                                                     End Sub)
+                                                       End If
+
+                                                   Catch ex As Exception
+                                                       System.Diagnostics.Debug.WriteLine($"Background error loading {customerCode}: {ex.Message}")
+                                                       Me.Invoke(Sub()
+                                                                     MessageBox.Show($"خطأ في تحميل بيانات العميل {customerCode}: {ex.Message}", "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                                                                 End Sub)
+                                                   Finally
+                                                       ' Always hide loading indicator
+                                                       Me.Invoke(Sub() HideLoadingIndicator())
+                                                       loadingTasks.TryRemove(customerCode, Nothing)
+                                                   End Try
+                                               End Sub, cancellationToken)
+
+            ' Store the task for potential cancellation
+            loadingTasks.TryAdd(customerCode, loadingTask)
+            Await loadingTask
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error in LoadCustomerByIndexAsync: {ex.Message}")
+            HideLoadingIndicator()
+        End Try
+    End Function
+
+    Private Sub ShowLoadingIndicator()
+        ''' <summary>
+        ''' Shows a loading indicator to user
+        ''' </summary>
+        Try
+            isLoadingData = True
+            ' Change cursor to loading
+            Me.Cursor = Cursors.WaitCursor
+            ' Update form title to show loading
+            Me.Text = "العملاء - جاري التحميل..."
+            ' Disable navigation buttons to prevent multiple requests
+            If UpCustomersPB IsNot Nothing Then UpCustomersPB.Enabled = False
+            If downCustomersPB IsNot Nothing Then downCustomersPB.Enabled = False
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error showing loading indicator: {ex.Message}")
+        End Try
+    End Sub
+
+    Private Sub HideLoadingIndicator()
+        ''' <summary>
+        ''' Hides the loading indicator
+        ''' </summary>
+        Try
+            isLoadingData = False
+            ' Restore normal cursor
+            Me.Cursor = Cursors.Default
+            ' Restore normal title
+            Me.Text = "العملاء"
+            ' Re-enable navigation buttons
+            If UpCustomersPB IsNot Nothing Then UpCustomersPB.Enabled = True
+            If downCustomersPB IsNot Nothing Then downCustomersPB.Enabled = True
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error hiding loading indicator: {ex.Message}")
+        End Try
+    End Sub
+
+    Private Sub PopulateFormWithCustomerData(customerData As CustomerSupplierData)
+        ''' <summary>
+        ''' Populates the form with customer data (extracted from LoadCustomerByIndex for reuse)
+        ''' </summary>
+        Try
+            If customerData Is Nothing Then Return
+
+            System.Diagnostics.Debug.WriteLine($"Populating form with data for: {customerData.Code}")
+            isNavigating = True
+
+            ' Clear all fields first (but don't reload ComboBoxes - they should already be loaded)
+            ClearFormFieldsOnly()
+
+            ' Populate Customer/Supplier Type
+            If customerData.Code.ToUpper().StartsWith("C") Then
+                If CustomerSupplierCB IsNot Nothing AndAlso CustomerSupplierCB.Items.Count > 0 Then
+                    CustomerSupplierCB.SelectedIndex = 0 ' Customer
+                End If
+            ElseIf customerData.Code.ToUpper().StartsWith("S") Then
+                If CustomerSupplierCB IsNot Nothing AndAlso CustomerSupplierCB.Items.Count > 1 Then
+                    CustomerSupplierCB.SelectedIndex = 1 ' Supplier
+                End If
+            End If
+
+            ' Populate basic fields
+            If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = customerData.EnglishName
+            If FormalNameTB IsNot Nothing Then FormalNameTB.Text = customerData.ArabicName
+            If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
+            If AddressTA IsNot Nothing Then AddressTA.Text = customerData.Address
+            If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
+
+            ' Populate Manager fields
+            If ManagerIDTB IsNot Nothing Then
+                ManagerIDTB.Text = customerData.ManagerID
+                System.Diagnostics.Debug.WriteLine($"ManagerIDTB populated with: '{customerData.ManagerID}'")
+            End If
+            If MangerNumberTB IsNot Nothing Then
+                MangerNumberTB.Text = customerData.ManagerNumber
+                System.Diagnostics.Debug.WriteLine($"MangerNumberTB populated with: '{customerData.ManagerNumber}'")
+            End If
+
+            ' Set CustomerAccountNumberTB to display customer code (read-only)
+            If CustomerAccountNumberTB IsNot Nothing Then
+                CustomerAccountNumberTB.Text = customerData.Code
+                CustomerAccountNumberTB.ReadOnly = True
+                CustomerAccountNumberTB.Enabled = True
+                System.Diagnostics.Debug.WriteLine($"CustomerAccountNumberTB set to: '{customerData.Code}'")
+            End If
+
+            ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly
+            If VTRAppliedCKB IsNot Nothing Then
+                VTRAppliedCKB.Checked = customerData.Active
+                System.Diagnostics.Debug.WriteLine($"VTRAppliedCKB set to: {customerData.Active}")
+            End If
+
+            ' Set VTRnumberTB based on VTRAppliedCKB state
+            If VTRnumberTB IsNot Nothing Then
+                If VTRAppliedCKB IsNot Nothing AndAlso VTRAppliedCKB.Checked Then
+                    VTRnumberTB.Text = customerData.VATNumber
+                    VTRnumberTB.Enabled = True
+                Else
+                    VTRnumberTB.Text = ""
+                    VTRnumberTB.Enabled = False
+                End If
+                System.Diagnostics.Debug.WriteLine($"VTRnumberTB - Text: '{VTRnumberTB.Text}', Enabled: {VTRnumberTB.Enabled}")
+            End If
+
+            If emailTB IsNot Nothing Then emailTB.Text = customerData.Email
+            If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
+            If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
+
+            ' Populate phone number fields
+            System.Diagnostics.Debug.WriteLine($"=== Populating Phone Number Form Fields ===")
+            If phoneNumber1TB IsNot Nothing Then
+                phoneNumber1TB.Text = customerData.PhoneNumber1
+                System.Diagnostics.Debug.WriteLine($"phoneNumber1TB populated with: '{customerData.PhoneNumber1}'")
+            End If
+            If phoneNumber2TB IsNot Nothing Then
+                phoneNumber2TB.Text = customerData.PhoneNumber2
+                System.Diagnostics.Debug.WriteLine($"phoneNumber2TB populated with: '{customerData.PhoneNumber2}'")
+            End If
+            If telephoneNumberTB IsNot Nothing Then
+                telephoneNumberTB.Text = customerData.TelephoneNumber
+                System.Diagnostics.Debug.WriteLine($"telephoneNumberTB populated with: '{customerData.TelephoneNumber}'")
+            End If
+            If telephoneNumberZipcodeTB IsNot Nothing Then
+                telephoneNumberZipcodeTB.Text = customerData.TelephoneZipCode
+                System.Diagnostics.Debug.WriteLine($"telephoneNumberZipcodeTB populated with: '{customerData.TelephoneZipCode}'")
+            End If
+            If phoneNumber1ZipCodeTB IsNot Nothing Then
+                phoneNumber1ZipCodeTB.Text = customerData.PostCode
+                System.Diagnostics.Debug.WriteLine($"phoneNumber1ZipCodeTB populated with: '{customerData.PostCode}'")
+            End If
+            System.Diagnostics.Debug.WriteLine($"==========================================")
+
+            ' Handle identity type and corresponding field mapping
+            Dim identityType As String = ""
+            If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                identityType = "فردي"
+            ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                identityType = "تجاري"
+            End If
+
+            If IdentityCommercialNameOptionCB IsNot Nothing Then
+                If identityType = "فردي" Then
+                    IdentityCommercialNameOptionCB.SelectedItem = "فردي"
+                ElseIf identityType = "تجاري" Then
+                    IdentityCommercialNameOptionCB.SelectedItem = "تجاري"
+                End If
+                System.Diagnostics.Debug.WriteLine($"Identity type set to: {identityType}")
+            End If
+
+            ' Update identity label
+            UpdateIdentityLabel(identityType)
+
+            ' Show data in CommercialRecordAndIdentityTB based on identity type
+            If CommercialRecordAndIdentityTB IsNot Nothing Then
+                If identityType = "فردي" And Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                    CommercialRecordAndIdentityTB.Text = customerData.IndividualID
+                ElseIf identityType = "تجاري" And Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                    CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                Else
+                    CommercialRecordAndIdentityTB.Text = ""
+                End If
+            End If
+
+            ' Populate ComboBoxes with customer's selected values
+            System.Diagnostics.Debug.WriteLine($"=== Populating ComboBoxes for customer: {customerData.Code} ===")
+            
+            ' Set Country ComboBox
+            If CountryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.Country) Then
+                Try
+                    For i As Integer = 0 To CountryCB.Items.Count - 1
+                        CountryCB.SelectedIndex = i
+                        If CountryCB.SelectedValue?.ToString() = customerData.Country Then
+                            System.Diagnostics.Debug.WriteLine($"CountryCB set to: {customerData.Country}")
+                            Exit For
+                        End If
+                    Next
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error setting CountryCB: {ex.Message}")
+                End Try
+            End If
+            
+            ' Set Area ComboBox  
+            If AreaCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.Area) Then
+                Try
+                    For i As Integer = 0 To AreaCB.Items.Count - 1
+                        AreaCB.SelectedIndex = i
+                        If AreaCB.SelectedValue?.ToString() = customerData.Area Then
+                            System.Diagnostics.Debug.WriteLine($"AreaCB set to: {customerData.Area}")
+                            Exit For
+                        End If
+                    Next
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error setting AreaCB: {ex.Message}")
+                End Try
+            End If
+            
+            ' Set Market ComboBox (SalesMan -> MarketCB)
+            If MarketCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.SalesMan) Then
+                Try
+                    For i As Integer = 0 To MarketCB.Items.Count - 1
+                        MarketCB.SelectedIndex = i
+                        If MarketCB.SelectedValue?.ToString() = customerData.SalesMan Then
+                            System.Diagnostics.Debug.WriteLine($"MarketCB set to: {customerData.SalesMan}")
+                            Exit For
+                        End If
+                    Next
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error setting MarketCB: {ex.Message}")
+                End Try
+            End If
+            
+            ' Set Groups ComboBox (ScrapAdjCode -> GroupsCB)
+            If GroupsCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.ScrapAdjCode) Then
+                Try
+                    For i As Integer = 0 To GroupsCB.Items.Count - 1
+                        GroupsCB.SelectedIndex = i
+                        If GroupsCB.SelectedValue?.ToString() = customerData.ScrapAdjCode Then
+                            System.Diagnostics.Debug.WriteLine($"GroupsCB set to: {customerData.ScrapAdjCode}")
+                            Exit For
+                        End If
+                    Next
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error setting GroupsCB: {ex.Message}")
+                End Try
+            End If
+            
+            ' Set Category ComboBox (CategoryCode -> CategoryCB)
+            If CategoryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CategoryCode) Then
+                Try
+                    For i As Integer = 0 To CategoryCB.Items.Count - 1
+                        CategoryCB.SelectedIndex = i
+                        If CategoryCB.SelectedValue?.ToString() = customerData.CategoryCode Then
+                            System.Diagnostics.Debug.WriteLine($"CategoryCB set to: {customerData.CategoryCode}")
+                            Exit For
+                        End If
+                    Next
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error setting CategoryCB: {ex.Message}")
+                End Try
+            End If
+            
+            ' Set Type ComboBox (TypeCode -> TypeCB)
+            If TypeCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.TypeCode) Then
+                Try
+                    For i As Integer = 0 To TypeCB.Items.Count - 1
+                        TypeCB.SelectedIndex = i
+                        If TypeCB.SelectedValue?.ToString() = customerData.TypeCode Then
+                            System.Diagnostics.Debug.WriteLine($"TypeCB set to: {customerData.TypeCode}")
+                            Exit For
+                        End If
+                    Next
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Error setting TypeCB: {ex.Message}")
+                End Try
+            End If
+            
+            System.Diagnostics.Debug.WriteLine($"=== ComboBox population completed ===")
+
+            ' Update form title with customer info
+            Dim currentIndex As Integer = If(customerList?.IndexOf(customerData.Code), -1)
+            If currentIndex >= 0 Then
+                Me.Text = $"العملاء - {currentIndex + 1} من {customerList.Count} - {customerData.Code}"
+            End If
+
+            isNavigating = False
+            System.Diagnostics.Debug.WriteLine($"Form population completed for: {customerData.Code}")
+
+        Catch ex As Exception
+            isNavigating = False
+            System.Diagnostics.Debug.WriteLine($"Error populating form: {ex.Message}")
+            MessageBox.Show("خطأ في عرض بيانات العميل: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub ClearFormFieldsOnly()
+        ''' <summary>
+        ''' Clears only form fields without reloading ComboBoxes for better performance
+        ''' </summary>
+        Try
+            ' Clear TextBoxes
+            If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = ""
+            If FormalNameTB IsNot Nothing Then FormalNameTB.Text = ""
+            If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = ""
+            If AddressTA IsNot Nothing Then AddressTA.Text = ""
+            If ManagerTB IsNot Nothing Then ManagerTB.Text = ""
+            If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = ""
+            If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = ""
+            If CustomerAccountNumberTB IsNot Nothing Then
+                CustomerAccountNumberTB.Text = ""
+                CustomerAccountNumberTB.ReadOnly = True
+            End If
+            If emailTB IsNot Nothing Then emailTB.Text = ""
+            If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = ""
+            If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = ""
+            If VTRnumberTB IsNot Nothing Then VTRnumberTB.Text = ""
+
+            ' Clear phone number fields
+            If phoneNumber1TB IsNot Nothing Then phoneNumber1TB.Text = ""
+            If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = ""
+            If phoneNumber2TB IsNot Nothing Then phoneNumber2TB.Text = ""
+            If telephoneNumberTB IsNot Nothing Then telephoneNumberTB.Text = ""
+            If telephoneNumberZipcodeTB IsNot Nothing Then telephoneNumberZipcodeTB.Text = ""
+            If CommercialRecordAndIdentityTB IsNot Nothing Then CommercialRecordAndIdentityTB.Text = ""
+
+            ' Reset checkboxes to default state
+            If VTRAppliedCKB IsNot Nothing Then
+                VTRAppliedCKB.Checked = False
+                VTRAppliedCKB.Enabled = False
+            End If
+
+            ' Clear ComboBox selections (but keep their data loaded)
+            If CountryCB IsNot Nothing Then CountryCB.SelectedIndex = -1
+            If AreaCB IsNot Nothing Then AreaCB.SelectedIndex = -1
+            If MarketCB IsNot Nothing Then MarketCB.SelectedIndex = -1
+            If GroupsCB IsNot Nothing Then GroupsCB.SelectedIndex = -1
+            If CategoryCB IsNot Nothing Then CategoryCB.SelectedIndex = -1
+            If TypeCB IsNot Nothing Then TypeCB.SelectedIndex = -1
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error clearing form fields: {ex.Message}")
+        End Try
+    End Sub
+
+    Private Sub PreloadAdjacentCustomers(currentIndex As Integer)
+        ''' <summary>
+        ''' Preloads adjacent customers (next and previous) for faster navigation
+        ''' </summary>
+        Try
+            If customerList Is Nothing OrElse customerList.Count = 0 Then Return
+
+            ' Calculate adjacent indices with wrapping
+            Dim nextIndex As Integer = If(currentIndex + 1 >= customerList.Count, 0, currentIndex + 1)
+            Dim previousIndex As Integer = If(currentIndex - 1 < 0, customerList.Count - 1, currentIndex - 1)
+
+            ' Preload next customer if not already cached
+            Dim nextCode As String = customerList(nextIndex)
+            If Not customerDataCache.ContainsKey(nextCode) Then
+                System.Diagnostics.Debug.WriteLine($"Preloading next customer: {nextCode}")
+                Task.Run(Sub()
+                             Try
+                                 Dim nextCustomerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(nextCode)
+                                 If nextCustomerData IsNot Nothing Then
+                                     customerDataCache.TryAdd(nextCode, nextCustomerData)
+                                     System.Diagnostics.Debug.WriteLine($"Preloaded and cached: {nextCode}")
+                                 End If
+                             Catch ex As Exception
+                                 System.Diagnostics.Debug.WriteLine($"Error preloading next customer {nextCode}: {ex.Message}")
+                             End Try
+                         End Sub)
+            End If
+
+            ' Preload previous customer if not already cached
+            Dim previousCode As String = customerList(previousIndex)
+            If Not customerDataCache.ContainsKey(previousCode) Then
+                System.Diagnostics.Debug.WriteLine($"Preloading previous customer: {previousCode}")
+                Task.Run(Sub()
+                             Try
+                                 Dim previousCustomerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(previousCode)
+                                 If previousCustomerData IsNot Nothing Then
+                                     customerDataCache.TryAdd(previousCode, previousCustomerData)
+                                     System.Diagnostics.Debug.WriteLine($"Preloaded and cached: {previousCode}")
+                                 End If
+                             Catch ex As Exception
+                                 System.Diagnostics.Debug.WriteLine($"Error preloading previous customer {previousCode}: {ex.Message}")
+                             End Try
+                         End Sub)
+            End If
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error in PreloadAdjacentCustomers: {ex.Message}")
+        End Try
+    End Sub
+
+    Private Sub ClearCustomerCache()
+        ''' <summary>
+        ''' Clears the customer data cache to free memory
+        ''' </summary>
+        Try
+            Dim cacheSize As Integer = customerDataCache.Count
+            customerDataCache.Clear()
+            System.Diagnostics.Debug.WriteLine($"Customer cache cleared - was containing {cacheSize} entries")
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error clearing customer cache: {ex.Message}")
+        End Try
+    End Sub
+
+    Private Function GetCacheStatus() As String
+        ''' <summary>
+        ''' Gets current cache status for debugging
+        ''' </summary>
+        Try
+            Return $"Cache Status: {customerDataCache.Count} customers cached, {loadingTasks.Count} loading tasks active"
+        Catch ex As Exception
+            Return $"Cache Status Error: {ex.Message}"
+        End Try
+    End Function
+
+    Private Sub WarmUpCustomerCache()
+        ''' <summary>
+        ''' Preloads the first few customers to warm up the cache for better initial performance
+        ''' </summary>
+        Try
+            System.Diagnostics.Debug.WriteLine("Starting cache warming...")
+
+            ' Wait a bit for form to fully load
+            Thread.Sleep(1000)
+
+            ' Get customer list
+            If customerList Is Nothing OrElse customerList.Count = 0 Then
+                Return
+            End If
+
+            ' Preload first 5 customers (or all if less than 5)
+            Dim maxToPreload As Integer = Math.Min(5, customerList.Count)
+
+            For i As Integer = 0 To maxToPreload - 1
+                Try
+                    Dim customerCode As String = customerList(i)
+                    If Not customerDataCache.ContainsKey(customerCode) Then
+                        System.Diagnostics.Debug.WriteLine($"Cache warming: Loading {customerCode}")
+                        Dim customerData As CustomerSupplierData = dbConn.GetCustomerSupplierByCode(customerCode)
+                        If customerData IsNot Nothing Then
+                            customerDataCache.TryAdd(customerCode, customerData)
+                            System.Diagnostics.Debug.WriteLine($"Cache warming: Cached {customerCode}")
+                        End If
+                    End If
+
+                    ' Small delay to not overwhelm database
+                    Thread.Sleep(200)
+
+                Catch ex As Exception
+                    System.Diagnostics.Debug.WriteLine($"Cache warming error for customer {i}: {ex.Message}")
+                End Try
+            Next
+
+            System.Diagnostics.Debug.WriteLine($"Cache warming completed - {customerDataCache.Count} customers pre-cached")
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error in cache warming: {ex.Message}")
         End Try
     End Sub
 
@@ -2662,7 +3287,7 @@
         End If
     End Sub
 
-    Private Sub refreshPB_Click_1(sender As Object, e As EventArgs)
+    Private Sub refreshPB_Click(sender As Object, e As EventArgs)
         Try
             Debug.WriteLine("RefreshPB clicked - Resetting all components")
 
@@ -2752,34 +3377,7 @@
         docMgmt.Dispose()
     End Sub
 
-    Private Sub Delegations_Click_1(sender As Object, e As EventArgs) Handles Delegations.Click
-        ' Check if a customer is selected
-        If currentSelectedCustomerId > 0 Then
-            ' Customer selected - create and show the delegations form
-            Dim delegMgmt As New DelegationsManagement
-            delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
 
-            delegMgmt.ShowDialog()
-            delegMgmt.Dispose()
-        Else
-            ' No customer selected - show customer search dialog
-            Dim searchForm As New CustomerSearchForm
-
-            If searchForm.ShowDialog = DialogResult.OK Then
-                ' Customer was selected from search - store and use selected customer
-                currentSelectedCustomerId = searchForm.SelectedCustomerId
-                currentSelectedCustomerName = searchForm.SelectedCustomerName
-
-                Dim delegMgmt As New DelegationsManagement
-                delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
-
-                delegMgmt.ShowDialog()
-                delegMgmt.Dispose()
-            End If
-
-            searchForm.Dispose()
-        End If
-    End Sub
 
     Private Sub Delegations_Click(sender As Object, e As EventArgs) Handles Delegations.Click
         ' Check if a customer is selected
@@ -2809,6 +3407,8 @@
             searchForm.Dispose()
         End If
     End Sub
+
+
 End Class
 
 

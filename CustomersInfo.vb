@@ -282,6 +282,14 @@
 
 
         Private Sub CountryCB_TextChanged(sender As Object, e As EventArgs)
+            ' Use enhanced search functionality for partial/random matching
+            If Not isPerformingSearch AndAlso Not isUpdatingCountryData Then
+                PerformEnhancedSearch(CountryCB, "CountryCB")
+            End If
+        End Sub
+
+        ' Legacy CountryCB search implementation (keeping as backup)
+        Private Sub CountryCB_TextChanged_Legacy(sender As Object, e As EventArgs)
             ' Safety check - ensure CountryCB is initialized and form is loaded
             If CountryCB Is Nothing OrElse Not Me.IsHandleCreated Then Return
 
@@ -364,6 +372,20 @@
                 isUpdatingCountryData = False
                 ' Ignore any errors during text change
             End Try
+        End Sub
+
+        Private Sub CountryCB_KeyUp(sender As Object, e As KeyEventArgs)
+            If e.KeyCode = Keys.Escape Then
+                ' Clear search on Escape
+                CountryCB.Text = ""
+                CountryCB.DroppedDown = False
+            ElseIf e.KeyCode = Keys.Enter Then
+                CountryCB.DroppedDown = False
+            ElseIf e.KeyCode = Keys.Down OrElse e.KeyCode = Keys.Up Then
+                If Not CountryCB.DroppedDown Then
+                    CountryCB.DroppedDown = True
+                End If
+            End If
         End Sub
 
         Private Sub AreaCB_KeyUp(sender As Object, e As KeyEventArgs)
@@ -1411,6 +1433,8 @@
                                 CountryCB.DisplayMember = "DisplayText"
                                 CountryCB.ValueMember = "countrycode"
                                 CountryCB.SelectedIndex = -1
+                                ' Store original data for enhanced search functionality
+                                CountryCB.Tag = countryData.Copy()
                             End If
                         End If
                     Catch ex As Exception
