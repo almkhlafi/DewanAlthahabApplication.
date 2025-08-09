@@ -8,8 +8,10 @@ Public Class DBconnections
 
     ' Helper method to truncate strings to prevent database field length errors
     Private Function TruncateString(value As String, maxLength As Integer) As Object
-        If String.IsNullOrEmpty(value) Then
-            Return DBNull.Value
+        If value Is Nothing Then
+            Return ""
+        ElseIf value = "" Then
+            Return ""
         End If
 
         If value.Length <= maxLength Then

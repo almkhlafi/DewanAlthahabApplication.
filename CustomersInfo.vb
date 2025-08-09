@@ -1602,10 +1602,13 @@
                         UpdateIdentityLabel(customerData.IdentityType)
 
                         If CommercialRecordAndIdentityTB IsNot Nothing Then
-                            If customerData.IsIndividual Then
+                            ' Check both fields and show whichever has data
+                            If Not String.IsNullOrEmpty(customerData.IndividualID) Then
                                 CommercialRecordAndIdentityTB.Text = customerData.IndividualID
-                            ElseIf customerData.IsCommercial Then
+                            ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
                                 CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                            Else
+                                CommercialRecordAndIdentityTB.Text = ""
                             End If
                         End If
                     End If
@@ -1869,12 +1872,19 @@
                             ' Enable/disable CommercialRecordAndIdentityTB based on Active status
                             If CommercialRecordAndIdentityTB IsNot Nothing Then
                                 CommercialRecordAndIdentityTB.Enabled = customerData.Active
-                                If customerData.Active Then
-                                    ' Populate the CommercialRecordAndIdentityTB if Active is true
-                                    CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                                ' Always show the data regardless of Active status for viewing purposes
+                                ' Check both IndividualID and CommercialRecord - show whichever has data
+                                System.Diagnostics.Debug.WriteLine($"IdentityType: '{customerData.IdentityType}', IndividualID: '{customerData.IndividualID}', CommercialRecord: '{customerData.CommercialRecord}'")
+                                
+                                If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                                    CommercialRecordAndIdentityTB.Text = customerData.IndividualID
+                                    System.Diagnostics.Debug.WriteLine($"Setting CommercialRecordAndIdentityTB to IndividualID: '{customerData.IndividualID}'")
+                                ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                                    CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                                    System.Diagnostics.Debug.WriteLine($"Setting CommercialRecordAndIdentityTB to CommercialRecord: '{customerData.CommercialRecord}'")
                                 Else
-                                    ' Clear the field if Active is false
                                     CommercialRecordAndIdentityTB.Text = ""
+                                    System.Diagnostics.Debug.WriteLine("Both IndividualID and CommercialRecord are empty")
                                 End If
                                 CommercialRecordAndIdentityTB.Refresh()
                             End If
@@ -2035,10 +2045,13 @@
                             UpdateIdentityLabel(customerData.IdentityType)
 
                             If CommercialRecordAndIdentityTB IsNot Nothing Then
-                                If customerData.IsIndividual Then
-                                    CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.IndividualID), "", customerData.IndividualID)
-                                ElseIf customerData.IsCommercial Then
-                                    CommercialRecordAndIdentityTB.Text = If(String.IsNullOrEmpty(customerData.CommercialRecord), "", customerData.CommercialRecord)
+                                ' Check both fields and show whichever has data
+                                If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                                    CommercialRecordAndIdentityTB.Text = customerData.IndividualID
+                                ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                                    CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
+                                Else
+                                    CommercialRecordAndIdentityTB.Text = ""
                                 End If
                                 CommercialRecordAndIdentityTB.Refresh()
                             End If
