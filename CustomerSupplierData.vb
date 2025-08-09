@@ -23,6 +23,13 @@ Public Class CustomerSupplierData
     Public Property IdentityType As String = "" ' "فردي" or "تجاري"
     Public Property Active As Boolean = False ' Active status for VTRAppliedCKB
     
+    ' Additional phone number fields for proper database mapping
+    Public Property PhoneNumber1 As String = "" ' phoneNumber1TB -> contact field
+    Public Property PhoneNumber2 As String = "" ' phoneNumber2TB -> fld_contry_code_mobile field  
+    Public Property TelephoneNumber As String = "" ' telephoneNumberTB -> plt_limit num2 zip field
+    Public Property PostCode As String = "" ' phoneNumber1ZipCodeTB -> fld_postcode field
+    Public Property TelephoneZipCode As String = "" ' telephoneNumberZipcodeTB -> fld_contrycode field
+    
     ' Foreign Key fields for CustomerAccountsMaster
     Public Property SalesMan As String = "" ' FK from CusTransactionMaster.fld_area_code
     Public Property ScrapAdjCode As String = "" ' FK from CusGradeMaster.code

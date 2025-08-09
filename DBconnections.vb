@@ -2169,7 +2169,11 @@ ORDER BY p.Name"
                        "area = @area, " &
                        "vat_tin_no = @vat_tin_no, " &
                        "email = @email, " &
+                       "contact = @contact, " &
                        "fld_contry_code_mobile = @fld_contry_code_mobile, " &
+                       "plt_limit = @plt_limit, " &
+                       "fld_postcode = @fld_postcode, " &
+                       "fld_contrycode = @fld_contrycode, " &
                        "country = @country, " &
                        "fld_fax_no = @fld_fax_no, " &
                        "fld_ref_no = @fld_ref_no, " &
@@ -2185,13 +2189,13 @@ ORDER BY p.Name"
                 query = "INSERT INTO [CustomerAccountsMaster] " &
                        "(code, c_type, name, fld_arabic_name, shortname, bussiness_address, " &
                        "acc_manager, bank_acc_name, bank_acc_no, fld_state, fld_dist, area, " &
-                       "vat_tin_no, email, fld_contry_code_mobile, country, fld_fax_no, " &
-                       "fld_ref_no, fld_indvl_id_no, fld_cr_no, currency, active, " &
+                       "vat_tin_no, email, contact, fld_contry_code_mobile, plt_limit, fld_postcode, " &
+                       "fld_contrycode, country, fld_fax_no, fld_ref_no, fld_indvl_id_no, fld_cr_no, currency, active, " &
                        "sales_man, scrap_adj_code, type, categoty) " &
                        "VALUES (@code, @c_type, @name, @fld_arabic_name, @shortname, @bussiness_address, " &
                        "@acc_manager, @bank_acc_name, @bank_acc_no, @fld_state, @fld_dist, @area, " &
-                       "@vat_tin_no, @email, @fld_contry_code_mobile, @country, @fld_fax_no, " &
-                       "@fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @currency, @active, " &
+                       "@vat_tin_no, @email, @contact, @fld_contry_code_mobile, @plt_limit, @fld_postcode, " &
+                       "@fld_contrycode, @country, @fld_fax_no, @fld_ref_no, @fld_indvl_id_no, @fld_cr_no, @currency, @active, " &
                        "@sales_man, @scrap_adj_code, @type, @categoty)"
             End If
 
@@ -2202,8 +2206,8 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@code", TruncateString(customerData.Code, 10))
             System.Diagnostics.Debug.WriteLine($"@code: '{customerData.Code}' -> '{TruncateString(customerData.Code, 10)}'")
             
-            cmd.Parameters.AddWithValue("@c_type", TruncateString(customerData.CustomerType, 10))
-            System.Diagnostics.Debug.WriteLine($"@c_type: '{customerData.CustomerType}' -> '{TruncateString(customerData.CustomerType, 10)}'")
+            cmd.Parameters.AddWithValue("@c_type", TruncateString(customerData.IdentityType, 10))
+            System.Diagnostics.Debug.WriteLine($"@c_type: '{customerData.IdentityType}' -> '{TruncateString(customerData.IdentityType, 10)}'")
             
             cmd.Parameters.AddWithValue("@name", TruncateString(customerData.EnglishName, 50))
             System.Diagnostics.Debug.WriteLine($"@name: '{customerData.EnglishName}' (Length: {customerData.EnglishName?.Length})")
@@ -2225,7 +2229,14 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@area", TruncateString(customerData.Area, 100))
             cmd.Parameters.AddWithValue("@vat_tin_no", TruncateString(customerData.VATNumber, 15))
             cmd.Parameters.AddWithValue("@email", TruncateString(customerData.Email, 50))
-            cmd.Parameters.AddWithValue("@fld_contry_code_mobile", TruncateString(customerData.MobileCountryCode, 5))
+            
+            ' Add new phone number field parameters based on specifications
+            cmd.Parameters.AddWithValue("@contact", TruncateString(customerData.PhoneNumber1, 20))
+            cmd.Parameters.AddWithValue("@fld_contry_code_mobile", TruncateString(customerData.PhoneNumber2, 5))
+            cmd.Parameters.AddWithValue("@plt_limit", TruncateString(customerData.TelephoneNumber, 20))
+            cmd.Parameters.AddWithValue("@fld_postcode", TruncateString(customerData.PostCode, 10))
+            cmd.Parameters.AddWithValue("@fld_contrycode", TruncateString(customerData.TelephoneZipCode, 10))
+            
             cmd.Parameters.AddWithValue("@country", TruncateString(customerData.CountryName, 500))
             cmd.Parameters.AddWithValue("@fld_fax_no", TruncateString(customerData.FaxNumber, 15))
             cmd.Parameters.AddWithValue("@fld_ref_no", TruncateString(customerData.ReferralNumber, 15))
@@ -2592,9 +2603,9 @@ ORDER BY p.Name"
                     cam.code, cam.c_type, cam.name, cam.fld_arabic_name, 
                     cam.shortname, cam.bussiness_address, cam.acc_manager, cam.fld_indvl_id_no, 
                     cam.contact, cam.country, cam.area, cam.vat_tin_no, 
-                    cam.email, cam.fld_contry_code_mobile, cam.fld_fax_no, cam.fld_ref_no,
-                    cam.fld_indvl_id_no, cam.fld_cr_no, cam.c_type, cam.active,
-                    cam.sales_man, cam.scrap_adj_code, cam.type, cam.categoty
+                    cam.email, cam.fld_contry_code_mobile, cam.plt_limit, cam.fld_postcode, 
+                    cam.fld_fax_no, cam.fld_ref_no, cam.fld_cr_no, cam.fld_contrycode,
+                    cam.active, cam.sales_man, cam.scrap_adj_code, cam.type, cam.categoty
                 FROM CustomerAccountsMaster cam
                 WHERE cam.code = @CustomerCode"
             
@@ -2626,15 +2637,33 @@ ORDER BY p.Name"
                 System.Diagnostics.Debug.WriteLine($"Mapped CommercialName: '{customerData.CommercialName}'")
                 customerData.Address = If(reader("bussiness_address") Is DBNull.Value, "", reader("bussiness_address").ToString())
                 customerData.Manager = If(reader("acc_manager") Is DBNull.Value, "", reader("acc_manager").ToString())
-                customerData.ManagerID = If(reader("fld_indvl_id_no") Is DBNull.Value, "", reader("fld_indvl_id_no").ToString())
-                customerData.ManagerNumber = If(reader("contact") Is DBNull.Value, "", reader("contact").ToString())
+                customerData.ManagerID = "" ' Will map separately below
+                customerData.ManagerNumber = "" ' Will map separately below
                 customerData.Country = If(reader("country") Is DBNull.Value, "", reader("country").ToString())
                 customerData.Area = If(reader("area") Is DBNull.Value, "", reader("area").ToString())
                 customerData.VATNumber = If(reader("vat_tin_no") Is DBNull.Value, "", reader("vat_tin_no").ToString())
                 customerData.Email = If(reader("email") Is DBNull.Value, "", reader("email").ToString())
-                customerData.MobileCountryCode = If(reader("fld_contry_code_mobile") Is DBNull.Value, "", reader("fld_contry_code_mobile").ToString())
                 customerData.FaxNumber = If(reader("fld_fax_no") Is DBNull.Value, "", reader("fld_fax_no").ToString())
                 customerData.ReferralNumber = If(reader("fld_ref_no") Is DBNull.Value, "", reader("fld_ref_no").ToString())
+                
+                ' Map phone number fields based on specifications
+                customerData.PhoneNumber1 = If(reader("contact") Is DBNull.Value, "", reader("contact").ToString()) ' phoneNumber1TB -> contact
+                customerData.PhoneNumber2 = If(reader("fld_contry_code_mobile") Is DBNull.Value, "", reader("fld_contry_code_mobile").ToString()) ' phoneNumber2TB -> fld_contry_code_mobile
+                customerData.TelephoneNumber = If(reader("plt_limit") Is DBNull.Value, "", reader("plt_limit").ToString()) ' telephoneNumberTB -> plt_limit
+                customerData.PostCode = If(reader("fld_postcode") Is DBNull.Value, "", reader("fld_postcode").ToString()) ' phoneNumber1ZipCodeTB -> fld_postcode
+                customerData.TelephoneZipCode = If(reader("fld_contrycode") Is DBNull.Value, "", reader("fld_contrycode").ToString()) ' telephoneNumberZipcodeTB -> fld_contrycode
+                customerData.MobileCountryCode = If(reader("fld_postcode") Is DBNull.Value, "", reader("fld_postcode").ToString()) ' phoneNumber1ZipCodeTB for backward compatibility
+                
+                ' Debug logging for phone number fields
+                System.Diagnostics.Debug.WriteLine($"=== Phone Number Fields Retrieved ===")
+                System.Diagnostics.Debug.WriteLine($"PhoneNumber1 (contact): '{customerData.PhoneNumber1}'")
+                System.Diagnostics.Debug.WriteLine($"PhoneNumber2 (fld_contry_code_mobile): '{customerData.PhoneNumber2}'")
+                System.Diagnostics.Debug.WriteLine($"TelephoneNumber (plt_limit): '{customerData.TelephoneNumber}'")
+                System.Diagnostics.Debug.WriteLine($"PostCode (fld_postcode): '{customerData.PostCode}'")
+                System.Diagnostics.Debug.WriteLine($"TelephoneZipCode (fld_contrycode): '{customerData.TelephoneZipCode}'")
+                System.Diagnostics.Debug.WriteLine($"MobileCountryCode (backward compatibility): '{customerData.MobileCountryCode}'")
+                System.Diagnostics.Debug.WriteLine($"=====================================")
+                
                 customerData.IndividualID = If(reader("fld_indvl_id_no") Is DBNull.Value, "", reader("fld_indvl_id_no").ToString())
                 customerData.CommercialRecord = If(reader("fld_cr_no") Is DBNull.Value, "", reader("fld_cr_no").ToString())
                 customerData.IdentityType = If(reader("c_type") Is DBNull.Value, "", reader("c_type").ToString())

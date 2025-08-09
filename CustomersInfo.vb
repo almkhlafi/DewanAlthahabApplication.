@@ -1540,15 +1540,16 @@
         Private Sub VTRAppliedCKB_CheckedChanged(sender As Object, e As EventArgs) Handles VTRAppliedCKB.CheckedChanged
             Try
                 If VTRnumberTB IsNot Nothing Then
-                    ' Disable VTRnumberTB when VTRAppliedCKB is checked
-                    VTRnumberTB.Enabled = Not VTRAppliedCKB.Checked
+                    ' Enable VTRnumberTB when VTRAppliedCKB is checked
+                    VTRnumberTB.Enabled = VTRAppliedCKB.Checked
 
-                    If VTRAppliedCKB.Checked Then
+                    If Not VTRAppliedCKB.Checked Then
                         ' Clear the text when disabled
                         VTRnumberTB.Text = ""
                     End If
 
                     VTRnumberTB.Refresh()
+                    System.Diagnostics.Debug.WriteLine($"VTRAppliedCKB (CustomersInfo) changed - Checked: {VTRAppliedCKB.Checked}, VTRnumberTB.Enabled: {VTRnumberTB.Enabled}")
                 End If
             Catch ex As Exception
                 MessageBox.Show("خطأ في تحديث حالة رقم الضريبة: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1590,22 +1591,79 @@
                     If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
                     If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = customerData.ManagerID
                     If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = customerData.ManagerNumber
-                    If VTRnumberTB IsNot Nothing Then VTRnumberTB.Text = customerData.VATNumber
+                    
+                    ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly
+                    If VTRAppliedCKB IsNot Nothing Then
+                        VTRAppliedCKB.Checked = customerData.Active
+                        System.Diagnostics.Debug.WriteLine($"VTRAppliedCKB (CustomersInfo) set to: {customerData.Active}")
+                    End If
+                    
+                    ' Set VTRnumberTB based on VTRAppliedCKB state
+                    If VTRnumberTB IsNot Nothing Then
+                        If VTRAppliedCKB IsNot Nothing AndAlso VTRAppliedCKB.Checked Then
+                            VTRnumberTB.Text = customerData.VATNumber
+                            VTRnumberTB.Enabled = True
+                        Else
+                            VTRnumberTB.Text = ""
+                            VTRnumberTB.Enabled = False
+                        End If
+                        System.Diagnostics.Debug.WriteLine($"VTRnumberTB (CustomersInfo) - Text: '{VTRnumberTB.Text}', Enabled: {VTRnumberTB.Enabled}")
+                    End If
+                    
                     If emailTB IsNot Nothing Then emailTB.Text = customerData.Email
-                    If phoneNumber1ZipCodeTB IsNot Nothing Then phoneNumber1ZipCodeTB.Text = customerData.MobileCountryCode
                     If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
                     If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
+                    
+                    ' Populate phone number fields based on new specifications
+                    System.Diagnostics.Debug.WriteLine($"=== Populating Phone Number Form Fields (CustomersInfo) ===")
+                    If phoneNumber1TB IsNot Nothing Then 
+                        phoneNumber1TB.Text = customerData.PhoneNumber1
+                        System.Diagnostics.Debug.WriteLine($"phoneNumber1TB populated with: '{customerData.PhoneNumber1}'")
+                    End If
+                    If phoneNumber2TB IsNot Nothing Then 
+                        phoneNumber2TB.Text = customerData.PhoneNumber2
+                        System.Diagnostics.Debug.WriteLine($"phoneNumber2TB populated with: '{customerData.PhoneNumber2}'")
+                    End If
+                    If telephoneNumberTB IsNot Nothing Then 
+                        telephoneNumberTB.Text = customerData.TelephoneNumber
+                        System.Diagnostics.Debug.WriteLine($"telephoneNumberTB populated with: '{customerData.TelephoneNumber}'")
+                    End If
+                    If telephoneNumberZipcodeTB IsNot Nothing Then 
+                        telephoneNumberZipcodeTB.Text = customerData.TelephoneZipCode
+                        System.Diagnostics.Debug.WriteLine($"telephoneNumberZipcodeTB populated with: '{customerData.TelephoneZipCode}'")
+                    End If
+                    If phoneNumber1ZipCodeTB IsNot Nothing Then 
+                        phoneNumber1ZipCodeTB.Text = customerData.PostCode
+                        System.Diagnostics.Debug.WriteLine($"phoneNumber1ZipCodeTB populated with: '{customerData.PostCode}'")
+                    End If
+                    System.Diagnostics.Debug.WriteLine($"==========================================================")
 
                     ' Set identity type and corresponding field
                     If IdentityCommercialNameOptionCB IsNot Nothing Then
-                        IdentityCommercialNameOptionCB.SelectedItem = customerData.IdentityType
-                        UpdateIdentityLabel(customerData.IdentityType)
+                        ' Determine identity type based on which field has data
+                        Dim identityType As String = ""
+                        If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                            identityType = "فردي"  ' Individual
+                        ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                            identityType = "تجاري"  ' Commercial
+                        Else
+                            ' If neither field has data, check the database IdentityType field
+                            If customerData.IdentityType = "فردي" Or customerData.IdentityType = "تجاري" Then
+                                identityType = customerData.IdentityType
+                            Else
+                                identityType = "فردي"  ' Default to Individual
+                            End If
+                        End If
+                        
+                        ' Set ComboBox selection
+                        IdentityCommercialNameOptionCB.SelectedItem = identityType
+                        UpdateIdentityLabel(identityType)
 
                         If CommercialRecordAndIdentityTB IsNot Nothing Then
-                            ' Check both fields and show whichever has data
-                            If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                            ' Show data based on determined identity type
+                            If identityType = "فردي" And Not String.IsNullOrEmpty(customerData.IndividualID) Then
                                 CommercialRecordAndIdentityTB.Text = customerData.IndividualID
-                            ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                            ElseIf identityType = "تجاري" And Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
                                 CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
                             Else
                                 CommercialRecordAndIdentityTB.Text = ""
@@ -1910,8 +1968,8 @@
 
                             ' Handle VTRnumberTB state based on VTRAppliedCKB
                             If VTRnumberTB IsNot Nothing Then
-                                ' Disable VTRnumberTB when VTRAppliedCKB is checked
-                                VTRnumberTB.Enabled = Not VTRAppliedCKB.Checked
+                                ' Enable VTRnumberTB when VTRAppliedCKB is checked
+                                VTRnumberTB.Enabled = VTRAppliedCKB.Checked
                                 VTRnumberTB.Refresh()
                             End If
                         End If
@@ -1961,9 +2019,23 @@
                             MangerNumberTB.Refresh()
                         End If
 
+                        ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly (second location - CustomersInfo)
+                        If VTRAppliedCKB IsNot Nothing Then
+                            VTRAppliedCKB.Checked = customerData.Active
+                            VTRAppliedCKB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"VTRAppliedCKB (CustomersInfo - second location) set to: {customerData.Active}")
+                        End If
+                        
                         If VTRnumberTB IsNot Nothing Then
-                            VTRnumberTB.Text = If(String.IsNullOrEmpty(customerData.VATNumber), "", customerData.VATNumber)
+                            If VTRAppliedCKB IsNot Nothing AndAlso VTRAppliedCKB.Checked Then
+                                VTRnumberTB.Text = If(String.IsNullOrEmpty(customerData.VATNumber), "", customerData.VATNumber)
+                                VTRnumberTB.Enabled = True
+                            Else
+                                VTRnumberTB.Text = ""
+                                VTRnumberTB.Enabled = False
+                            End If
                             VTRnumberTB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"VTRnumberTB (CustomersInfo - second location) - Text: '{VTRnumberTB.Text}', Enabled: {VTRnumberTB.Enabled}")
                         End If
 
                         If emailTB IsNot Nothing Then
@@ -2008,47 +2080,67 @@
                             VTRAppliedCKB.Enabled = False ' Default disabled until CommercialRecordAndIdentityTB has data
                             VTRAppliedCKB.Refresh()
 
-                            ' Ensure VTRnumberTB is enabled when VTRAppliedCKB is unchecked (default state)
+                            ' Set VTRnumberTB enabled state based on VTRAppliedCKB
                             If VTRnumberTB IsNot Nothing Then
-                                VTRnumberTB.Enabled = Not VTRAppliedCKB.Checked ' True since VTRAppliedCKB is unchecked by default
+                                VTRnumberTB.Enabled = VTRAppliedCKB.Checked ' Enabled when VTRAppliedCKB is checked
                             End If
                         End If
 
                         If phoneNumber1TB IsNot Nothing Then
-                            phoneNumber1TB.Text = "" ' No direct mapping specified in your table
+                            phoneNumber1TB.Text = If(String.IsNullOrEmpty(customerData.PhoneNumber1), "", customerData.PhoneNumber1)
                             phoneNumber1TB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"phoneNumber1TB (second location - CustomersInfo) populated with: '{customerData.PhoneNumber1}'")
                         End If
 
                         If phoneNumber2TB IsNot Nothing Then
-                            phoneNumber2TB.Text = "" ' No direct mapping specified in your table
+                            phoneNumber2TB.Text = If(String.IsNullOrEmpty(customerData.PhoneNumber2), "", customerData.PhoneNumber2)
                             phoneNumber2TB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"phoneNumber2TB (second location - CustomersInfo) populated with: '{customerData.PhoneNumber2}'")
                         End If
 
                         If telephoneNumberTB IsNot Nothing Then
-                            telephoneNumberTB.Text = "" ' No direct mapping specified in your table
+                            telephoneNumberTB.Text = If(String.IsNullOrEmpty(customerData.TelephoneNumber), "", customerData.TelephoneNumber)
                             telephoneNumberTB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"telephoneNumberTB (second location - CustomersInfo) populated with: '{customerData.TelephoneNumber}'")
                         End If
 
                         If telephoneNumberZipcodeTB IsNot Nothing Then
-                            telephoneNumberZipcodeTB.Text = "" ' Maps to pld_limit but no data available yet
+                            telephoneNumberZipcodeTB.Text = If(String.IsNullOrEmpty(customerData.TelephoneZipCode), "", customerData.TelephoneZipCode)
                             telephoneNumberZipcodeTB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"telephoneNumberZipcodeTB (second location - CustomersInfo) populated with: '{customerData.TelephoneZipCode}'")
                         End If
 
                         ' Set identity type and corresponding field
-                        If IdentityCommercialNameOptionCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.IdentityType) Then
+                        If IdentityCommercialNameOptionCB IsNot Nothing Then
+                            ' Determine identity type based on which field has data
+                            Dim identityType As String = ""
+                            If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                                identityType = "فردي"  ' Individual
+                            ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                                identityType = "تجاري"  ' Commercial
+                            Else
+                                ' If neither field has data, check the database IdentityType field
+                                If customerData.IdentityType = "فردي" Or customerData.IdentityType = "تجاري" Then
+                                    identityType = customerData.IdentityType
+                                Else
+                                    identityType = "فردي"  ' Default to Individual
+                                End If
+                            End If
+                            
+                            ' Set ComboBox selection
                             For i As Integer = 0 To IdentityCommercialNameOptionCB.Items.Count - 1
-                                If IdentityCommercialNameOptionCB.Items(i).ToString() = customerData.IdentityType Then
+                                If IdentityCommercialNameOptionCB.Items(i).ToString() = identityType Then
                                     IdentityCommercialNameOptionCB.SelectedIndex = i
                                     Exit For
                                 End If
                             Next
-                            UpdateIdentityLabel(customerData.IdentityType)
+                            UpdateIdentityLabel(identityType)
 
                             If CommercialRecordAndIdentityTB IsNot Nothing Then
-                                ' Check both fields and show whichever has data
-                                If Not String.IsNullOrEmpty(customerData.IndividualID) Then
+                                ' Show data based on determined identity type
+                                If identityType = "فردي" And Not String.IsNullOrEmpty(customerData.IndividualID) Then
                                     CommercialRecordAndIdentityTB.Text = customerData.IndividualID
-                                ElseIf Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
+                                ElseIf identityType = "تجاري" And Not String.IsNullOrEmpty(customerData.CommercialRecord) Then
                                     CommercialRecordAndIdentityTB.Text = customerData.CommercialRecord
                                 Else
                                     CommercialRecordAndIdentityTB.Text = ""
@@ -2188,11 +2280,27 @@
                     customerData.Area = selectedArea("code").ToString()
                 End If
 
-                customerData.VATNumber = If(VTRnumberTB IsNot Nothing, VTRnumberTB.Text.Trim(), "")
+                ' Only save VTR number if VTRAppliedCKB is checked (enabled)
+                If VTRAppliedCKB IsNot Nothing AndAlso VTRAppliedCKB.Checked AndAlso VTRnumberTB IsNot Nothing Then
+                    customerData.VATNumber = VTRnumberTB.Text.Trim()
+                Else
+                    customerData.VATNumber = ""
+                End If
+                
+                ' Save VTRAppliedCKB state to Active property
+                customerData.Active = If(VTRAppliedCKB IsNot Nothing, VTRAppliedCKB.Checked, False)
+                
                 customerData.Email = If(emailTB IsNot Nothing, emailTB.Text.Trim(), "")
-                customerData.MobileCountryCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "")
                 customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
                 customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
+                
+                ' Updated phone number field mappings based on specifications
+                customerData.PhoneNumber1 = If(phoneNumber1TB IsNot Nothing, phoneNumber1TB.Text.Trim(), "") ' -> contact field
+                customerData.PhoneNumber2 = If(phoneNumber2TB IsNot Nothing, phoneNumber2TB.Text.Trim(), "") ' -> fld_contry_code_mobile field
+                customerData.TelephoneNumber = If(telephoneNumberTB IsNot Nothing, telephoneNumberTB.Text.Trim(), "") ' -> plt_limit field
+                customerData.TelephoneZipCode = If(telephoneNumberZipcodeTB IsNot Nothing, telephoneNumberZipcodeTB.Text.Trim(), "") ' -> fld_contrycode field
+                customerData.MobileCountryCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "") ' -> fld_contry_code_mobile field
+                customerData.PostCode = If(phoneNumber1ZipCodeTB IsNot Nothing, phoneNumber1ZipCodeTB.Text.Trim(), "") ' -> fld_postcode field
 
                 ' Handle identity type and corresponding field mapping per specification
                 If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then

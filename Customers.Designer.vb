@@ -234,7 +234,7 @@ Partial Class Customers
         CurrencyDGV.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None
         DataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle1.BackColor = SystemColors.Control
-        DataGridViewCellStyle1.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle1.Font = New Font("Segoe UI", 9F)
         DataGridViewCellStyle1.ForeColor = SystemColors.WindowText
         DataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight
         DataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText
@@ -243,7 +243,7 @@ Partial Class Customers
         CurrencyDGV.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
         DataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter
         DataGridViewCellStyle2.BackColor = SystemColors.Window
-        DataGridViewCellStyle2.Font = New Font("Segoe UI", 9.0F)
+        DataGridViewCellStyle2.Font = New Font("Segoe UI", 9F)
         DataGridViewCellStyle2.ForeColor = SystemColors.Highlight
         DataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight
         DataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText
@@ -280,7 +280,7 @@ Partial Class Customers
         ' 
         Label23.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label23.AutoSize = True
-        Label23.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label23.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
         Label23.ForeColor = SystemColors.Highlight
         Label23.Location = New Point(345, 520)
         Label23.Margin = New Padding(2, 0, 2, 0)
@@ -293,7 +293,7 @@ Partial Class Customers
         ' 
         Label22.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label22.AutoSize = True
-        Label22.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label22.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
         Label22.ForeColor = SystemColors.Highlight
         Label22.Location = New Point(744, 520)
         Label22.Margin = New Padding(2, 0, 2, 0)
@@ -306,7 +306,7 @@ Partial Class Customers
         ' 
         Label21.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label21.AutoSize = True
-        Label21.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label21.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
         Label21.ForeColor = SystemColors.Highlight
         Label21.Location = New Point(332, 449)
         Label21.Margin = New Padding(2, 0, 2, 0)
@@ -319,7 +319,7 @@ Partial Class Customers
         ' 
         Label12.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label12.AutoSize = True
-        Label12.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold)
+        Label12.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
         Label12.ForeColor = SystemColors.Highlight
         Label12.Location = New Point(767, 450)
         Label12.Margin = New Padding(2, 0, 2, 0)
@@ -843,7 +843,7 @@ Partial Class Customers
         GroupBox2.Controls.Add(refreshPB)
         GroupBox2.Controls.Add(AddAttachmentsBT)
         GroupBox2.Controls.Add(PictureBox5)
-        GroupBox2.Font = New Font("Segoe UI Black", 8.0F, FontStyle.Bold)
+        GroupBox2.Font = New Font("Segoe UI Black", 8F, FontStyle.Bold)
         GroupBox2.Location = New Point(1553, 154)
         GroupBox2.Margin = New Padding(3, 4, 3, 4)
         GroupBox2.Name = "GroupBox2"
@@ -923,7 +923,7 @@ Partial Class Customers
         ' 
         ' Customers
         ' 
-        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
+        AutoScaleDimensions = New SizeF(8F, 20F)
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
         ClientSize = New Size(1622, 968)
