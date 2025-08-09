@@ -2602,6 +2602,7 @@ ORDER BY p.Name"
                 SELECT 
                     cam.code, cam.c_type, cam.name, cam.fld_arabic_name, 
                     cam.shortname, cam.bussiness_address, cam.acc_manager, cam.fld_indvl_id_no, 
+                    cam.bank_acc_name, cam.bank_acc_no,
                     cam.contact, cam.country, cam.area, cam.vat_tin_no, 
                     cam.email, cam.fld_contry_code_mobile, cam.plt_limit, cam.fld_postcode, 
                     cam.fld_fax_no, cam.fld_ref_no, cam.fld_cr_no, cam.fld_contrycode,
@@ -2637,8 +2638,11 @@ ORDER BY p.Name"
                 System.Diagnostics.Debug.WriteLine($"Mapped CommercialName: '{customerData.CommercialName}'")
                 customerData.Address = If(reader("bussiness_address") Is DBNull.Value, "", reader("bussiness_address").ToString())
                 customerData.Manager = If(reader("acc_manager") Is DBNull.Value, "", reader("acc_manager").ToString())
-                customerData.ManagerID = "" ' Will map separately below
-                customerData.ManagerNumber = "" ' Will map separately below
+                customerData.ManagerID = If(reader("bank_acc_name") Is DBNull.Value, "", reader("bank_acc_name").ToString())
+                customerData.ManagerNumber = If(reader("bank_acc_no") Is DBNull.Value, "", reader("bank_acc_no").ToString())
+                System.Diagnostics.Debug.WriteLine($"Mapped Manager: '{customerData.Manager}'")
+                System.Diagnostics.Debug.WriteLine($"Mapped ManagerID (bank_acc_name): '{customerData.ManagerID}'")
+                System.Diagnostics.Debug.WriteLine($"Mapped ManagerNumber (bank_acc_no): '{customerData.ManagerNumber}'")
                 customerData.Country = If(reader("country") Is DBNull.Value, "", reader("country").ToString())
                 customerData.Area = If(reader("area") Is DBNull.Value, "", reader("area").ToString())
                 customerData.VATNumber = If(reader("vat_tin_no") Is DBNull.Value, "", reader("vat_tin_no").ToString())

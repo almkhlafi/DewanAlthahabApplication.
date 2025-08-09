@@ -1,6 +1,4 @@
-﻿Imports System.Linq
-
-Public Class Customers
+﻿Public Class Customers
 
     Private dbConn As New DBconnections()
 
@@ -59,6 +57,13 @@ Public Class Customers
 
         ' Initialize Customer/Supplier ComboBoxes with enhanced logic
         InitializeCustomerSupplierComboBoxes()
+
+        ' Initialize CustomerAccountNumberTB as read-only
+        If CustomerAccountNumberTB IsNot Nothing Then
+            CustomerAccountNumberTB.ReadOnly = True
+            CustomerAccountNumberTB.Enabled = True
+            System.Diagnostics.Debug.WriteLine("CustomerAccountNumberTB initialized as read-only")
+        End If
 
         ' Initialize customer list for navigation (but don't load first customer data)
         ' Set up timer for delayed navigation initialization
@@ -1077,93 +1082,6 @@ Public Class Customers
     End Function
 
 
-
-
-    Private Sub DocumentsSettings_Click(sender As Object, e As EventArgs) Handles DocumentsSettings.Click
-        Dim docMgmt As New DocumentsManagement
-
-        ' Check if a customer is selected
-        If currentSelectedCustomerId > 0 Then
-            ' Customer selected - show customer-specific documents
-            docMgmt.SelectedCustomerId = currentSelectedCustomerId
-            docMgmt.SelectedCustomerName = currentSelectedCustomerName
-        Else
-            ' No customer selected - show all documents for all customers
-            docMgmt.SelectedCustomerId = 0 ' 0 means show all customers
-            docMgmt.SelectedCustomerName = "جميع العملاء"
-        End If
-
-        docMgmt.ShowDialog()
-        docMgmt.Dispose()
-    End Sub
-
-    Private Sub Delegations_Click_1(sender As Object, e As EventArgs) Handles Delegations.Click
-        ' Check if a customer is selected
-        If currentSelectedCustomerId > 0 Then
-            ' Customer selected - create and show the delegations form
-            Dim delegMgmt As New DelegationsManagement
-            delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
-
-            delegMgmt.ShowDialog()
-            delegMgmt.Dispose()
-        Else
-            ' No customer selected - show customer search dialog
-            Dim searchForm As New CustomerSearchForm
-
-            If searchForm.ShowDialog = DialogResult.OK Then
-                ' Customer was selected from search - store and use selected customer
-                currentSelectedCustomerId = searchForm.SelectedCustomerId
-                currentSelectedCustomerName = searchForm.SelectedCustomerName
-
-                Dim delegMgmt As New DelegationsManagement
-                delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
-
-                delegMgmt.ShowDialog()
-                delegMgmt.Dispose()
-            End If
-
-            searchForm.Dispose()
-        End If
-    End Sub
-
-    Private Sub SearchForCustomer_Click(sender As Object, e As EventArgs) Handles PictureBox5.Click
-        Dim searchForm As New CustomerSearchForm
-
-        If searchForm.ShowDialog = DialogResult.OK Then
-            ' Customer was selected - store customer info
-            currentSelectedCustomerId = searchForm.SelectedCustomerId
-            currentSelectedCustomerName = searchForm.SelectedCustomerName
-
-            MessageBox.Show($"تم اختيار العميل: {currentSelectedCustomerName}", "تم الاختيار", MessageBoxButtons.OK, MessageBoxIcon.Information)
-        End If
-
-        searchForm.Dispose()
-    End Sub
-
-
-    Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
-        Dim result As DialogResult = MessageBox.Show("هل أنت متأكد من تسجيل الخروج؟", "تسجيل الخروج", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-
-        If result = DialogResult.Yes Then
-            ' Clear all session data including document access credentials
-            Session.Clear()
-
-            ' Close current form and show login form
-            Me.Hide()
-
-            Dim loginForm As New Login()
-            If loginForm.ShowDialog() = DialogResult.OK Then
-                ' User logged in successfully, show main form again
-                Me.Show()
-            Else
-                ' User cancelled login, exit application
-                Application.Exit()
-            End If
-        End If
-    End Sub
-
-
-
     Private Sub CategoryCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CategoryCB.SelectedIndexChanged
 
     End Sub
@@ -1493,7 +1411,7 @@ Public Class Customers
         End Try
     End Sub
 
-    Private Sub CustomerSupplierCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CustomerSupplierCB.SelectedIndexChanged
+    Private Sub CustomerSupplierCB_SelectedIndexChanged(sender As Object, e As EventArgs)
         ' Handle customer/supplier type selection with code generation
         Try
             If CustomerSupplierCB.SelectedItem IsNot Nothing AndAlso Not isNavigating Then
@@ -1505,11 +1423,11 @@ Public Class Customers
         End Try
     End Sub
 
-    Private Sub IdentityCommercialNameOptionCB_SelectedIndexChanged(sender As Object, e As EventArgs) Handles IdentityCommercialNameOptionCB.SelectedIndexChanged
+    Private Sub IdentityCommercialNameOptionCB_SelectedIndexChanged(sender As Object, e As EventArgs)
         ' Handle identity type selection and update label dynamically
         Try
             If IdentityCommercialNameOptionCB.SelectedItem IsNot Nothing Then
-                Dim selectedType As String = IdentityCommercialNameOptionCB.SelectedItem.ToString()
+                Dim selectedType = IdentityCommercialNameOptionCB.SelectedItem.ToString
                 UpdateIdentityLabel(selectedType)
             End If
         Catch ex As Exception
@@ -1577,9 +1495,13 @@ Public Class Customers
                 Dim isCustomer As Boolean = CustomerSupplierCB.SelectedItem.ToString() = "Customer"
                 Dim nextCode As String = dbConn.GenerateNextCode(isCustomer)
 
-                ' Display the generated code in a suitable control (assuming there's a code display textbox)
-                ' If there's no specific code display control, we could show it in the form title or a label
+                ' Display the generated code in CustomerAccountNumberTB
+                SetCustomerAccountNumber(nextCode)
+
+                ' Also display it in the form title for additional visibility
                 Me.Text = $"العملاء - الكود التالي: {nextCode}"
+
+                System.Diagnostics.Debug.WriteLine($"Generated and displayed next code: {nextCode}")
             End If
         Catch ex As Exception
             MessageBox.Show("خطأ في توليد الكود: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
@@ -1603,15 +1525,29 @@ Public Class Customers
                 If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
                 If AddressTA IsNot Nothing Then AddressTA.Text = customerData.Address
                 If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
-                If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = customerData.ManagerID
-                If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = customerData.ManagerNumber
-                
+                If ManagerIDTB IsNot Nothing Then
+                    ManagerIDTB.Text = customerData.ManagerID
+                    System.Diagnostics.Debug.WriteLine($"ManagerIDTB populated with: '{customerData.ManagerID}'")
+                End If
+                If MangerNumberTB IsNot Nothing Then
+                    MangerNumberTB.Text = customerData.ManagerNumber
+                    System.Diagnostics.Debug.WriteLine($"MangerNumberTB populated with: '{customerData.ManagerNumber}'")
+                End If
+
+                ' Set CustomerAccountNumberTB to display customer code (read-only)
+                If CustomerAccountNumberTB IsNot Nothing Then
+                    CustomerAccountNumberTB.Text = customerData.Code
+                    CustomerAccountNumberTB.ReadOnly = True ' Make it non-editable
+                    CustomerAccountNumberTB.Enabled = True ' Enable by default
+                    System.Diagnostics.Debug.WriteLine($"CustomerAccountNumberTB set to: '{customerData.Code}' (ReadOnly: {CustomerAccountNumberTB.ReadOnly})")
+                End If
+
                 ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly
                 If VTRAppliedCKB IsNot Nothing Then
                     VTRAppliedCKB.Checked = customerData.Active
                     System.Diagnostics.Debug.WriteLine($"VTRAppliedCKB set to: {customerData.Active}")
                 End If
-                
+
                 ' Set VTRnumberTB based on VTRAppliedCKB state
                 If VTRnumberTB IsNot Nothing Then
                     If VTRAppliedCKB IsNot Nothing AndAlso VTRAppliedCKB.Checked Then
@@ -1623,7 +1559,7 @@ Public Class Customers
                     End If
                     System.Diagnostics.Debug.WriteLine($"VTRnumberTB - Text: '{VTRnumberTB.Text}', Enabled: {VTRnumberTB.Enabled}")
                 End If
-                
+
                 If emailTB IsNot Nothing Then emailTB.Text = customerData.Email
                 If FaxNumberTB IsNot Nothing Then FaxNumberTB.Text = customerData.FaxNumber
                 If ReferralNumberTB IsNot Nothing Then ReferralNumberTB.Text = customerData.ReferralNumber
@@ -1731,7 +1667,7 @@ Public Class Customers
 
     ' =====================Navigation and Save Methods========================
 
-    Private Sub SaveInfo_Click(sender As Object, e As EventArgs) Handles SaveInfo.Click
+    Private Sub SaveInfo_Click(sender As Object, e As EventArgs)
         ' Save current customer/supplier data
         SaveCustomerSupplierData()
 
@@ -2018,6 +1954,16 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"  Active: {customerData.Active}")
 
                     System.Diagnostics.Debug.WriteLine("Starting to populate text fields...")
+
+                    ' Set CustomerAccountNumberTB to display customer code (read-only) - second location
+                    If CustomerAccountNumberTB IsNot Nothing Then
+                        CustomerAccountNumberTB.Text = If(String.IsNullOrEmpty(customerData.Code), "", customerData.Code)
+                        CustomerAccountNumberTB.ReadOnly = True ' Make it non-editable
+                        CustomerAccountNumberTB.Enabled = True ' Enable by default
+                        CustomerAccountNumberTB.Refresh()
+                        System.Diagnostics.Debug.WriteLine($"CustomerAccountNumberTB (second location) set to: '{customerData.Code}' (ReadOnly: {CustomerAccountNumberTB.ReadOnly})")
+                    End If
+
                     If NameInEnglishTB IsNot Nothing Then
                         NameInEnglishTB.Text = If(String.IsNullOrEmpty(customerData.EnglishName), "", customerData.EnglishName)
                         NameInEnglishTB.Refresh()
@@ -2047,11 +1993,13 @@ Public Class Customers
                     If ManagerIDTB IsNot Nothing Then
                         ManagerIDTB.Text = If(String.IsNullOrEmpty(customerData.ManagerID), "", customerData.ManagerID)
                         ManagerIDTB.Refresh()
+                        System.Diagnostics.Debug.WriteLine($"ManagerIDTB (second location) populated with: '{customerData.ManagerID}'")
                     End If
 
                     If MangerNumberTB IsNot Nothing Then
                         MangerNumberTB.Text = If(String.IsNullOrEmpty(customerData.ManagerNumber), "", customerData.ManagerNumber)
                         MangerNumberTB.Refresh()
+                        System.Diagnostics.Debug.WriteLine($"MangerNumberTB (second location) populated with: '{customerData.ManagerNumber}'")
                     End If
 
                     ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly (second location)
@@ -2060,7 +2008,7 @@ Public Class Customers
                         VTRAppliedCKB.Refresh()
                         System.Diagnostics.Debug.WriteLine($"VTRAppliedCKB (second location) set to: {customerData.Active}")
                     End If
-                    
+
                     If VTRnumberTB IsNot Nothing Then
                         If VTRAppliedCKB IsNot Nothing AndAlso VTRAppliedCKB.Checked Then
                             VTRnumberTB.Text = If(String.IsNullOrEmpty(customerData.VATNumber), "", customerData.VATNumber)
@@ -2327,7 +2275,7 @@ Public Class Customers
             customerData.Email = If(emailTB IsNot Nothing, emailTB.Text.Trim(), "")
             customerData.FaxNumber = If(FaxNumberTB IsNot Nothing, FaxNumberTB.Text.Trim(), "")
             customerData.ReferralNumber = If(ReferralNumberTB IsNot Nothing, ReferralNumberTB.Text.Trim(), "")
-            
+
             ' Save VTRAppliedCKB state to Active property
             customerData.Active = If(VTRAppliedCKB IsNot Nothing, VTRAppliedCKB.Checked, False)
 
@@ -2415,26 +2363,7 @@ Public Class Customers
     End Sub
 
 
-    Private Sub AddAttachmentsBT_Click(sender As Object, e As EventArgs) Handles AddAttachmentsBT.Click
-        AttachmentsManagement.Show()
 
-        ' Check if a customer is selected - if not, show search dialog first
-        '  If currentSelectedCustomerId = 0 Then
-        ' No customer selected - show customer search dialog
-        '  Dim searchForm As New CustomerSearchForm
-
-        ' If searchForm.ShowDialog = DialogResult.OK Then
-        ' Customer was selected from search - store customer info
-        '     currentSelectedCustomerId = searchForm.SelectedCustomerId
-        '    currentSelectedCustomerName = searchForm.SelectedCustomerName
-        '  End If
-        '
-        ' searchForm.Dispose()
-        '  End If
-
-        ' Open attachments management (regardless of customer selection)
-
-    End Sub
 
 
 
@@ -2447,44 +2376,16 @@ Public Class Customers
 
     End Sub
 
-    Private Sub refreshPB_Click(sender As Object, e As EventArgs) Handles refreshPB.Click
-        Try
-            System.Diagnostics.Debug.WriteLine("RefreshPB clicked - Resetting all components")
 
-            ' Reset all TextBoxes to empty
-            ResetAllTextBoxes()
-
-            ' Reset all ComboBoxes
-            ResetAllComboBoxes()
-
-            ' Reset all CheckBoxes
-            ResetAllCheckBoxes()
-
-            ' Reset form state for new customer/supplier entry
-            ResetFormState()
-
-            ' Reset navigation state
-            currentCustomerIndex = -1
-            currentSelectedCustomerName = ""
-
-            ' Update form title
-            Me.Text = "العملاء - إدخال جديد"
-
-            ' Set focus to first field
-            If CustomerSupplierCB IsNot Nothing Then
-                CustomerSupplierCB.Focus()
-            End If
-
-            System.Diagnostics.Debug.WriteLine("All components reset successfully")
-
-        Catch ex As Exception
-            MessageBox.Show("خطأ في إعادة تعيين المكونات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        End Try
-    End Sub
 
     Private Sub ResetAllTextBoxes()
         ' Reset all TextBox controls to empty
         If CommercialRecordAndIdentityTB IsNot Nothing Then CommercialRecordAndIdentityTB.Text = ""
+        If CustomerAccountNumberTB IsNot Nothing Then
+            CustomerAccountNumberTB.Text = ""
+            CustomerAccountNumberTB.ReadOnly = True ' Keep it read-only even when cleared
+            CustomerAccountNumberTB.Enabled = True ' Keep it enabled by default
+        End If
         If NameInEnglishTB IsNot Nothing Then NameInEnglishTB.Text = ""
         If AddressTA IsNot Nothing Then AddressTA.Text = ""
         If ManagerTB IsNot Nothing Then ManagerTB.Text = ""
@@ -2693,7 +2594,221 @@ Public Class Customers
         End Try
     End Sub
 
+    ' Helper methods to control CustomerAccountNumberTB
+    Public Sub EnableCustomerAccountNumber()
+        ''' <summary>
+        ''' Enables the CustomerAccountNumberTB field
+        ''' </summary>
+        Try
+            If CustomerAccountNumberTB IsNot Nothing Then
+                CustomerAccountNumberTB.Enabled = True
+                CustomerAccountNumberTB.ReadOnly = True ' Always keep it read-only
+                System.Diagnostics.Debug.WriteLine("CustomerAccountNumberTB enabled")
+            End If
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error enabling CustomerAccountNumberTB: {ex.Message}")
+        End Try
+    End Sub
 
+    Public Sub DisableCustomerAccountNumber()
+        ''' <summary>
+        ''' Disables the CustomerAccountNumberTB field
+        ''' </summary>
+        Try
+            If CustomerAccountNumberTB IsNot Nothing Then
+                CustomerAccountNumberTB.Enabled = False
+                CustomerAccountNumberTB.ReadOnly = True ' Always keep it read-only
+                System.Diagnostics.Debug.WriteLine("CustomerAccountNumberTB disabled")
+            End If
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error disabling CustomerAccountNumberTB: {ex.Message}")
+        End Try
+    End Sub
+
+    Public Sub SetCustomerAccountNumber(code As String)
+        ''' <summary>
+        ''' Sets the customer code in CustomerAccountNumberTB
+        ''' </summary>
+        ''' <param name="code">The customer code to display</param>
+        Try
+            If CustomerAccountNumberTB IsNot Nothing Then
+                CustomerAccountNumberTB.Text = If(String.IsNullOrEmpty(code), "", code)
+                CustomerAccountNumberTB.ReadOnly = True ' Always keep it read-only
+                System.Diagnostics.Debug.WriteLine($"CustomerAccountNumberTB set to: '{code}'")
+            End If
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error setting CustomerAccountNumberTB: {ex.Message}")
+        End Try
+    End Sub
+
+    Private Sub ClosingPB_Click(sender As Object, e As EventArgs) Handles ClosingPB.Click
+        Dim result = MessageBox.Show("هل أنت متأكد من تسجيل الخروج؟", "تسجيل الخروج", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+
+        If result = DialogResult.Yes Then
+            ' Clear all session data including document access credentials
+            Session.Clear()
+
+            ' Close current form and show login form
+            Hide()
+
+            Dim loginForm As New Login
+            If loginForm.ShowDialog = DialogResult.OK Then
+                ' User logged in successfully, show main form again
+                Show()
+            Else
+                ' User cancelled login, exit application
+                Application.Exit()
+            End If
+        End If
+    End Sub
+
+    Private Sub refreshPB_Click_1(sender As Object, e As EventArgs)
+        Try
+            Debug.WriteLine("RefreshPB clicked - Resetting all components")
+
+            ' Reset all TextBoxes to empty
+            ResetAllTextBoxes()
+
+            ' Reset all ComboBoxes
+            ResetAllComboBoxes()
+
+            ' Reset all CheckBoxes
+            ResetAllCheckBoxes()
+
+            ' Reset form state for new customer/supplier entry
+            ResetFormState()
+
+            ' Reset navigation state
+            currentCustomerIndex = -1
+            currentSelectedCustomerName = ""
+
+            ' Update form title
+            Text = "العملاء - إدخال جديد"
+
+            ' Set focus to first field
+            If CustomerSupplierCB IsNot Nothing Then
+                CustomerSupplierCB.Focus()
+            End If
+
+            Debug.WriteLine("All components reset successfully")
+
+        Catch ex As Exception
+            MessageBox.Show("خطأ في إعادة تعيين المكونات: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub CustomerSearchPB_Click(sender As Object, e As EventArgs) Handles CustomerSearchPB.Click
+        Dim searchForm As New CustomerSearchForm
+
+        If searchForm.ShowDialog = DialogResult.OK Then
+            ' Customer was selected - store customer info
+            currentSelectedCustomerId = searchForm.SelectedCustomerId
+            currentSelectedCustomerName = searchForm.SelectedCustomerName
+
+            MessageBox.Show($"تم اختيار العميل: {currentSelectedCustomerName}", "تم الاختيار", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        End If
+
+        searchForm.Dispose()
+    End Sub
+
+    Private Sub AddAttachmentsBT_Click_1(sender As Object, e As EventArgs) Handles AddAttachmentsBT.Click
+
+        AttachmentsManagement.Show()
+
+        ' Check if a customer is selected - if not, show search dialog first
+        '  If currentSelectedCustomerId = 0 Then
+        ' No customer selected - show customer search dialog
+        '  Dim searchForm As New CustomerSearchForm
+
+        ' If searchForm.ShowDialog = DialogResult.OK Then
+        ' Customer was selected from search - store customer info
+        '     currentSelectedCustomerId = searchForm.SelectedCustomerId
+        '    currentSelectedCustomerName = searchForm.SelectedCustomerName
+        '  End If
+        '
+        ' searchForm.Dispose()
+        '  End If
+
+        ' Open attachments management (regardless of customer selection)
+
+    End Sub
+
+    Private Sub DocumentsSettings_Click_1(sender As Object, e As EventArgs) Handles DocumentsSettings.Click
+
+        Dim docMgmt As New DocumentsManagement
+
+        ' Check if a customer is selected
+        If currentSelectedCustomerId > 0 Then
+            ' Customer selected - show customer-specific documents
+            docMgmt.SelectedCustomerId = currentSelectedCustomerId
+            docMgmt.SelectedCustomerName = currentSelectedCustomerName
+        Else
+            ' No customer selected - show all documents for all customers
+            docMgmt.SelectedCustomerId = 0 ' 0 means show all customers
+            docMgmt.SelectedCustomerName = "جميع العملاء"
+        End If
+
+        docMgmt.ShowDialog()
+        docMgmt.Dispose()
+    End Sub
+
+    Private Sub Delegations_Click_1(sender As Object, e As EventArgs) Handles Delegations.Click
+        ' Check if a customer is selected
+        If currentSelectedCustomerId > 0 Then
+            ' Customer selected - create and show the delegations form
+            Dim delegMgmt As New DelegationsManagement
+            delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
+
+            delegMgmt.ShowDialog()
+            delegMgmt.Dispose()
+        Else
+            ' No customer selected - show customer search dialog
+            Dim searchForm As New CustomerSearchForm
+
+            If searchForm.ShowDialog = DialogResult.OK Then
+                ' Customer was selected from search - store and use selected customer
+                currentSelectedCustomerId = searchForm.SelectedCustomerId
+                currentSelectedCustomerName = searchForm.SelectedCustomerName
+
+                Dim delegMgmt As New DelegationsManagement
+                delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
+
+                delegMgmt.ShowDialog()
+                delegMgmt.Dispose()
+            End If
+
+            searchForm.Dispose()
+        End If
+    End Sub
+
+    Private Sub Delegations_Click(sender As Object, e As EventArgs) Handles Delegations.Click
+        ' Check if a customer is selected
+        If currentSelectedCustomerId > 0 Then
+            ' Customer selected - create and show the delegations form
+            Dim delegMgmt As New DelegationsManagement
+            delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
+
+            delegMgmt.ShowDialog()
+            delegMgmt.Dispose()
+        Else
+            ' No customer selected - show customer search dialog
+            Dim searchForm As New CustomerSearchForm
+
+            If searchForm.ShowDialog = DialogResult.OK Then
+                ' Customer was selected from search - store and use selected customer
+                currentSelectedCustomerId = searchForm.SelectedCustomerId
+                currentSelectedCustomerName = searchForm.SelectedCustomerName
+
+                Dim delegMgmt As New DelegationsManagement
+                delegMgmt.CustomerIdToLoad = currentSelectedCustomerId
+
+                delegMgmt.ShowDialog()
+                delegMgmt.Dispose()
+            End If
+
+            searchForm.Dispose()
+        End If
+    End Sub
 End Class
 
 

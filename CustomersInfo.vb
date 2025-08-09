@@ -1589,8 +1589,14 @@
                     If CommercialNameTB IsNot Nothing Then CommercialNameTB.Text = customerData.CommercialName
                     If AddressTA IsNot Nothing Then AddressTA.Text = customerData.Address
                     If ManagerTB IsNot Nothing Then ManagerTB.Text = customerData.Manager
-                    If ManagerIDTB IsNot Nothing Then ManagerIDTB.Text = customerData.ManagerID
-                    If MangerNumberTB IsNot Nothing Then MangerNumberTB.Text = customerData.ManagerNumber
+                    If ManagerIDTB IsNot Nothing Then 
+                        ManagerIDTB.Text = customerData.ManagerID
+                        System.Diagnostics.Debug.WriteLine($"ManagerIDTB (CustomersInfo) populated with: '{customerData.ManagerID}'")
+                    End If
+                    If MangerNumberTB IsNot Nothing Then 
+                        MangerNumberTB.Text = customerData.ManagerNumber
+                        System.Diagnostics.Debug.WriteLine($"MangerNumberTB (CustomersInfo) populated with: '{customerData.ManagerNumber}'")
+                    End If
                     
                     ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly
                     If VTRAppliedCKB IsNot Nothing Then
@@ -2012,11 +2018,13 @@
                         If ManagerIDTB IsNot Nothing Then
                             ManagerIDTB.Text = If(String.IsNullOrEmpty(customerData.ManagerID), "", customerData.ManagerID)
                             ManagerIDTB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"ManagerIDTB (CustomersInfo - second location) populated with: '{customerData.ManagerID}'")
                         End If
 
                         If MangerNumberTB IsNot Nothing Then
                             MangerNumberTB.Text = If(String.IsNullOrEmpty(customerData.ManagerNumber), "", customerData.ManagerNumber)
                             MangerNumberTB.Refresh()
+                            System.Diagnostics.Debug.WriteLine($"MangerNumberTB (CustomersInfo - second location) populated with: '{customerData.ManagerNumber}'")
                         End If
 
                         ' Set VTRAppliedCKB from Active property and configure VTRnumberTB accordingly (second location - CustomersInfo)
