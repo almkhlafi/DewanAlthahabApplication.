@@ -2182,7 +2182,8 @@ ORDER BY p.Name"
                        "sales_man = @sales_man, " &
                        "scrap_adj_code = @scrap_adj_code, " &
                        "type = @type, " &
-                       "categoty = @categoty " &
+                       "categoty = @categoty, " &
+                       "active = @active " &
                        "WHERE code = @code"
             Else
                 ' Insert new record - include FK fields
@@ -2249,10 +2250,13 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@type", TruncateString(customerData.TypeCode, 50))
             cmd.Parameters.AddWithValue("@categoty", TruncateString(customerData.CategoryCode, 50))
             
+            ' Add Active parameter for both INSERT and UPDATE operations
+            cmd.Parameters.AddWithValue("@active", customerData.Active)
+            System.Diagnostics.Debug.WriteLine($"@active: '{customerData.Active}'")
+            
             ' Add additional parameters for INSERT operations only
             If Not customerData.IsUpdate Then
                 cmd.Parameters.AddWithValue("@currency", TruncateString("SAR", 10))  ' Default currency
-                cmd.Parameters.AddWithValue("@active", True)  ' Default to active
                 System.Diagnostics.Debug.WriteLine("Added default values for new customer")
             End If
             

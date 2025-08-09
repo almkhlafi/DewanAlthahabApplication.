@@ -229,37 +229,27 @@ Public Class Customers
             AreaCB.Tag = Nothing
             AreaCB.Text = ""
 
-            ' Set up AreaCB properties for enhanced search functionality
+            ' Set up AreaCB properties for optimized search functionality
             AreaCB.DisplayMember = "DisplayText"
             AreaCB.ValueMember = "code"
-            AreaCB.AutoCompleteMode = AutoCompleteMode.Suggest
+            AreaCB.AutoCompleteMode = AutoCompleteMode.SuggestAppend
             AreaCB.AutoCompleteSource = AutoCompleteSource.ListItems
             AreaCB.DropDownStyle = ComboBoxStyle.DropDown
 
-            ' Create a new DataTable with combined display text
-            Dim displayTable As New DataTable()
-            displayTable.Columns.Add("code", GetType(String))
-            displayTable.Columns.Add("description", GetType(String))
-            displayTable.Columns.Add("DisplayText", GetType(String))
+            ' Create display text directly in the original table for better performance
+            If Not areasTable.Columns.Contains("DisplayText") Then
+                areasTable.Columns.Add("DisplayText", GetType(String))
+            End If
 
-            ' Add areas to ComboBox with combined display format: description - shortname
+            ' Add display text efficiently
             For Each row As DataRow In areasTable.Rows
-                Dim newRow As DataRow = displayTable.NewRow()
-                newRow("code") = row("code").ToString()
-                newRow("description") = row("description").ToString()
-
                 ' Create display text with code, description and short name
-                Dim displayText As String = $"{row("code")} - {row("description")} - {row("shortname")}"
-
-                newRow("DisplayText") = displayText
-                displayTable.Rows.Add(newRow)
+                row("DisplayText") = $"{row("code")} - {row("description")} - {row("shortname")}"
             Next
 
-            ' Store original data for filtering before binding
-            AreaCB.Tag = displayTable
-
-            ' Bind to ComboBox
-            AreaCB.DataSource = displayTable
+            ' Store original data for filtering and bind to ComboBox
+            AreaCB.Tag = areasTable
+            AreaCB.DataSource = areasTable
 
 
             isUpdatingAreaData = False
@@ -297,16 +287,12 @@ Public Class Customers
     Private areaSearchSetups As Boolean = False
 
     Private Sub SetupAreaSearch()
-        ' Enable advanced search functionality for AreaCB only once
+        ' Enable optimized search functionality for AreaCB only once
         If Not areaSearchSetups AndAlso AreaCB IsNot Nothing Then
             Try
+                ' Only add essential event handlers for better performance
                 AddHandler AreaCB.KeyUp, AddressOf AreaCB_KeyUp
-                AddHandler AreaCB.TextChanged, AddressOf AreaCB_TextChanged
-                AddHandler AreaCB.DropDown, AddressOf AreaCB_DropDown
                 AddHandler AreaCB.SelectedIndexChanged, AddressOf AreaCB_SelectedIndexChanged
-                AddHandler AreaCB.Click, AddressOf AreaCB_Click
-                AddHandler AreaCB.Enter, AddressOf AreaCB_Enter
-                AddHandler AreaCB.GotFocus, AddressOf AreaCB_GotFocus
                 areaSearchSetups = True
             Catch ex As Exception
                 ' Handle any errors during event handler setup
@@ -471,64 +457,14 @@ Public Class Customers
         ' Prevent recursive calls when updating data
         If isUpdatingAreaData Then Return
 
-        ' Enhanced search functionality - move matching items to top
+        ' Use built-in AutoComplete functionality for better performance
         Try
-            Dim searchText As String = AreaCB.Text.ToLower().Trim()
-            Dim currentCursorPosition As Integer = AreaCB.SelectionStart
-
-            ' Get the original data
-            Dim originalData As DataTable = CType(AreaCB.Tag, DataTable)
-            If originalData Is Nothing Then Return
-
-            ' If search text is empty, restore full list
-            If String.IsNullOrEmpty(searchText) Then
-                isUpdatingAreaData = True
-                AreaCB.DataSource = originalData
-                AreaCB.Text = ""
-                isUpdatingAreaData = False
-                Return
-            End If
-
-            ' Sort data: matching items first, then non-matching items
-            Dim matchingRows = originalData.AsEnumerable().Where(Function(row)
-                                                                     Dim displayText As String = row("DisplayText").ToString().ToLower()
-                                                                     Return displayText.Contains(searchText)
-                                                                 End Function).OrderBy(Function(row) row("DisplayText").ToString())
-
-            Dim nonMatchingRows = originalData.AsEnumerable().Where(Function(row)
-                                                                        Dim displayText As String = row("DisplayText").ToString().ToLower()
-                                                                        Return Not displayText.Contains(searchText)
-                                                                    End Function).OrderBy(Function(row) row("DisplayText").ToString())
-
-            ' Create reordered DataTable with matches first
-            Dim reorderedTable As DataTable = originalData.Clone()
-
-            ' Add matching rows first
-            For Each row In matchingRows
-                reorderedTable.ImportRow(row)
-            Next
-
-            ' Add non-matching rows after
-            For Each row In nonMatchingRows
-                reorderedTable.ImportRow(row)
-            Next
-
-            ' Update ComboBox with reordered data without changing text
-            isUpdatingAreaData = True
-            Dim userText As String = AreaCB.Text
-            AreaCB.DataSource = reorderedTable
-            AreaCB.Text = userText
-            AreaCB.SelectionStart = currentCursorPosition
-            AreaCB.SelectionLength = 0
-            ' Only open dropdown if AreaCB has focus and user is actively typing
-            If AreaCB.Focused AndAlso Not String.IsNullOrEmpty(searchText) Then
-                AreaCB.DroppedDown = True
-            End If
-            isUpdatingAreaData = False
+            ' Just let AutoCompleteMode.Suggest handle the search
+            ' This is much faster than manual filtering
+            If Not AreaCB.Focused Then Return ' Only process when user is actively typing
 
         Catch ex As Exception
-            isUpdatingAreaData = False
-            ' Ignore any errors during text change
+            ' Handle any search errors silently for better user experience
         End Try
     End Sub
 
@@ -1526,17 +1462,9 @@ Public Class Customers
     ' Handle ActiveNoActiveCKB checkbox state change
     Private Sub ActiveNoActiveCKB_CheckedChanged(sender As Object, e As EventArgs) Handles ActiveNoActiveCKB.CheckedChanged
         Try
-            If CommercialRecordAndIdentityTB IsNot Nothing Then
-                ' Enable/disable CommercialRecordAndIdentityTB based on ActiveNoActiveCKB state
-                CommercialRecordAndIdentityTB.Enabled = ActiveNoActiveCKB.Checked
-
-                If Not ActiveNoActiveCKB.Checked Then
-                    ' Clear the text when disabled
-                    CommercialRecordAndIdentityTB.Text = ""
-                End If
-
-                CommercialRecordAndIdentityTB.Refresh()
-            End If
+            ' ActiveNoActiveCKB only controls active/inactive status in database (true/false)
+            ' It does not affect CommercialRecordAndIdentityTB field
+            System.Diagnostics.Debug.WriteLine($"ActiveNoActiveCKB changed to: {ActiveNoActiveCKB.Checked}")
         Catch ex As Exception
             MessageBox.Show("خطأ في تحديث حالة رقم الحساب: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
@@ -1740,14 +1668,14 @@ Public Class Customers
     End Sub
 
     ' =====================Navigation and Save Methods========================
-
-    Private Sub SaveInfo_Click_1(sender As Object, e As EventArgs)
+    Private Sub SaveInfo_Click_1(sender As Object, e As EventArgs) Handles SaveInfo.Click
         ' Save current customer/supplier data
         SaveCustomerSupplierData()
 
         ' Refresh customer list after save to include any new records (without loading ComboBox data)
         RefreshCustomerListOnly()
     End Sub
+
 
     Private Sub LoadCustomerListForNavigation()
         Try
@@ -1978,9 +1906,9 @@ Public Class Customers
                         ActiveNoActiveCKB.Checked = customerData.Active
                         ActiveNoActiveCKB.Refresh()
 
-                        ' Enable/disable CommercialRecordAndIdentityTB based on Active status
+                        ' CommercialRecordAndIdentityTB is always enabled (not linked to Active status)
                         If CommercialRecordAndIdentityTB IsNot Nothing Then
-                            CommercialRecordAndIdentityTB.Enabled = customerData.Active
+                            CommercialRecordAndIdentityTB.Enabled = True ' Always enabled, not controlled by Active status
                             ' Always show the data regardless of Active status for viewing purposes
                             ' Check both IndividualID and CommercialRecord - show whichever has data
                             System.Diagnostics.Debug.WriteLine($"IdentityType: '{customerData.IdentityType}', IndividualID: '{customerData.IndividualID}', CommercialRecord: '{customerData.CommercialRecord}'")
@@ -2129,13 +2057,8 @@ Public Class Customers
 
                     ' Add all the missing controls you mentioned
                     If ActiveNoActiveCKB IsNot Nothing Then
-                        ActiveNoActiveCKB.Checked = False ' Default value, no field mapping specified
+                        ActiveNoActiveCKB.Checked = False ' Default value: inactive
                         ActiveNoActiveCKB.Refresh()
-
-                        ' Ensure CommercialRecordAndIdentityTB is disabled when ActiveNoActiveCKB is unchecked
-                        If CommercialRecordAndIdentityTB IsNot Nothing Then
-                            CommercialRecordAndIdentityTB.Enabled = False
-                        End If
                     End If
 
                     If VTRAppliedCKB IsNot Nothing Then
@@ -2569,7 +2492,7 @@ Public Class Customers
 
             ' Populate ComboBoxes with customer's selected values
             System.Diagnostics.Debug.WriteLine($"=== Populating ComboBoxes for customer: {customerData.Code} ===")
-            
+
             ' Set Country ComboBox
             If CountryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.Country) Then
                 Try
@@ -2584,7 +2507,7 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"Error setting CountryCB: {ex.Message}")
                 End Try
             End If
-            
+
             ' Set Area ComboBox  
             If AreaCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.Area) Then
                 Try
@@ -2599,7 +2522,7 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"Error setting AreaCB: {ex.Message}")
                 End Try
             End If
-            
+
             ' Set Market ComboBox (SalesMan -> MarketCB)
             If MarketCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.SalesMan) Then
                 Try
@@ -2614,7 +2537,7 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"Error setting MarketCB: {ex.Message}")
                 End Try
             End If
-            
+
             ' Set Groups ComboBox (ScrapAdjCode -> GroupsCB)
             If GroupsCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.ScrapAdjCode) Then
                 Try
@@ -2629,7 +2552,7 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"Error setting GroupsCB: {ex.Message}")
                 End Try
             End If
-            
+
             ' Set Category ComboBox (CategoryCode -> CategoryCB)
             If CategoryCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.CategoryCode) Then
                 Try
@@ -2644,7 +2567,7 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"Error setting CategoryCB: {ex.Message}")
                 End Try
             End If
-            
+
             ' Set Type ComboBox (TypeCode -> TypeCB)
             If TypeCB IsNot Nothing AndAlso Not String.IsNullOrEmpty(customerData.TypeCode) Then
                 Try
@@ -2659,7 +2582,7 @@ Public Class Customers
                     System.Diagnostics.Debug.WriteLine($"Error setting TypeCB: {ex.Message}")
                 End Try
             End If
-            
+
             System.Diagnostics.Debug.WriteLine($"=== ComboBox population completed ===")
 
             ' Update form title with customer info
