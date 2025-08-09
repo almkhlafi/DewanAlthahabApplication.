@@ -1857,7 +1857,7 @@ ORDER BY p.Name"
             conn = New SqlConnection(connpath2)
             conn.Open()
 
-            Dim query As String = "SELECT branch_code, branch_name, branch_arabic FROM Branchs ORDER BY branch_arabic"
+            Dim query As String = "SELECT CAST(Code AS NVARCHAR(50)) as Code, name, active FROM branches ORDER BY name"
             cmd = New SqlCommand(query, conn)
             da = New SqlDataAdapter(cmd)
             da.Fill(dt)
@@ -1954,6 +1954,105 @@ ORDER BY p.Name"
         End Try
 
         Return success
+    End Function
+
+    ' =====================Update Customer Branch Selection with all fields========================
+    Public Function UpdateCustomerBranchSelection(customerCode As String, branchCode As String, branchName As String, basicCode As String, isSelected As Boolean, isActive As Boolean, isLocked As Boolean, refNo As String) As Boolean
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim success As Boolean = False
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            ' Check if record exists for this customer and branch
+            Dim checkQuery As String = "SELECT COUNT(*) FROM CustomerAccountsMaster_BranchSelected WHERE fld_branch_code = @BranchCode AND fld_customer_code = @CustomerCode"
+            cmd = New SqlCommand(checkQuery, conn)
+            cmd.Parameters.AddWithValue("@BranchCode", branchCode)
+            cmd.Parameters.AddWithValue("@CustomerCode", customerCode)
+            Dim recordExists As Integer = Convert.ToInt32(cmd.ExecuteScalar())
+            cmd.Dispose()
+
+            If recordExists > 0 Then
+                ' Update existing record with all fields
+                Dim updateQuery As String = "UPDATE CustomerAccountsMaster_BranchSelected SET fld_branch_name = @BranchName, fld_basic_code = @BasicCode, fld_select = @Selected, fld_active_branch = @Active, fld_loacked = @Locked, fld_ref_no_branch = @RefNo WHERE fld_branch_code = @BranchCode AND fld_customer_code = @CustomerCode"
+                cmd = New SqlCommand(updateQuery, conn)
+            Else
+                ' Insert new record with all fields including customer code
+                Dim insertQuery As String = "INSERT INTO CustomerAccountsMaster_BranchSelected (fld_customer_code, fld_branch_code, fld_branch_name, fld_basic_code, fld_select, fld_active_branch, fld_loacked, fld_ref_no_branch) VALUES (@CustomerCode, @BranchCode, @BranchName, @BasicCode, @Selected, @Active, @Locked, @RefNo)"
+                cmd = New SqlCommand(insertQuery, conn)
+            End If
+
+            cmd.Parameters.AddWithValue("@CustomerCode", customerCode)
+            cmd.Parameters.AddWithValue("@BranchCode", branchCode)
+            cmd.Parameters.AddWithValue("@BranchName", branchName)
+            cmd.Parameters.AddWithValue("@BasicCode", basicCode)
+            cmd.Parameters.AddWithValue("@Selected", isSelected)
+            cmd.Parameters.AddWithValue("@Active", isActive)
+            cmd.Parameters.AddWithValue("@Locked", isLocked)
+            cmd.Parameters.AddWithValue("@RefNo", refNo)
+
+            Dim rowsAffected As Integer = cmd.ExecuteNonQuery()
+            success = (rowsAffected > 0)
+
+        Catch ex As Exception
+            Throw New Exception("Error updating customer branch selection: " & ex.Message)
+        Finally
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return success
+    End Function
+
+    ' =====================Get Customer Branch Selections========================
+    Public Function GetCustomerBranchSelections(customerCode As String) As DataTable
+        Dim dt As New DataTable()
+        Dim conn As SqlConnection = Nothing
+        Dim cmd As SqlCommand = Nothing
+        Dim da As SqlDataAdapter = Nothing
+
+        Try
+            conn = New SqlConnection(connpath2)
+            conn.Open()
+
+            ' Join branches with customer branch selections to show complete information
+            ' Cast fields explicitly to handle potential data type mismatches
+            Dim query As String = "
+                SELECT 
+                    CAST(b.Code AS NVARCHAR(50)) as Code, 
+                    b.name as branch_english_name,
+                    ISNULL(cbs.fld_branch_name, '') as fld_branch_name,
+                    ISNULL(cbs.fld_basic_code, @CustomerCode + '0' + CAST(b.Code AS NVARCHAR(50))) as fld_basic_code,
+                    ISNULL(cbs.fld_select, 0) as fld_select,
+                    ISNULL(cbs.fld_active_branch, 0) as fld_active_branch,
+                    ISNULL(cbs.fld_ref_no_branch, '') as fld_ref_no_branch,
+                    ISNULL(cbs.fld_loacked, 0) as fld_loacked
+                FROM branches b
+                LEFT JOIN CustomerAccountsMaster_BranchSelected cbs ON CAST(cbs.fld_branch_code AS NVARCHAR(50)) = CAST(b.Code AS NVARCHAR(50)) AND cbs.fld_customer_code = @CustomerCode
+                ORDER BY b.name"
+
+            cmd = New SqlCommand(query, conn)
+            cmd.Parameters.AddWithValue("@CustomerCode", customerCode)
+            da = New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+        Catch ex As Exception
+            Throw New Exception("Error getting customer branch selections: " & ex.Message)
+        Finally
+            If da IsNot Nothing Then da.Dispose()
+            If cmd IsNot Nothing Then cmd.Dispose()
+            If conn IsNot Nothing AndAlso conn.State = ConnectionState.Open Then
+                conn.Close()
+                conn.Dispose()
+            End If
+        End Try
+
+        Return dt
     End Function
 
     ' =====================Get Areas from CustomerAccountsMaster Database========================
@@ -2206,22 +2305,22 @@ ORDER BY p.Name"
             System.Diagnostics.Debug.WriteLine("=== Adding SQL Parameters ===")
             cmd.Parameters.AddWithValue("@code", TruncateString(customerData.Code, 10))
             System.Diagnostics.Debug.WriteLine($"@code: '{customerData.Code}' -> '{TruncateString(customerData.Code, 10)}'")
-            
+
             cmd.Parameters.AddWithValue("@c_type", TruncateString(customerData.IdentityType, 10))
             System.Diagnostics.Debug.WriteLine($"@c_type: '{customerData.IdentityType}' -> '{TruncateString(customerData.IdentityType, 10)}'")
-            
+
             cmd.Parameters.AddWithValue("@name", TruncateString(customerData.EnglishName, 50))
             System.Diagnostics.Debug.WriteLine($"@name: '{customerData.EnglishName}' (Length: {customerData.EnglishName?.Length})")
-            
+
             cmd.Parameters.AddWithValue("@fld_arabic_name", TruncateString(customerData.ArabicName, 50))
             System.Diagnostics.Debug.WriteLine($"@fld_arabic_name: '{customerData.ArabicName}' (Length: {customerData.ArabicName?.Length})")
-            
+
             cmd.Parameters.AddWithValue("@shortname", TruncateString(customerData.CommercialName, 30))
             System.Diagnostics.Debug.WriteLine($"@shortname: '{customerData.CommercialName}' (Length: {customerData.CommercialName?.Length})")
-            
+
             cmd.Parameters.AddWithValue("@bussiness_address", TruncateString(customerData.Address, 200))
             System.Diagnostics.Debug.WriteLine($"@bussiness_address: Length: {customerData.Address?.Length}")
-            
+
             cmd.Parameters.AddWithValue("@acc_manager", TruncateString(customerData.Manager, 50))
             cmd.Parameters.AddWithValue("@bank_acc_name", TruncateString(customerData.ManagerID, 30))
             cmd.Parameters.AddWithValue("@bank_acc_no", TruncateString(customerData.ManagerNumber, 30))
@@ -2230,36 +2329,36 @@ ORDER BY p.Name"
             cmd.Parameters.AddWithValue("@area", TruncateString(customerData.Area, 100))
             cmd.Parameters.AddWithValue("@vat_tin_no", TruncateString(customerData.VATNumber, 15))
             cmd.Parameters.AddWithValue("@email", TruncateString(customerData.Email, 50))
-            
+
             ' Add new phone number field parameters based on specifications
             cmd.Parameters.AddWithValue("@contact", TruncateString(customerData.PhoneNumber1, 20))
             cmd.Parameters.AddWithValue("@fld_contry_code_mobile", TruncateString(customerData.PhoneNumber2, 5))
             cmd.Parameters.AddWithValue("@plt_limit", TruncateString(customerData.TelephoneNumber, 20))
             cmd.Parameters.AddWithValue("@fld_postcode", TruncateString(customerData.PostCode, 10))
             cmd.Parameters.AddWithValue("@fld_contrycode", TruncateString(customerData.TelephoneZipCode, 10))
-            
+
             cmd.Parameters.AddWithValue("@country", TruncateString(customerData.CountryName, 500))
             cmd.Parameters.AddWithValue("@fld_fax_no", TruncateString(customerData.FaxNumber, 15))
             cmd.Parameters.AddWithValue("@fld_ref_no", TruncateString(customerData.ReferralNumber, 15))
             cmd.Parameters.AddWithValue("@fld_indvl_id_no", TruncateString(customerData.IndividualID, 15))
             cmd.Parameters.AddWithValue("@fld_cr_no", TruncateString(customerData.CommercialRecord, 15))
-            
+
             ' Add FK parameters - apply to both INSERT and UPDATE
             cmd.Parameters.AddWithValue("@sales_man", TruncateString(customerData.SalesMan, 50))
             cmd.Parameters.AddWithValue("@scrap_adj_code", TruncateString(customerData.ScrapAdjCode, 50))
             cmd.Parameters.AddWithValue("@type", TruncateString(customerData.TypeCode, 50))
             cmd.Parameters.AddWithValue("@categoty", TruncateString(customerData.CategoryCode, 50))
-            
+
             ' Add Active parameter for both INSERT and UPDATE operations
             cmd.Parameters.AddWithValue("@active", customerData.Active)
             System.Diagnostics.Debug.WriteLine($"@active: '{customerData.Active}'")
-            
+
             ' Add additional parameters for INSERT operations only
             If Not customerData.IsUpdate Then
                 cmd.Parameters.AddWithValue("@currency", TruncateString("SAR", 10))  ' Default currency
                 System.Diagnostics.Debug.WriteLine("Added default values for new customer")
             End If
-            
+
             System.Diagnostics.Debug.WriteLine("=== End SQL Parameters ===")
 
             Dim result As Integer = cmd.ExecuteNonQuery()
@@ -2311,7 +2410,7 @@ ORDER BY p.Name"
                     System.Diagnostics.Debug.WriteLine($"Found customer code: '{code}' (Length: {code.Length})")
                 End If
             End While
-            
+
             System.Diagnostics.Debug.WriteLine($"Total customer codes loaded: {codes.Count}")
 
         Catch ex As Exception
@@ -2329,31 +2428,31 @@ ORDER BY p.Name"
     End Function
 
     ' =====================Lookup Methods for ComboBoxes========================
-    
+
     ' Load data from CusTransactionMaster table
     Public Function LoadCusTransactionMaster() As DataTable
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
-        
+
         Try
             conn = New SqlConnection(connpath2)
             ' Create the basic structure
             dt.Columns.Add("fld_area_code", GetType(String))
             dt.Columns.Add("DisplayText", GetType(String))
             dt.Columns.Add("Description", GetType(String))
-            
+
             conn.Open()
-            
+
             ' Get all columns for proper display format
             Dim query As String = "SELECT DISTINCT fld_area_code, description, shortname, arabic_desc, code
                 FROM CusTransactionMaster 
                 WHERE fld_area_code IS NOT NULL 
                 ORDER BY description"
-            
+
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
-            
+
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim areaCode As String = If(reader("fld_area_code") Is DBNull.Value, "", reader("fld_area_code").ToString().Trim())
@@ -2361,14 +2460,14 @@ ORDER BY p.Name"
                 Dim shortname As String = If(reader("shortname") Is DBNull.Value, "", reader("shortname").ToString().Trim())
                 Dim arabicDesc As String = If(reader("arabic_desc") Is DBNull.Value, "", reader("arabic_desc").ToString().Trim())
                 Dim code As String = If(reader("code") Is DBNull.Value, "", reader("code").ToString().Trim())
-                
+
                 row("fld_area_code") = areaCode
                 row("Description") = description
                 ' Use the correct display format: description - shortname - arabic_desc - fld_area_code - code
                 row("DisplayText") = $"{description} - {shortname} - {arabicDesc} - {areaCode} - {code}"
                 dt.Rows.Add(row)
             End While
-            
+
             reader.Close()
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error loading CusTransactionMaster: " & ex.Message)
@@ -2387,7 +2486,7 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return dt
     End Function
 
@@ -2396,39 +2495,39 @@ ORDER BY p.Name"
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
-        
+
         Try
             conn = New SqlConnection(connpath2)
             ' Create the basic structure
             dt.Columns.Add("code", GetType(String))
             dt.Columns.Add("DisplayText", GetType(String))
             dt.Columns.Add("Description", GetType(String))
-            
+
             conn.Open()
-            
+
             ' Get all columns for proper display format
             Dim query As String = "SELECT code, description, shortname, arabic_desc
                 FROM CusGradeMaster 
                 WHERE code IS NOT NULL 
                 ORDER BY description"
-            
+
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
-            
+
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim code As String = If(reader("code") Is DBNull.Value, "", reader("code").ToString().Trim())
                 Dim description As String = If(reader("description") Is DBNull.Value, "", reader("description").ToString().Trim())
                 Dim shortname As String = If(reader("shortname") Is DBNull.Value, "", reader("shortname").ToString().Trim())
                 Dim arabicDesc As String = If(reader("arabic_desc") Is DBNull.Value, "", reader("arabic_desc").ToString().Trim())
-                
+
                 row("code") = code
                 row("Description") = description
                 ' Use the correct display format: code - description - shortname - arabic_desc
                 row("DisplayText") = $"{code} - {description} - {shortname} - {arabicDesc}"
                 dt.Rows.Add(row)
             End While
-            
+
             reader.Close()
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error loading CusGradeMaster: " & ex.Message)
@@ -2447,7 +2546,7 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return dt
     End Function
 
@@ -2456,32 +2555,32 @@ ORDER BY p.Name"
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
-        
+
         Try
             conn = New SqlConnection(connpath2)
             ' Create the basic structure
             dt.Columns.Add("fld_code", GetType(String))
             dt.Columns.Add("DisplayText", GetType(String))
             dt.Columns.Add("Description", GetType(String))
-            
+
             conn.Open()
-            
+
             ' Load from CustomerType table - PK: fld_code -> FK: type
             Dim query As String = "SELECT DISTINCT fld_code FROM CustomerType WHERE fld_code IS NOT NULL ORDER BY fld_code"
-            
+
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
-            
+
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
-                
+
                 row("fld_code") = fldCode
                 row("Description") = fldCode
                 row("DisplayText") = fldCode
                 dt.Rows.Add(row)
             End While
-            
+
             reader.Close()
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error loading CustomerType: " & ex.Message)
@@ -2500,7 +2599,7 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return dt
     End Function
 
@@ -2509,35 +2608,35 @@ ORDER BY p.Name"
         Dim dt As New DataTable()
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
-        
+
         Try
             conn = New SqlConnection(connpath2)
             ' Create the basic structure
             dt.Columns.Add("fld_code", GetType(String))
             dt.Columns.Add("DisplayText", GetType(String))
             dt.Columns.Add("Description", GetType(String))
-            
+
             conn.Open()
-            
+
             ' Load from CustomerCategory table - PK: fld_code -> FK: categoty
             Dim query As String = "SELECT fld_code, fld_name, fld_arabic_name FROM CustomerCategory WHERE fld_code IS NOT NULL ORDER BY fld_arabic_name"
-            
+
             cmd = New SqlCommand(query, conn)
             Dim reader As SqlDataReader = cmd.ExecuteReader()
-            
+
             While reader.Read()
                 Dim row As DataRow = dt.NewRow()
                 Dim fldCode As String = If(reader("fld_code") Is DBNull.Value, "", reader("fld_code").ToString().Trim())
                 Dim fldName As String = If(reader("fld_name") Is DBNull.Value, "", reader("fld_name").ToString().Trim())
                 Dim fldArabicName As String = If(reader("fld_arabic_name") Is DBNull.Value, "", reader("fld_arabic_name").ToString().Trim())
-                
+
                 row("fld_code") = fldCode
                 row("Description") = fldName
                 ' Use the correct display format: fld_code - fld_name - fld_arabic_name
                 row("DisplayText") = $"{fldCode} - {fldName} - {fldArabicName}"
                 dt.Rows.Add(row)
             End While
-            
+
             reader.Close()
         Catch ex As Exception
             System.Diagnostics.Debug.WriteLine("Error loading CustomerCategory: " & ex.Message)
@@ -2556,7 +2655,7 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return dt
     End Function
 
@@ -2567,7 +2666,7 @@ ORDER BY p.Name"
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
         Dim da As SqlDataAdapter = Nothing
-        
+
         Try
             conn = New SqlConnection(connpath2)
             cmd = New SqlCommand("SELECT contryCode, contryCode AS DisplayText FROM AreaMaster ORDER BY contryCode", conn)
@@ -2583,7 +2682,7 @@ ORDER BY p.Name"
                 conn.Dispose()
             End If
         End Try
-        
+
         Return dt
     End Function
 
@@ -2592,14 +2691,14 @@ ORDER BY p.Name"
         Dim customerData As New CustomerSupplierData()
         Dim conn As SqlConnection = Nothing
         Dim cmd As SqlCommand = Nothing
-        
+
         Try
             conn = New SqlConnection(connpath2)
             conn.Open()
-            
+
             System.Diagnostics.Debug.WriteLine($"GetCustomerSupplierByCode called with code: '{customerCode}' (Length: {customerCode?.Length})")
             System.Diagnostics.Debug.WriteLine($"Connection string: {connpath2}")
-            
+
             ' Query to get customer data with FK values from CustomerAccountsMaster
             ' Using actual column names from the database
             Dim query As String = "
@@ -2613,31 +2712,31 @@ ORDER BY p.Name"
                     cam.active, cam.sales_man, cam.scrap_adj_code, cam.type, cam.categoty
                 FROM CustomerAccountsMaster cam
                 WHERE cam.code = @CustomerCode"
-            
+
             cmd = New SqlCommand(query, conn)
             cmd.Parameters.AddWithValue("@CustomerCode", customerCode.Trim())
-            
+
             System.Diagnostics.Debug.WriteLine($"Executing query: {query}")
             System.Diagnostics.Debug.WriteLine($"Parameter @CustomerCode: '{customerCode}' (trimmed to '{customerCode.Trim()}')")
-            
+
             Dim reader As SqlDataReader = cmd.ExecuteReader()
             System.Diagnostics.Debug.WriteLine("Query executed successfully")
-            
+
             If reader.Read() Then
                 System.Diagnostics.Debug.WriteLine($"Customer record found in database for code: {customerCode}")
                 ' Map basic customer data - ensure Code is always set from parameter
                 customerData.Code = customerCode.Trim() ' Use the search parameter, not the database value
                 System.Diagnostics.Debug.WriteLine($"Forced Code to: '{customerData.Code}'")
-                
+
                 customerData.CustomerType = If(reader("c_type") Is DBNull.Value, "", reader("c_type").ToString())
                 System.Diagnostics.Debug.WriteLine($"Mapped CustomerType: '{customerData.CustomerType}'")
-                
+
                 customerData.EnglishName = If(reader("name") Is DBNull.Value, "", reader("name").ToString())
                 System.Diagnostics.Debug.WriteLine($"Mapped EnglishName: '{customerData.EnglishName}'")
-                
+
                 customerData.ArabicName = If(reader("fld_arabic_name") Is DBNull.Value, "", reader("fld_arabic_name").ToString())
                 System.Diagnostics.Debug.WriteLine($"Mapped ArabicName: '{customerData.ArabicName}'")
-                
+
                 customerData.CommercialName = If(reader("shortname") Is DBNull.Value, "", reader("shortname").ToString())
                 System.Diagnostics.Debug.WriteLine($"Mapped CommercialName: '{customerData.CommercialName}'")
                 customerData.Address = If(reader("bussiness_address") Is DBNull.Value, "", reader("bussiness_address").ToString())

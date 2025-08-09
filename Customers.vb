@@ -657,26 +657,106 @@ Public Class Customers
                 Return
             End If
 
-            ' Load branches from CMGADB2024 database
+            ' Load branches from CMGADB2024 database - just basic branches for initial setup
             Dim branchesTable As DataTable = dbConn.GetBranches()
             BranchesInfoDGV.Rows.Clear()
-            ' Add branches to DataGridView - only populate Arabic and English names from database
-            ' Other columns (Select, Active, RefNo, Locked) will be filled by users later
+            
+            ' Add branches to DataGridView with default values
             For Each row As DataRow In branchesTable.Rows
+                Dim branchCode As String = row("Code").ToString()
                 Dim newRow As Object() = {
-                    False, ' Select checkbox (default unchecked - user will set)
-                    row("branch_arabic").ToString(), ' Arabic name from database
-                    row("branch_name").ToString(), ' English name from database
-                    "", ' Branch code (empty - user will fill)
-                    False, ' Active status (default unchecked - user will set)
-                    "", ' Ref NO (empty - user will fill)
-                    False ' Locked status (default unchecked - user will set)
+                    False, ' Select checkbox (default unchecked)
+                    "", ' Arabic name (will be filled when user saves)
+                    row("name").ToString(), ' English name from branches table
+                    "", ' Basic code (will be generated when customer is loaded)
+                    False, ' Active status (default unchecked)
+                    "", ' Ref NO (empty initially)
+                    False ' Locked status (default unchecked)
                 }
                 BranchesInfoDGV.Rows.Add(newRow)
+                ' Store the branch code in the Tag property for reference
+                BranchesInfoDGV.Rows(BranchesInfoDGV.Rows.Count - 1).Tag = branchCode
             Next
 
         Catch ex As Exception
             MessageBox.Show("خطأ في تحميل الفروع: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+    
+    ' Load customer-specific branch selections
+    Private Sub LoadCustomerBranchSelections(customerCode As String)
+        Try
+            If BranchesInfoDGV Is Nothing OrElse String.IsNullOrEmpty(customerCode) Then Return
+            
+            System.Diagnostics.Debug.WriteLine($"Loading branch selections for customer: {customerCode}")
+            
+            ' Get customer-specific branch selections
+            Dim customerBranchData As DataTable = dbConn.GetCustomerBranchSelections(customerCode)
+            
+            System.Diagnostics.Debug.WriteLine($"Retrieved {customerBranchData.Rows.Count} branch records")
+            
+            ' Clear existing rows and add customer-specific data
+            BranchesInfoDGV.Rows.Clear()
+            
+            For Each row As DataRow In customerBranchData.Rows
+                Dim newRow As Object() = {
+                    CBool(row("fld_select")), ' Select checkbox from database
+                    row("fld_branch_name").ToString(), ' Arabic name from CustomerAccountsMaster_BranchSelected
+                    row("branch_english_name").ToString(), ' English name from branches table
+                    row("fld_basic_code").ToString(), ' Generated basic code
+                    CBool(row("fld_active_branch")), ' Active status from database
+                    row("fld_ref_no_branch").ToString(), ' Ref NO from database
+                    CBool(row("fld_loacked")) ' Locked status from database
+                }
+                BranchesInfoDGV.Rows.Add(newRow)
+                ' Store the branch code in the Tag property for reference
+                BranchesInfoDGV.Rows(BranchesInfoDGV.Rows.Count - 1).Tag = row("Code").ToString()
+            Next
+            
+            System.Diagnostics.Debug.WriteLine($"Loaded {customerBranchData.Rows.Count} branch selections for customer {customerCode}")
+
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error loading customer branch selections: {ex.Message}")
+            MessageBox.Show("خطأ في تحميل اختيارات الفروع للعميل: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+    
+    ' Save customer branch selections
+    Private Sub SaveCustomerBranchSelections(customerCode As String)
+        Try
+            If BranchesInfoDGV Is Nothing OrElse String.IsNullOrEmpty(customerCode) Then Return
+            
+            System.Diagnostics.Debug.WriteLine($"Saving branch selections for customer: {customerCode}")
+            
+            For Each row As DataGridViewRow In BranchesInfoDGV.Rows
+                If row.Tag IsNot Nothing Then
+                    Dim branchCode As String = row.Tag.ToString()
+                    Dim isSelected As Boolean = CBool(row.Cells("Select").Value)
+                    Dim isActive As Boolean = CBool(row.Cells("Active").Value)
+                    Dim isLocked As Boolean = CBool(row.Cells("Locked").Value)
+                    Dim refNo As String = If(row.Cells("RefNo").Value?.ToString(), "")
+                    Dim arabicName As String = If(row.Cells("BranchArabic").Value?.ToString(), "")
+                    
+                    ' Generate basic code: CustomerCode + "0" + BranchCode
+                    Dim basicCode As String = customerCode + "0" + branchCode
+                    
+                    ' Update the basic code in the display
+                    row.Cells("BranchCode").Value = basicCode
+                    
+                    ' Save to database using enhanced method with all fields
+                    Dim success As Boolean = dbConn.UpdateCustomerBranchSelection(customerCode, branchCode, arabicName, basicCode, isSelected, isActive, isLocked, refNo)
+                    
+                    If success Then
+                        System.Diagnostics.Debug.WriteLine($"Saved branch {branchCode}: Selected={isSelected}, Active={isActive}, Locked={isLocked}")
+                    Else
+                        System.Diagnostics.Debug.WriteLine($"Failed to save branch {branchCode}")
+                    End If
+                End If
+            Next
+            
+        Catch ex As Exception
+            System.Diagnostics.Debug.WriteLine($"Error saving customer branch selections: {ex.Message}")
+            MessageBox.Show("خطأ في حفظ اختيارات الفروع: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -1466,7 +1546,7 @@ Public Class Customers
             ' It does not affect CommercialRecordAndIdentityTB field
             System.Diagnostics.Debug.WriteLine($"ActiveNoActiveCKB changed to: {ActiveNoActiveCKB.Checked}")
         Catch ex As Exception
-            MessageBox.Show("خطأ في تحديث حالة رقم الحساب: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("خطأ في تحديث حالة العميل النشطة: " & ex.Message, "خطأ", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -2585,6 +2665,15 @@ Public Class Customers
 
             System.Diagnostics.Debug.WriteLine($"=== ComboBox population completed ===")
 
+            ' Set ActiveNoActiveCKB checkbox based on customer active status
+            If ActiveNoActiveCKB IsNot Nothing Then
+                ActiveNoActiveCKB.Checked = customerData.Active
+                System.Diagnostics.Debug.WriteLine($"ActiveNoActiveCKB set to: {customerData.Active}")
+            End If
+
+            ' Load customer-specific branch selections
+            LoadCustomerBranchSelections(customerData.Code)
+
             ' Update form title with customer info
             Dim currentIndex As Integer = If(customerList?.IndexOf(customerData.Code), -1)
             If currentIndex >= 0 Then
@@ -2635,6 +2724,11 @@ Public Class Customers
             If VTRAppliedCKB IsNot Nothing Then
                 VTRAppliedCKB.Checked = False
                 VTRAppliedCKB.Enabled = False
+            End If
+
+            ' Clear ActiveNoActiveCKB checkbox
+            If ActiveNoActiveCKB IsNot Nothing Then
+                ActiveNoActiveCKB.Checked = False
             End If
 
             ' Clear ComboBox selections (but keep their data loaded)
@@ -2893,6 +2987,9 @@ Public Class Customers
             Dim success As Boolean = dbConn.SaveCustomerSupplier(customerData)
 
             If success Then
+                ' Save customer branch selections
+                SaveCustomerBranchSelections(customerData.Code)
+                
                 MessageBox.Show($"تم حفظ بيانات {If(customerData.IsCustomer, "العميل", "المورد")} بنجاح!" & vbCrLf & $"الكود: {customerData.Code}", "نجح الحفظ", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
                 ' If this was a new customer, add it to the list and navigate to it

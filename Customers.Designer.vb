@@ -413,7 +413,7 @@ Partial Class Customers
         ' 
         ' IdentityCommercialNameOptionCB
         ' 
-        IdentityCommercialNameOptionCB.ForeColor = Color.FromArgb(CByte(192), CByte(0), CByte(0))
+        IdentityCommercialNameOptionCB.ForeColor = Color.FromArgb(192, 0, 0)
         IdentityCommercialNameOptionCB.FormattingEnabled = True
         IdentityCommercialNameOptionCB.Location = New Point(423, 13)
         IdentityCommercialNameOptionCB.Name = "IdentityCommercialNameOptionCB"
@@ -422,7 +422,7 @@ Partial Class Customers
         ' 
         ' CustomerSupplierCB
         ' 
-        CustomerSupplierCB.ForeColor = Color.FromArgb(CByte(192), CByte(0), CByte(0))
+        CustomerSupplierCB.ForeColor = Color.FromArgb(192, 0, 0)
         CustomerSupplierCB.FormattingEnabled = True
         CustomerSupplierCB.Location = New Point(579, 13)
         CustomerSupplierCB.Name = "CustomerSupplierCB"
@@ -596,7 +596,7 @@ Partial Class Customers
         ' 
         Label24.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         Label24.AutoSize = True
-        Label24.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
+        Label24.Font = New Font("Segoe UI", 9.0F, FontStyle.Bold, GraphicsUnit.Point, 0)
         Label24.Location = New Point(667, 690)
         Label24.Margin = New Padding(2, 0, 2, 0)
         Label24.Name = "Label24"
